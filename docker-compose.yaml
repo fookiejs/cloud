@@ -7,7 +7,7 @@ services:
     volumes:
       - ./server:/usr/src/app
     ports:
-      - "3000:8080"
+      - "3000:3000"
     depends_on:
       - mongo
     restart: always

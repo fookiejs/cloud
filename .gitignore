@@ -6,6 +6,7 @@ bin-release/
 
 server/node_modules
 server/package-lock.json
+data
 
 # Other files and folders
 .settings/
