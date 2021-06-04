@@ -4,6 +4,9 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 
+server/node_modules
+server/package-lock.json
+
 # Other files and folders
 .settings/
 
@@ -12,6 +15,8 @@ bin-release/
 *.air
 *.ipa
 *.apk
+.npmrc
+
 
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
