@@ -1,15 +1,23 @@
-<template>
-  <hello-world />
+<template lang="pug">
+    div(class="flex justify-center items-center h-full" style="height:500px;")
+        div
+            div(class="text-8xl my-6")  Fookie JS
+            div(class="flex justify-center space-x-8")
+                v-btn(x-large) 
+                    v-icon(dark) mdi-nodejs
+                    span GET STARTED
+                v-btn(
+                    x-large,
+                    href="https://www.patreon.com/fookie",
+                    target="_blank"
+                ) 
+                    v-icon(dark) mdi-patreon
+                    span PATREON
+        div {{$store.state}}
 </template>
 
 <script>
-import HelloWorld from "../components/HelloWorld";
-
 export default {
-  name: "Home",
-
-  components: {
-    HelloWorld,
-  },
+    components: {},
 };
 </script>
