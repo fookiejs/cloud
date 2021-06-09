@@ -1,7 +1,7 @@
 <template lang="pug">
     div(class="flex justify-center items-center h-full" style="height:500px;")
         div
-            div(class="text-8xl my-6")  Fookie JS
+            div(class="text-8xl my-6") Fookie JS
             div(class="flex justify-center space-x-8")
                 v-btn(x-large) 
                     v-icon(dark) mdi-nodejs
@@ -12,8 +12,7 @@
                     target="_blank"
                 ) 
                     v-icon(dark) mdi-patreon
-                    span PATREON
-        div {{$store.state}}
+                    span PATREON        
 </template>
 
 <script>

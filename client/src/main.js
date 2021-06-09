@@ -6,9 +6,6 @@ import vuetify from "./plugins/vuetify";
 
 Vue.config.productionTip = false;
 
-import fookieVue from "fookie-vue"
-Vue.use(fookieVue.plugin)
-
 new Vue({
   router,
   store,
