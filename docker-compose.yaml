@@ -19,6 +19,6 @@ services:
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
       - ./:/app:cached
     ports:
-      - "8080:8080"
+      - "80:8080"
   mongo:
     image: mongo
