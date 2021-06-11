@@ -1,9 +1,16 @@
-FROM node:lts-alpine
-RUN npm install -g http-server
+# base image
+FROM node:12.2.0-alpine
+
+# set working directory
 WORKDIR /app
-COPY package*.json ./
+
+# add `/app/node_modules/.bin` to $PATH
+ENV PATH /app/node_modules/.bin:$PATH
+
+# install and cache app dependencies
+COPY package.json /app/package.json
 RUN npm install
-COPY . .
-RUN npm run build
-EXPOSE 8080
-CMD [ "http-server", "dist" ]
+RUN npm install @vue/cli@3.7.0 -g
+
+# start app
+RUN npm run start

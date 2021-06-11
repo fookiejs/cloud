@@ -19,7 +19,7 @@ v-app
             span.mr-2 Discord
             v-icon mdi-discord
     v-main(app)
-        v-navigation-drawer(absolute) 
+        v-navigation-drawer(app) 
             v-list
                 v-list-group(
                     v-for="m in menu",

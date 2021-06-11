@@ -37,7 +37,6 @@ export default new Vuex.Store({
         sub: []
       },
     ],
-
   },
   mutations: {},
   actions: {},

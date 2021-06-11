@@ -14,7 +14,7 @@ const routes = [
     path: "/page/:slug",
     name: "page",
     component: () =>
-      import("../views/Application.vue"),
+      import("../views/Page.vue"),
   },
   {
     path: "/about",

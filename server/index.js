@@ -1,8 +1,9 @@
 const Fookie = require('fookie')
-const api = new Fookie()
+const fookie = new Fookie()
 
 let start = async function () {
-    await api.connect('mongodb://mongo/fookie')
-    api.listen(3000)
+    await fookie.connect('mongodb://mongo/fookie')
+    fookie.model(require("./src/documentation/model/page.js"))
+    fookie.listen(3000)
 }
 start()
