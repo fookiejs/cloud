@@ -1,2 +1,2 @@
 # fookie-cloud
-basic cloud for fookie js
+basic cloud developed with fookie js
