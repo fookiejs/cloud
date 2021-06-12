@@ -1,21 +1,18 @@
 version: "3.7"
 services:
-  server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    volumes:
-      - ./server:/usr/src/app
-    ports:
-      - "3000:3000"
-    depends_on:
-      - mongo
-    restart: always
   landing:
     build:
       context: ./landing
       dockerfile: Dockerfile
     ports:
       - "80:8080"
-  mongo:
-    image: mongo  
+  jenkins:
+    image: jenkins/jenkins:lts
+    privileged: true
+    user: root
+    ports:
+      - 8083:8080
+      - 50003:50000
+    volumes:
+      - ~/jenkins_data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
