@@ -1,7 +1,7 @@
 <template lang="pug">
     div(class="flex justify-center items-center h-full" style="height:500px;")
         div
-            div hi 11
+            div hi 12
             div(class="text-8xl my-6") Fookie JS
             div(class="flex justify-center space-x-8")
                 v-btn(x-large) 
