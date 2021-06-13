@@ -1,11 +1,8 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
-import Setting from "../views/Setting.vue";
 import View from "../views/View.vue";
-import ApiSetting from "../views/ApiSetting.vue";
-import Game from "../views/Game.vue";
-import Hud from "../views/Hud.vue";
+import Application from "../views/Application.vue";
 import App from "../App.vue";
 
 Vue.use(VueRouter);
@@ -22,9 +19,9 @@ const routes = [
         component: Login,
     },
     {
-        path: "/game",
-        name: "game",
-        component: Game,
+        path: "/application",
+        name: "application",
+        component: Application,
         meta: {
             auth: true
         },
@@ -33,22 +30,7 @@ const routes = [
                 path: "view",
                 name: "view",
                 component: View,
-            },
-            {
-                path: "hud",
-                name: "hud",
-                component: Hud,
-            },
-            {
-                path: "api",
-                name: "api",
-                component: ApiSetting,
-            },
-            {
-                path: "setting",
-                name: "setting",
-                component: Setting,
-            }
+            },              
         ]
     },
 

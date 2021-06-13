@@ -1,7 +1,21 @@
 <template>
-    <div>
-        <router-view></router-view>
-    </div>
+    <v-app style="background-color: transparent">
+        <v-main app>
+            <v-container fluid>
+                <router-view></router-view>
+            </v-container>
+        </v-main>
+        <v-snackbar
+            right
+            light
+            absolute
+            :color="$store.state.snackbar.color"
+            :timeout="1500"
+            v-model="$store.state.snackbar.opened"
+        >
+            {{ $store.state.snackbar.text }}
+        </v-snackbar>
+    </v-app>
 </template>
 
 <script>

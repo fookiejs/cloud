@@ -9,8 +9,6 @@ export default new Vuex.Store({
         system_loaded: false,
         logs: [],
         token: null,
-        baseURL: "http://localhost:7777",
-        inGame: false,
         system_model: {
             pool: [],
             display: "name",
@@ -88,15 +86,12 @@ export default new Vuex.Store({
                 title: `REQUEST -> Method:${payload.method} | Model:${payload.model}`,
                 body: payload
             })
-            if (ctx.state.inGame) {
-                payload.response = JSON.parse(await mp.events.callProc('apiProc', JSON.stringify(payload)))
-            } else {
-                payload.response = await axios.post(ctx.state.baseURL, payload, {
-                    headers: {
-                        token: localStorage.getItem("token")
-                    }
-                })
-            }
+            console.log("http://server:3000/");
+            payload.response = await axios.post("http://server:3000/", payload, {
+                headers: {
+                    token: localStorage.getItem("token")
+                }
+            })
 
             ctx.dispatch("apiSync", payload)
             return payload.response.data
