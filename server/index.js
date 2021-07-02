@@ -1,4 +1,4 @@
-const Fookie = require('fookie')
+const Fookie = require("../../fookie/fookie")
 const fookie = new Fookie()
 
 let start = async function () {

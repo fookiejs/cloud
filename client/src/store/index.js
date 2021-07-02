@@ -86,8 +86,7 @@ export default new Vuex.Store({
                 title: `REQUEST -> Method:${payload.method} | Model:${payload.model}`,
                 body: payload
             })
-            console.log("http://server:3000/");
-            payload.response = await axios.post("http://server:3000/", payload, {
+            payload.response = await axios.post("http://localhost:3000", payload, {
                 headers: {
                     token: localStorage.getItem("token")
                 }

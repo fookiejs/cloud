@@ -37,9 +37,10 @@ export default {
                 model: "system_user",
                 body,
             });
+            console.log(res);
             if (typeof res == "string") {
                 localStorage.setItem("token", res);
-                this.$router.push({ name: "game" });
+                this.$router.push({ name: "application" });
             }
         },
     },
