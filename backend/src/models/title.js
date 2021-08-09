@@ -32,7 +32,7 @@ module.exports = {
         filter:[],
         effect:[],  
        },
-       patch: {
+       update: {
         preRule:[],
         modify:[],
         role: ["admin"],

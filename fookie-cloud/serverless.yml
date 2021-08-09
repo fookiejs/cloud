@@ -1,0 +1,24 @@
+service: fookie-cloud
+frameworkVersion: '2'
+provider:
+  region: eu-central-1
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: /api
+          method: POST
+plugins:
+  - serverless-offline
+custom:
+  serverless-offline:
+    noPrependStageInUrl: true
+  webpack:
+    includeModules:
+      packagePath: './package.json' # relative path to custom package.json file
+
+

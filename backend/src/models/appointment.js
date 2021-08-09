@@ -1,6 +1,6 @@
 module.exports = {
     name: "project",
-    database:"cognito",
+    database:"store",
     display: "name",
     schema: {
        name: {
@@ -13,7 +13,8 @@ module.exports = {
           input: "text",
           required: true,
           type: "string",
-       },       
+       },
+       
     },
     lifecycle: {
        get: {
