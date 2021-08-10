@@ -3,9 +3,10 @@ bin-debug/
 bin-release/
 [Oo]bj/
 [Bb]in/
-
-server/node_modules
-server/package-lock.json
+client/node_modules
+client/package-lock.json
+backend/node_modules
+backend/package-lock.json
 data
 
 # Other files and folders

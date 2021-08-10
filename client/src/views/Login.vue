@@ -1,49 +1,78 @@
-<template>
-    <div class="h-screen flex justify-center items-center">
-        <v-card width="500">
-            <v-card-title>Login</v-card-title>
-            <v-card-text>
-                <form>
-                    <v-text-field v-model="email" label="E-Mail"></v-text-field>
-                    <v-text-field
-                        v-model="password"
-                        label="Password"
-                    ></v-text-field>
-                </form>
-            </v-card-text>
-            <v-card-actions>
-                <v-btn @click="login">Login </v-btn>
-            </v-card-actions>
-        </v-card>
-    </div>
+<template lang='pug'>
+  div.h-screen.flex.justify-center.items-center
+    div
+      v-tabs(v-model="tab" color='green')
+        v-tab Giriş
+        v-tab(:disabled='!needReset') Şifre Değiştir
+        v-tab Bize Ulaşın
+      v-tabs-items(v-model="tab")
+        v-tab-item
+          v-card
+            v-card-text
+              form
+                v-text-field(name="username" v-model='phone' :label="$t('phone')" v-mask="'+90 (###) ###-####'" append-icon="mdi-phone")
+                v-text-field(name="password" type='password' v-model='password' :label="$t('password')" append-icon="mdi-lock")
+            v-card-actions
+              v-btn(@click='login') Giriş
+        v-tab-item
+          v-card
+            v-card-text
+              form
+                v-text-field(name="old_pw" type='password' v-model='oldPw' :label="$t('password')" append-icon="mdi-lock")
+                v-text-field(name="new_pw" type='password' v-model='newPw' :label="$t('password')" append-icon="mdi-lock")
+            v-card-actions
+              v-btn(@click='resetPw') Sıfırla
+        v-tab-item
+          v-card
+            v-card-text iletişim form
 </template>
 
+
 <script>
+import { Auth } from 'aws-amplify';
+import { onAuthUIStateChange } from '@aws-amplify/ui-components';
+
 export default {
-    data() {
-        return {
-            email: "",
-            password: "",
-        };
+  data() {
+    return {
+      needReset: false,
+      cognitoUser: null,
+      tab: 0,
+      oldPw: '',
+      newPw: '',
+      unsubscribeAuth: undefined,
+      phone: '',
+      password: '',
+    };
+  },
+  mounted() {
+    return
+    this.unsubscribeAuth = onAuthUIStateChange((authState, authData) => {
+      if (authState === 'signedin' && authData) this.$router.push({ name: 'application' });
+    });
+
+  },
+  methods: {
+    login: async function() {
+      let vue = this;
+      this.$router.push({ name: 'application' });
+      return
+      this.cognitoUser = await Auth.signIn({
+        username: vue.phone.replace(/[\(\)\- ]+/g, ''),
+        password: vue.password,
+      });
+      if (this.cognitoUser.challengeName == 'NEW_PASSWORD_REQUIRED') {
+        this.tab = 1;
+        this.needReset = true;
+      } else {
+        this.$router.push({ name: 'application' });
+      }
+
     },
-    mounted() {
-        this.login();
+    resetPw: async function() {
+      await this.cognitoUser.completeNewPasswordChallenge(this.newPw);
     },
-    methods: {
-        login: async function () {
-            let body = { email: "admin", password: "admin" };
-            let res = await this.$store.dispatch("api", {
-                method: "login",
-                model: "system_user",
-                body,
-            });
-            console.log(res);
-            if (typeof res == "string") {
-                localStorage.setItem("token", res);
-                this.$router.push({ name: "application" });
-            }
-        },
-    },
+  },
 };
 </script>
 
