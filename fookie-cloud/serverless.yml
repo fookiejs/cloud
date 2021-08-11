@@ -13,12 +13,11 @@ functions:
           path: /api
           method: POST
 plugins:
+  - serverless-plugin-common-excludes
+  - serverless-plugin-include-dependencies
   - serverless-offline
-custom:
-  serverless-offline:
-    noPrependStageInUrl: true
-  webpack:
-    includeModules:
-      packagePath: './package.json' # relative path to custom package.json file
+package:
+  patterns:
+    - '!node_modules/**' # no need to add this, this plugin does it for you
 
 
