@@ -99,7 +99,7 @@
     "filter-obj": "^1.1.0",
     "finalhandler": "^1.1.2",
     "follow-redirects": "^1.14.1",
-    "fookie": "^0.6.1",
+    "fookie": "^0.6.7",
     "forwarded": "^0.2.0",
     "fresh": "^0.5.2",
     "get-stream": "^4.1.0",
@@ -254,8 +254,8 @@
     "statuses": "^1.5.0",
     "streamsearch": "^0.1.2",
     "strict-uri-encode": "^2.0.0",
-    "string-width": "^4.2.2",
     "string_decoder": "^1.1.1",
+    "string-width": "^4.2.2",
     "strip-ansi": "^6.0.0",
     "strip-json-comments": "^2.0.1",
     "supports-color": "^7.2.0",
@@ -298,7 +298,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Seyit Umut Biçer",
   "license": "ISC",
   "devDependencies": {
     "serverless-esbuild": "^1.16.1",
