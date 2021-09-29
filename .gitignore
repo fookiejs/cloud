@@ -5,8 +5,8 @@ bin-release/
 [Bb]in/
 client/node_modules
 client/package-lock.json
-backend/node_modules
-backend/package-lock.json
+serverless/node_modules
+serverless/package-lock.json
 data
 
 # Other files and folders

@@ -178,7 +178,7 @@
     "negotiator": "^0.6.2",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.6.3",
-    "nodemon": "^2.0.12",
+    "nodemon": "^2.0.13",
     "nopt": "^1.0.10",
     "normalize-path": "^3.0.0",
     "normalize-url": "^4.5.1",
@@ -296,7 +296,8 @@
     "yallist": "^4.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "sls offline",
+    "dev:watch": "nodemon -e js,ts,jsx,tsx -x npm run dev"
   },
   "author": "Seyit Umut Biçer",
   "license": "ISC",

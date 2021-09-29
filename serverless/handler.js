@@ -1,5 +1,4 @@
 module.exports = async (event, context, cb) => {
-
   const F = require("fookie");
   const fookie = new F()
   await fookie.core()

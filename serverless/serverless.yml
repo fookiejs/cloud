@@ -6,7 +6,7 @@ provider:
   runtime: nodejs14.x
   lambdaHashingVersion: 20201221
 functions:
-  api:
+  fookie:
     handler: default
     events:
       - http:
