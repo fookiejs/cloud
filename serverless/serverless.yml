@@ -3,7 +3,7 @@ frameworkVersion: "2"
 provider:
   region: eu-central-1
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs12.x
   lambdaHashingVersion: 20201221
 functions:
   api:
@@ -16,7 +16,3 @@ plugins:
   - serverless-plugin-common-excludes
   - serverless-plugin-include-dependencies
   - serverless-offline
-package:
-  patterns:
-    - "!node_modules/**" # no need to add this, this plugin does it for you
-
