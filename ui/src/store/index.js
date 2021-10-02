@@ -56,11 +56,11 @@ export default new Vuex.Store({
   },
   actions: {
     api: async function (ctx, payload) {
-      payload.token = localStorage.getItem("token")
       ctx.commit("log", {
         title: `REQUEST -> Method:${payload.method} | Model:${payload.model}`,
         body: payload
       })
+      payload.system = "admin"
       let response = await axios.post(ctx.state.baseURL, payload, {
         headers: {
           token: localStorage.getItem("token")

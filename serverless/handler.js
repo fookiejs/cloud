@@ -1,7 +1,8 @@
 
 
 (async () => {
-  const F = require("../../fookie");
+  //const F = require("../../fookie");
+  F = require("fookie");
   const fookie = new F()
   await fookie.core()
 

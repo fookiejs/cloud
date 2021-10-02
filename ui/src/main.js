@@ -4,6 +4,11 @@ import vuetify from './plugins/vuetify'
 import store from './store'
 import router from './router'
 
+Vue.component("fookie-view")
+Vue.component("fookie-post")
+Vue.component("fookie-field")
+Vue.component("fookie-delete")
+
 Vue.config.productionTip = false
 
 new Vue({

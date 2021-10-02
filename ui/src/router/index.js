@@ -6,24 +6,24 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/application',
-    name: 'Application',
+    name: 'application',
     component: () => import(/* webpackChunkName: "application" */ '../views/Application/Application.vue'),
     children: [
       {
-        path: 'view',
-        name: 'View',
+        path: ':model/view',
+        name: 'view',
         component: () => import(/* webpackChunkName: "view" */ '../views/Application/Application/View.vue'),
       },
       {
         path: 'panel',
-        name: 'Panel',
+        name: 'panel',
         component: () => import(/* webpackChunkName: "view" */ '../views/Application/Application/Panel.vue'),
       },
     ]
   },
   {
     path: '/auth',
-    name: 'Auth',
+    name: 'auth',
     component: () => import(/* webpackChunkName: "auth" */ '../views/Auth/Auth.vue'),
     children: [
 
@@ -31,7 +31,7 @@ const routes = [
   },
   {
     path: '/about',
-    name: 'About',
+    name: 'about',
     component: () => import(/* webpackChunkName: "about" */ '../views/About/About.vue'),
     children: [
 

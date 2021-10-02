@@ -1,10 +1,16 @@
 <template lang="pug">
-v-app
+v-app(dark)
   v-navigation-drawer(v-model="drawer", app)
-    v-list
-      v-list-item(v-for="i in $store.state.model", :key="i.name", link)
+    v-list-item All Models
+    v-list(dense)
+      v-list-item(
+        link,
+        v-for="i in $store.state.model",
+        :key="i.name",
+        :to="{ name: 'view', params: { model: i.name } }"
+      )
         v-list-item-icon
-          v-icon mdi-target
+          v-icon mdi-minus
         v-list-item-content
           v-list-item-title {{ i.name }}
   v-app-bar(app)
@@ -21,6 +27,9 @@ export default {
     return {
       drawer: null,
     };
+  },
+  mounted() {
+    this.$vuetify.theme.dark = false;
   },
 };
 </script>
