@@ -1,22 +1,21 @@
 service: fookie-cloud
 frameworkVersion: "2"
 provider:
-  region: eu-central-1
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs12.x
   lambdaHashingVersion: 20201221
+  region: eu-central-1
 functions:
+<<<<<<< HEAD
   fookie:
     handler: default
+=======
+  run:
+    handler: handler.run
+>>>>>>> a1e8f1a81c96636c373aaa790f51cf597340cf1a
     events:
-      - http:
-          path: /api
+      - httpApi:
           method: POST
+          path: /
 plugins:
-  - serverless-plugin-common-excludes
-  - serverless-plugin-include-dependencies
   - serverless-offline
-package:
-  patterns:
-    - "!node_modules/**" # no need to add this, this plugin does it for you
-

@@ -8,6 +8,7 @@ client/package-lock.json
 serverless/node_modules
 serverless/package-lock.json
 data
+.idea
 
 # Other files and folders
 .settings/

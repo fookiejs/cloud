@@ -1,9 +1,10 @@
 {
-  "name": "fookie-cloud-serverless",
+  "name": "serverless",
   "version": "1.0.0",
+  "description": "",
   "type": "commonjs",
-  "description": "<!-- title: 'AWS NodeJS Example' description: 'This template demonstrates how to deploy a NodeJS function running on AWS Lambda using the traditional Serverless Framework.' layout: Doc framework: v2 platform: AWS language: nodeJS authorLink: 'https://github.com/serverless' authorName: 'Serverless, inc.' authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4' -->",
   "main": "handler.js",
+<<<<<<< HEAD
   "dependencies": {
     "abbrev": "^1.1.1",
     "abort-controller": "^3.0.0",
@@ -295,18 +296,16 @@
     "xtend": "^4.0.2",
     "yallist": "^4.0.0"
   },
+=======
+>>>>>>> a1e8f1a81c96636c373aaa790f51cf597340cf1a
   "scripts": {
     "dev": "sls offline",
     "dev:watch": "nodemon -e js,ts,jsx,tsx -x npm run dev"
   },
-  "author": "Seyit Umut Biçer",
+  "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "serverless-esbuild": "^1.16.1",
-    "serverless-offline": "^8.0.0",
-    "serverless-plugin-common-excludes": "^4.0.0",
-    "serverless-plugin-include-dependencies": "^5.0.0",
-    "serverless-webpack": "^5.5.1",
-    "webpack": "^5.50.0"
+  "dependencies": {
+    "fookie": "^0.6.8",
+    "serverless-offline": "^8.2.0"
   }
 }
