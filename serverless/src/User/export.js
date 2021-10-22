@@ -1,4 +1,4 @@
 module.exports = async function (ctx) {
-    await require("./model/user")(ctx)
-    await require("./model/admin")(ctx)
+    await ctx.use(require("./model/user"))
+    await ctx.use(require("./model/admin"))
 }

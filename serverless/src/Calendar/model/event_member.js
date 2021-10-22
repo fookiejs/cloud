@@ -1,18 +1,17 @@
 module.exports = async function (ctx) {
     await ctx.model({
-        name: "wallet",
+        name: "event_member",
         database: "store",
-        display: "user",
+        display: "_id",
         schema: {
             user: {
                 relation: "user",
                 required: true,
             },
-            amount: {
-                type: "number",
-                default: 0,
-            },
-
+            coming: {
+                type: "boolean",
+                default: false,
+            }
         },
         lifecycle: {
             get: {

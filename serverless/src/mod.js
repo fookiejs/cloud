@@ -1,7 +1,8 @@
 module.exports = async function (ctx) {
-    await require("./User/export")(ctx)
-    await require("./Payment/export")(ctx)
-    await require("./Inventory/export")(ctx)
-    await require("./Chat/export")(ctx)
-    await require("./Callendar/export")(ctx)
+    await ctx.use(require("./User/export"))
+    await ctx.use(require("./Payment/export"))
+    await ctx.use(require("./Inventory/export"))
+    await ctx.use(require("./Chat/export"))
+    await ctx.use(require("./Calendar/export"))
+    await ctx.use(require("./User/export"))
 }

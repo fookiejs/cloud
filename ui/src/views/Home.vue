@@ -1,14 +1,11 @@
 <template lang="pug">
-div 
-  h1 hi
+div hi
 </template>
 
 <script>
 export default {
-  name: "App",
+  name: "Home",
 
-  data: () => ({
-    //
-  }),
+  components: {},
 };
 </script>

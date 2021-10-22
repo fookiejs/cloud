@@ -1,3 +1,3 @@
 module.exports = async function (ctx) {
-    await require("./model/wallet")(ctx)
+    await ctx.use(require("./model/wallet"))
 }

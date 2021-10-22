@@ -1,4 +1,4 @@
 module.exports = async function (ctx) {
-    await require("./model/inventory")(ctx)
-    await require("./model/item")(ctx)
+    await ctx.use(require("./model/inventory"))
+    await ctx.use(require("./model/item"))
 }
