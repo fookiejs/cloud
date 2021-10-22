@@ -5,12 +5,13 @@
   "type": "commonjs",
   "main": "handler.js",
   "scripts": {
+    "dev": "nodemon --exec 'sls offline start' -e 'extensions,to,watch,for,example,js,elm,hs,py'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fookie": "^0.6.8",
+    "fookie": "^0.7.3",
     "serverless-offline": "^8.2.0"
   }
 }

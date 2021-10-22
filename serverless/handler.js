@@ -1,11 +1,10 @@
 
 
-const Fookie = require("fookie")
-let fookie = new Fookie()
 module.exports.run = async (event) => {
-
-
-  await fookie.core()
+  const Fookie = require("fookie")
+  let fookie = new Fookie()
+  await fookie.init()
+  await fookie.use(require("./src/mod"))
   if (typeof event.body.system == "boolean") return false
   let body = Object.assign({}, JSON.parse(event.body))
   let res = await fookie.run(body)
@@ -13,7 +12,4 @@ module.exports.run = async (event) => {
     statusCode: 200,
     body: JSON.stringify(res),
   };
-
-  // Use this code if you don't use the http event with the LAMBDA-PROXY integration
-  // return { message: 'Go Serverless v1.0! Your function executed successfully!', event };
 };
