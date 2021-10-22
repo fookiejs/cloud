@@ -7,6 +7,7 @@ module.exports = async function (ctx) {
             user: {
                 relation: "user",
                 required: true,
+                input:"relation"
             },
         },
         lifecycle: {

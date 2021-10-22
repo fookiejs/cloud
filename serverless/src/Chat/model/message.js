@@ -7,20 +7,18 @@ module.exports = async function (ctx) {
             room: {
                 relation: "room",
                 required: true,
+                input:"relation"
             },
             user: {
                 relation: "user",
                 required: true,
+                input:"relation"
             },
             text: {
                 type: "string",
                 required: true,
-            },
-            rooms: {
-                type: "array",
-                required: true,
-                default: []
-            }
+                input:"text"
+            }        
         },
         lifecycle: {
             get: {

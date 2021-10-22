@@ -7,10 +7,12 @@ module.exports = async function (ctx) {
             room: {
                 relation: "room",
                 required: true,
+                input:"relation",
             },
             user: {
                 relation: "user",
                 required: true,
+                input:"relation",
             },
         },
         lifecycle: {

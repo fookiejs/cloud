@@ -1,14 +1,64 @@
 <template lang="pug">
-div 
-  h1 hi
+router-view
 </template>
 
 <script>
 export default {
   name: "App",
+  data() {
+    return {};
+  },
+  mounted: async function () {
+    await this.$store.dispatch("api", {
+      method: "getAll",
+      model: "model",
+      system: "admin",
+    });
 
-  data: () => ({
-    //
-  }),
+    for (let model of this.$store.state.model) {
+      this.$set(this.$store.state, model.name, []);
+      this.$store.dispatch("api", {
+        method: "getAll",
+        model: model.name,
+        system: "admin",
+      });
+    }
+    this.$store.state.system_loaded = true;
+  },
 };
 </script>
+
+<style >
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+.justify-around {
+  justify-content: space-around;
+}
+.flex-wrap {
+  flex-wrap: wrap;
+}
+.myapp {
+  background-color: transparent !important;
+}
+
+::-webkit-scrollbar {
+  display: none;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+body {
+  overflow: hidden;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+}
+</style>
