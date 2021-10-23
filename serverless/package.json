@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "fookie": "^0.7.3",
-    "serverless-offline": "^8.2.0"
+    "serverless-offline": "^8.2.0",
+    "sha512": "^0.0.1"
   }
 }
