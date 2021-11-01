@@ -8,9 +8,9 @@ export default {
   data() {
     return {};
   },
-  mounted: async function () {
+  mounted: async function() {
     await this.$store.dispatch("api", {
-      method: "getAll",
+      method: "read",
       model: "model",
       system: "admin",
     });
@@ -18,7 +18,7 @@ export default {
     for (let model of this.$store.state.model) {
       this.$set(this.$store.state, model.name, []);
       this.$store.dispatch("api", {
-        method: "getAll",
+        method: "read",
         model: model.name,
         system: "admin",
       });
@@ -28,7 +28,7 @@ export default {
 };
 </script>
 
-<style >
+<style>
 .justify-center {
   justify-content: center;
 }

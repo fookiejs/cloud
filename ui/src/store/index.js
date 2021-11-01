@@ -3,7 +3,6 @@ import Vuex from "vuex";
 import axios from "axios"
 Vue.use(Vuex);
 
-/* eslint-disable */
 export default new Vuex.Store({
   state: {
     system_loaded: false,
@@ -20,13 +19,8 @@ export default new Vuex.Store({
     menus: [],
   },
   mutations: {
-    getAll(state, payload) {
+    read(state, payload) {
       state[payload.model] = payload.response.data;
-    },
-
-    get(state, payload) {
-      state[payload.model] = state[payload.model].filter((i) => i._id != payload.response.data._id);
-      state[payload.model].push(payload.response.data);
     },
     create(state, payload) {
       state[payload.model] = state[payload.model].filter((i) => i._id != payload.response.data._id);

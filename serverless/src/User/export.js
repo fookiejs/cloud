@@ -12,12 +12,12 @@ module.exports = async function (ctx) {
   let res = await ctx.run({
     system: true,
     model: "model",
-    method: "get",
+    method: "read",
     query: {
       name: "user",
     },
   });
-  let user_model = res.data;
+  let user_model = res.data[0];
 
   user_model.methods.set("login", async ({ body, response }, ctx) => {
     let { email, password } = body;

@@ -10,7 +10,7 @@ functions:
     handler: handler.run
     events:
       - httpApi:
-          method: POST
+          method: post
           path: /
 plugins:
   - serverless-offline

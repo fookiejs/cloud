@@ -22,10 +22,6 @@ module.exports = async function (ctx) {
         required: true,
         input: "password",
       },
-      password: {
-        type: "phone",
-        input: "phone",
-      },
     },
     lifecycle: {
       get: {
