@@ -6,7 +6,7 @@ v-app(app)
         v-for="model in $store.state.model",
         :key="model.name",
         link,
-        :to="{ params: { model: model.name } }"
+        :to="{name:'view', params: { model: model.name } }"
       )
         v-list-item-content
           v-list-item-title {{ model.name }}

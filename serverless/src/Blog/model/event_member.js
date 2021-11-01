@@ -10,6 +10,7 @@ module.exports = async function (ctx) {
             },
             coming: {
                 type: "boolean",
+                input: "text",
                 default: false,
             }
         },

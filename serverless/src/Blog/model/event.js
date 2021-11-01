@@ -5,13 +5,16 @@ module.exports = async function (ctx) {
         display: "user",
         schema: {
             title: {
+                input: "timestamp",
                 type: "string",
                 required: true,
             },
             start: {
-                type: "string"
+                type: "string", input: "text",
+                input: "timestamp",
             },
             end: {
+                input: "timestamp",
                 type: "string"
             }
         },

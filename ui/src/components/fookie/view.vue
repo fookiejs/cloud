@@ -3,11 +3,10 @@ v-row
   v-col 
     v-dialog(v-model="dialog", width="500")
         template(v-slot:activator="{ on, attrs }")
-            v-btn(color="green", dark, fab, v-bind="attrs", v-on="on")
+            v-btn(color="green", dark, fab, v-bind="attrs", v-on="on" bottom right fixed)
                 v-icon(dark) mdi-plus
-        v-card
-            v-card-text
-                fookie-post(:model="model")
+        div
+          fookie-post(:model="model")
   v-col(
     v-for="entity in $store.state[model.name]",
     :key="entity",
@@ -28,6 +27,11 @@ import lodash from "lodash";
 
 export default {
   props: ["model"],
+  data(){
+    return {
+      dialog:false
+    }
+  },
   computed: {
     schema_keys() {
       return lodash.keys(this.model.schema);
