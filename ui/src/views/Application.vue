@@ -1,5 +1,5 @@
 <template lang="pug">
-div panel
+router-view 
 </template>
 
 <script>

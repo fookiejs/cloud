@@ -1,48 +1,39 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import Home from '../views/Home.vue'
+import View from '../views/Application/View.vue'
+import Application from '../views/Application.vue'
 
 Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/application',
-    name: 'application',
-    component: () => import(/* webpackChunkName: "application" */ '../views/Application/Application.vue'),
+    path: '/',
+    name: 'Home',
+    component: Home,
     children: [
       {
-        path: ':model/view',
-        name: 'view',
-        component: () => import(/* webpackChunkName: "view" */ '../views/Application/Application/View.vue'),
+        path: 'application',
+        name: 'application',
+        component: Application,
+        children: [
+          {
+            path: "view/:model",
+            name: 'view',
+            component: View,
+          },
+        ]
       },
-      {
-        path: 'panel',
-        name: 'panel',
-        component: () => import(/* webpackChunkName: "view" */ '../views/Application/Application/Panel.vue'),
-      },
-    ]
-  },
-  {
-    path: '/auth',
-    name: 'auth',
-    component: () => import(/* webpackChunkName: "auth" */ '../views/Auth/Auth.vue'),
-    children: [
 
     ]
   },
-  {
-    path: '/about',
-    name: 'about',
-    component: () => import(/* webpackChunkName: "about" */ '../views/About/About.vue'),
-    children: [
 
-    ]
-  },
 ]
 
-
 const router = new VueRouter({
-  routes,
   mode: 'history',
+  base: process.env.BASE_URL,
+  routes
 })
 
 export default router

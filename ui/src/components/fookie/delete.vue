@@ -1,9 +1,11 @@
 <template lang="pug">
-div auth
+pre {{ model }}
 </template>
 
 <script>
-export default {};
+export default {
+  props: ["model"],
+};
 </script>
 
 <style>

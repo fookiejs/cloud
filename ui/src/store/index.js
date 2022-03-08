@@ -1,27 +1,26 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import axios from 'axios'
-Vue.use(Vuex)
+import Vue from "vue";
+import Vuex from "vuex";
+import axios from "axios"
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    system_loaded: false,
+    logs: [],
+    token: null,
+    baseURL: "http://localhost:3000",
+    inGame: false,
     model: [],
-    baseURL: "http://localhost:3000/dev/api",
     snackbar: {
       text: "Ok",
       opened: false,
       color: "success",
     },
-    logs: []
+    menus: [],
   },
   mutations: {
-    getAll(state, payload) {
-      console.log(payload);
+    read(state, payload) {
       state[payload.model] = payload.response.data;
-    },
-    get(state, payload) {
-      state[payload.model] = state[payload.model].filter((i) => i._id != payload.response.data._id);
-      state[payload.model].push(payload.response.data);
     },
     create(state, payload) {
       state[payload.model] = state[payload.model].filter((i) => i._id != payload.response.data._id);
@@ -30,10 +29,11 @@ export default new Vuex.Store({
     remove(state, payload) {
       state[payload.model] = state[payload.model].filter((i) => i._id != payload.query.where._id);
     },
-    patch(state, payload) {
+    update(state, payload) {
       state[payload.model] = state[payload.model].filter((i) => i._id != payload.response.data._id);
       state[payload.model].push(payload.response.data);
     },
+
     login(state, payload) {
       state.token = payload
       localStorage.setItem("token", payload)
@@ -56,17 +56,19 @@ export default new Vuex.Store({
   },
   actions: {
     api: async function (ctx, payload) {
+      payload.token = localStorage.getItem("token")
       ctx.commit("log", {
         title: `REQUEST -> Method:${payload.method} | Model:${payload.model}`,
         body: payload
       })
-      payload.system = "admin"
-      let response = await axios.post(ctx.state.baseURL, payload, {
+
+      payload.response = await axios.post(ctx.state.baseURL, payload, {
         headers: {
           token: localStorage.getItem("token")
         }
       })
-      payload.response = response.data
+
+      payload.response = payload.response.data
       ctx.dispatch("apiSync", payload)
       return payload.response.data
     },
@@ -86,6 +88,5 @@ export default new Vuex.Store({
       }
     },
   },
-  modules: {
-  }
-})
+  modules: {}
+});

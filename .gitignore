@@ -6,7 +6,11 @@ bin-release/
 client/node_modules
 client/package-lock.json
 serverless/node_modules
+<<<<<<< HEAD
 serverless/package-lock.json
+=======
+backend/package-lock.json
+>>>>>>> 5373dceb6f08fa7a059bff29736a956fd92ae7bf
 data
 .idea
 

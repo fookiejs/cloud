@@ -299,13 +299,20 @@
 =======
 >>>>>>> a1e8f1a81c96636c373aaa790f51cf597340cf1a
   "scripts": {
+<<<<<<< HEAD
     "dev": "sls offline",
     "dev:watch": "nodemon -e js,ts,jsx,tsx -x npm run dev"
+=======
+    "dev": "nodemon --exec \"serverless offline start\" -e 'extensions,to,watch,for,example,js,elm,hs,py'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+>>>>>>> 5373dceb6f08fa7a059bff29736a956fd92ae7bf
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fookie": "^0.6.8",
-    "serverless-offline": "^8.2.0"
+    "fookie": "^0.7.3",
+    "serverless": "^2.64.1",
+    "serverless-offline": "^8.2.0",
+    "sha512": "^0.0.1"
   }
 }
