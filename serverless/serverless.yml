@@ -6,13 +6,8 @@ provider:
   lambdaHashingVersion: 20201221
   region: eu-central-1
 functions:
-<<<<<<< HEAD
-  fookie:
-    handler: default
-=======
   run:
     handler: handler.run
->>>>>>> a1e8f1a81c96636c373aaa790f51cf597340cf1a
     events:
       - httpApi:
           method: post
