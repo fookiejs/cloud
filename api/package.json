@@ -11,7 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fookie": "^0.7.94",
+    "fookie": "^0.8.7",
+    "fookie-cache": "^0.0.13",
+    "fookie-server": "^0.0.42",
     "serverless": "^2.64.1",
     "serverless-offline": "^8.2.0",
     "sha512": "^0.0.1"

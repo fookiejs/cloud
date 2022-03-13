@@ -1,10 +1,21 @@
-version: "3.2"
+version: "3"
 services:
-  serverless:
-    build: ./serverless
+  api:
+    restart: always
+    env_file: .env
+    build: api
     ports:
-     - 2626:3000
+      - "2626:2626"
+    depends_on:
+      - cache
+      - mongo
+  cache:
+    restart: always
+    env_file: .env
+    build: cache
+    ports:
+      - "2630:2630"
   mongo:
     image: mongo
     ports:
-      - 27017:27017
+      - "27017:27017"
