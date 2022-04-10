@@ -1,19 +1,20 @@
 (async () => {
+  const fookie = require("../../core");
   const mod = require("./src/mod")
-  const Fookie = require("fookie");
-  await Fookie.init();
+  await fookie.init();
 
-  await Fookie.use(require("fookie-server"))
-  await Fookie.use(require("fookie-cache").client)  
-  await Fookie.use(mod);
+  await fookie.use(require("../../server"))
+  await fookie.use(require("../../cache").client)
 
-  await Fookie.setting({
+  await fookie.setting({
     name: "mongodb_connection",
-    value: [process.env.MONGO]
+    value: {
+      url: process.env.MONGO
+    }
   })
-  
-
-  Fookie.listen(2626)
+  await fookie.use(require("../../databases").mongodb)
+  await fookie.use(mod);
+  fookie.listen(2626)
 })()
 
 

@@ -1,5 +1,5 @@
 FROM node
-WORKDIR /use/src/app
+WORKDIR /user/src/app
 COPY . .
 RUN npm i
 EXPOSE 2630

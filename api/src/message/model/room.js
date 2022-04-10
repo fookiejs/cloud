@@ -1,13 +1,18 @@
 module.exports = async function (ctx) {
     await ctx.model({
         name: "room",
-        database: "store",
-        display: "name",
+        database: "mongodb",
         schema: {
-            user: {
+            name: {
                 type: "string",
                 required: true,
+                unique: true,
             },
+            color: {
+                type: "string",
+                required: true,
+                defalut: "blue",
+            }
         },
         lifecycle: {
             get: {
@@ -60,6 +65,6 @@ module.exports = async function (ctx) {
                 effect: [],
             },
         },
-        mixin: [],
+        mixin: ["cache"],
     })
 }

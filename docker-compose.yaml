@@ -9,12 +9,22 @@ services:
     depends_on:
       - cache
       - mongo
+    volumes:
+      - ../core:/user/core
+      - ../server:/user/server
+      - ../cache:/user/cache
+      - ../databases:/user/databases
   cache:
     restart: always
     env_file: .env
     build: cache
     ports:
       - "2630:2630"
+    volumes:
+      - ../core:/user/core
+      - ../server:/user/server
+      - ../cache:/user/cache
+      - ../databases:/user/databases
   mongo:
     image: mongo
     ports:

@@ -4,10 +4,7 @@
   "description": "",
   "type": "commonjs",
   "main": "handler.js",
-  "scripts": {
-    "dev": "sls offline",
-    "dev:watch": "nodemon -e js,ts,jsx,tsx -x npm run dev"
-  },
+  "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {

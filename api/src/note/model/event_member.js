@@ -64,6 +64,6 @@ module.exports = async function (ctx) {
                 effect: [],
             },
         },
-        mixin: [],
+        mixin: ["cache"],
     })
 }
