@@ -9,6 +9,9 @@ module.exports = async function (ctx) {
         required: true,
         unique: true,
       },
+      color: {
+        type: "string",
+      }
     },
     lifecycle: {
       read: {

@@ -4,8 +4,8 @@ module.exports = async function (ctx) {
         database: "mongodb",
         display: "name",
         schema: {
-            room: {
-                relation: "room",
+            group: {
+                relation: "group",
                 required: true,
                 input: "relation"
             },
