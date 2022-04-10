@@ -17,7 +17,7 @@ module.exports = async function (ctx) {
 
 
   await ctx.run({
-    system: true,
+    token: true,
     model: "mixin",
     method: "update",
     query: {
@@ -34,7 +34,7 @@ module.exports = async function (ctx) {
 
   await ctx.rule("admin_required", async function (payload, ctx, state) { // TODO ROLE ALTINA AL
     let res = await ctx.run({
-      system: true,
+      token: true,
       method: "count",
       model: "system",
       query: payload.query

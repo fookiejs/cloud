@@ -6,7 +6,7 @@ module.exports = async function (ctx) {
 
   user.methods.login = async function (payload, ctx, state) {
     let res = await ctx.run({
-      system: true,
+      token: true,
       model: "user",
       method: "read",
       query: {
