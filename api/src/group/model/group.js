@@ -2,7 +2,6 @@ module.exports = async function (ctx) {
   await ctx.model({
     name: "group",
     database: "mongodb",
-    display: "name",
     schema: {
       name: {
         type: "string",

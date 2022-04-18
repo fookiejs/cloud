@@ -2,7 +2,6 @@ module.exports = async function (ctx) {
   await ctx.model({
     name: "user",
     database: "mongodb",
-    display: "email",
     schema: {
       email: {
         type: "string",

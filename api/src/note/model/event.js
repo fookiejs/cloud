@@ -2,7 +2,6 @@ module.exports = async function (ctx) {
     await ctx.model({
         name: "event",
         database: "store",
-        display: "user",
         schema: {
             title: {
                 type: "string",

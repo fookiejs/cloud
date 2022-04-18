@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 module.exports = async function (ctx) {
   let user = ctx.local.get("model", "user")
-
+  console.log(user);
   user.methods.login = async function (payload, ctx, state) {
     let res = await ctx.run({
       token: true,
