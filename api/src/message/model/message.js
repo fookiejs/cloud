@@ -7,17 +7,14 @@ module.exports = async function (ctx) {
             group: {
                 relation: "group",
                 required: true,
-                input: "relation"
             },
             user: {
                 relation: "user",
                 required: true,
-                input: "relation"
             },
             text: {
                 type: "string",
                 required: true,
-                input: "text"
             }
         },
         lifecycle: {
