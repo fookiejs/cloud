@@ -1,5 +1,5 @@
 module.exports = async function (ctx) {
-  await ctx.modify({
+  await ctx.lifecycle({
     name: "set_user",
     function: async function (payload, ctx, state) {
       if (payload.token) {
@@ -8,7 +8,7 @@ module.exports = async function (ctx) {
         } catch (error) {
           console.log("Invalid token");
         }
-      } 
+      }
     }
   })
 };

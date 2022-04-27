@@ -32,7 +32,7 @@ module.exports = async function (ctx) {
 
 
 
-  await ctx.rule("admin_required", async function (payload, ctx, state) { // TODO ROLE ALTINA AL
+  await ctx.lifecycle("admin_required", async function (payload, ctx, state) { // TODO ROLE ALTINA AL
     let res = await ctx.run({
       token: true,
       method: "count",

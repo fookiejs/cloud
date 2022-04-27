@@ -1,5 +1,5 @@
 module.exports = async function (ctx) {
-  await ctx.role({
+  await ctx.lifecycle({
     name: "group_owner",
     function: async function (payload, ctx, state) {
 
