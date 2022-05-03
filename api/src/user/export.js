@@ -8,13 +8,13 @@ module.exports = async function (ctx) {
   await ctx.use(require("./method/login"));
 
   const before = ctx.local.get("mixin", "before")
+
   before.object.lifecycle.read.modify.push("set_user")
   before.object.lifecycle.create.modify.push("set_user")
   before.object.lifecycle.update.modify.push("set_user")
   before.object.lifecycle.delete.modify.push("set_user")
   before.object.lifecycle.count.modify.push("set_user")
   before.object.lifecycle.test.modify.push("set_user")
-
 
   await ctx.run({
     token: true,
@@ -30,17 +30,27 @@ module.exports = async function (ctx) {
     }
   })
 
+  console.log(ctx.local.all("model"));
 
-
-  await ctx.lifecycle("admin_required", async function (payload, ctx, state) { // TODO ROLE ALTINA AL
-    let res = await ctx.run({
+  await ctx.lifecycle("admin_required", async function (payload, ctx, state) {
+    const res = await ctx.run({
       token: true,
       method: "count",
       model: "system",
       query: payload.query
     });
+    const will_delete = res.data;
 
-    return res.data > 2;
+    const res2 = await ctx.run({
+      token: true,
+      method: "count",
+      model: "system",
+      query: payload.query
+    });
+    const existed_admin = res2.data;
+
+    return (existed_admin - will_delete) > 0
+
   });
 
 };
