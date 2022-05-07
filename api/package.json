@@ -3,15 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "type": "commonjs",
-  "main": "handler.js",
+  "main": "index.js",
   "scripts": {},
-  "author": "",
+  "author": "umudik",
   "license": "ISC",
   "dependencies": {
+    "crypto-js": "^4.1.1",
     "fookie-cache": "^0.0.13",
     "fookie-server": "^0.0.42",
-    "serverless": "^2.64.1",
-    "serverless-offline": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
     "sha512": "^0.0.1"
   }
 }

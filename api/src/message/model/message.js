@@ -2,70 +2,27 @@ module.exports = async function (ctx) {
     await ctx.model({
         name: "message",
         database: "mongodb",
-
         schema: {
-            group: {
-                relation: "group",
-                required: true,
-            },
-            user: {
-                relation: "user",
-                required: true,
-            },
             text: {
                 type: "string",
                 required: true,
             }
         },
         lifecycle: {
-            get: {
-                preRUle: [],
-                modify: [],
-                rule: [],
-                role: [],
-                filter: [],
-                effect: [],
-
-            },
-            getAll: {
-                preRUle: [],
-                modify: [],
-                rule: [],
-                role: [],
-                filter: [],
-                effect: [],
+            read: {
+                role: ["system"],
             },
             update: {
-                preRUle: [],
-                modify: [],
-                rule: [],
-                role: [],
-                filter: [],
-                effect: [],
+                role: ["system"],
             },
             create: {
-                preRUle: [],
-                modify: [],
-                rule: [],
-                role: [],
-                filter: [],
-                effect: [],
+                role: ["system"],
             },
             delete: {
-                preRUle: [],
-                modify: [],
-                rule: [],
-                role: [],
-                filter: [],
-                effect: [],
+                role: ["system"],
             },
             count: {
-                preRUle: [],
-                modify: [],
-                rule: [],
-                role: [],
-                filter: [],
-                effect: [],
+                role: ["system"],
             },
         },
         mixin: ["cache"],

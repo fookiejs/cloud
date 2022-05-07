@@ -1,8 +1,7 @@
 (async () => {
   const fookie = require("../../core");
-  const mod = require("./src/mod")
   await fookie.init();
-
+  const mod = require("./src/mod")
   await fookie.use(require("../../server"))
   await fookie.use(require("../../cache").client)
 
@@ -15,6 +14,15 @@
   await fookie.use(require("../../databases").mongodb)
   await fookie.use(mod);
   fookie.listen(2626)
+
+  await fookie.run({
+    token: true,
+    model: "message",
+    method: "create",
+    body: {
+      text: "yoo-" + Date.now()
+    }
+  })
 })()
 
 

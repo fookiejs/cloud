@@ -1,4 +1,4 @@
-const { sha512 } = require("js-sha512");
+const sha256 = require("crypto-js/sha256");
 const jwt = require("jsonwebtoken");
 
 module.exports = async function (ctx) {
@@ -11,7 +11,7 @@ module.exports = async function (ctx) {
       query: {
         filter: {
           email: payload.query.filter.email,
-          password: sha512(payload.query.filter.password),
+          password: sha256(payload.query.filter.password),
         }
       },
     });

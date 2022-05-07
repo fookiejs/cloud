@@ -20,7 +20,7 @@ module.exports = async function (ctx) {
     lifecycle: {
       read: {
         role: ["system"],
-        modify: ["login"]
+        modify: []
       },
       update: {
         role: ["system"],
@@ -38,7 +38,6 @@ module.exports = async function (ctx) {
       },
       login: {
         preRule: ["has_password_email"],
-
       }
     },
     mixin: ["cache"],

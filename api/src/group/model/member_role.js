@@ -14,23 +14,20 @@ module.exports = async function (ctx) {
     },
     lifecycle: {
       read: {
-        role: [],
-        modify: []
+        role: ["system"],
       },
       update: {
-        role: [],
-        modify: [],
+        role: ["system"],
       },
       create: {
-        role: [],
-        modify: [],
+        role: ["system"],
       },
       delete: {
-        role: [],
+        role: ["system"],
       },
       count: {
-        role: [],
-      }
+        role: ["system"],
+      },
     },
     mixin: ["cache"],
   });

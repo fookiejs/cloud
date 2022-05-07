@@ -21,6 +21,9 @@ module.exports = async function (ctx) {
       delete: {
         role: ["system"],
       },
+      count: {
+        role: ["system"],
+      },
     },
     mixin: ["cache"],
   });
