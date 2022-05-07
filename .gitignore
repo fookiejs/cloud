@@ -13,7 +13,7 @@ data
 
 # Other files and folders
 .settings/
-
+.env
 # Executables
 *.swf
 *.air
