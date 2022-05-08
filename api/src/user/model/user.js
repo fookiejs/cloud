@@ -20,13 +20,13 @@ module.exports = async function (ctx) {
     lifecycle: {
       read: {
         role: ["system"],
-        modify: []
       },
       update: {
         role: ["system"],
         modify: ["hash_password"],
       },
       create: {
+        rule: [],
         role: ["system"],
         modify: ["hash_password"],
       },

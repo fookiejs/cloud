@@ -14,15 +14,6 @@
   await fookie.use(require("../../databases").mongodb)
   await fookie.use(mod);
   fookie.listen(2626)
-
-  await fookie.run({
-    token: true,
-    model: "message",
-    method: "create",
-    body: {
-      text: "yoo-" + Date.now()
-    }
-  })
 })()
 
 

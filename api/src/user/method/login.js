@@ -11,7 +11,7 @@ module.exports = async function (ctx) {
       query: {
         filter: {
           email: payload.query.filter.email,
-          password: sha256(payload.query.filter.password),
+          password: sha256(payload.query.filter.password).toString(),
         }
       },
     });
