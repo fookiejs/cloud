@@ -57,6 +57,12 @@ function closeKeySheet() {
   if (!keySheet) return;
   keySheet.hidden = true;
   document.body.style.overflow = "";
+  const valueEl = document.getElementById("key-value");
+  if (valueEl) valueEl.textContent = "";
+  const form = document.getElementById("key-form");
+  const reveal = document.getElementById("key-reveal");
+  if (form) form.hidden = false;
+  if (reveal) reveal.hidden = true;
 }
 
 function getUser() {
@@ -174,7 +180,7 @@ function renderKeys(keys) {
       return `<li class="key-row${k.revoked ? " revoked" : ""}">
         <div class="meta">
           <strong>${escapeHtml(k.name)}</strong>
-          <span>${escapeHtml(k.prefix)}… · ${escapeHtml(status)}</span>
+          <span>${escapeHtml(status)}</span>
         </div>
         ${action}
       </li>`;

@@ -581,14 +581,21 @@ func (s *Server) handleListAPIKeys(w http.ResponseWriter, r *http.Request) {
 	}
 	out := make([]map[string]any, 0, len(keys))
 	for _, k := range keys {
-		out = append(out, map[string]any{
+		hint := k.TokenPrefix
+		if strings.HasPrefix(hint, "eyJ") {
+			hint = ""
+		}
+		item := map[string]any{
 			"id":         k.ID,
 			"name":       k.Name,
-			"prefix":     k.TokenPrefix,
 			"created_at": k.CreatedAt.UTC().Format(time.RFC3339),
 			"expires_at": k.ExpiresAt.UTC().Format(time.RFC3339),
 			"revoked":    k.RevokedAt != nil,
-		})
+		}
+		if hint != "" {
+			item["prefix"] = hint
+		}
+		out = append(out, item)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"keys": out})
 }
@@ -629,10 +636,7 @@ func (s *Server) handleCreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prefix := raw
-	if len(prefix) > 16 {
-		prefix = prefix[:16]
-	}
+	prefix := "fk_" + strings.ReplaceAll(jti, "-", "")[:8]
 	now := time.Now().UTC()
 	id := uuid.NewString()
 	if err := s.store.CreateAPIKey(r.Context(), domain.APIKey{
