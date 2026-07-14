@@ -32,6 +32,17 @@
         <span>Epic / task board</span>
       </button>
     </section>
+
+    <section class="keys-panel" id="keys-panel" hidden>
+      <div class="keys-head">
+        <div>
+          <h2>API keys</h2>
+          <p>Long-lived Bearer tokens for Lotaru, Task Bridge, and MCP.</p>
+        </div>
+        <button class="btn-solid" type="button" id="create-key">Create key</button>
+      </div>
+      <ul class="keys-list" id="keys-list"></ul>
+    </section>
   </main>
 
   <footer class="foot">
@@ -53,6 +64,29 @@
         </svg>
         Continue with Google
       </a>
+    </div>
+  </div>
+
+  <div class="sheet" id="key-sheet" hidden>
+    <button class="sheet-backdrop" type="button" data-close-key aria-label="Close"></button>
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="key-title">
+      <button class="sheet-x" type="button" data-close-key aria-label="Close">×</button>
+      <p class="sheet-kicker">Developer</p>
+      <h2 id="key-title">New API key</h2>
+      <div id="key-form">
+        <label class="field">
+          <span>Name</span>
+          <input id="key-name" type="text" placeholder="Cursor MCP" maxlength="80" />
+        </label>
+        <button class="btn-solid large" type="button" id="key-submit" style="width:100%;margin-top:1rem">Create</button>
+      </div>
+      <div id="key-reveal" hidden>
+        <p class="sheet-copy">Copy this key now. It won’t be shown again.</p>
+        <div class="key-box">
+          <code id="key-value"></code>
+          <button class="btn-solid" type="button" id="key-copy">Copy</button>
+        </div>
+      </div>
     </div>
   </div>
 

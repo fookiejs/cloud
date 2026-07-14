@@ -40,3 +40,15 @@ type RefreshToken struct {
 	RevokedAt *time.Time
 	CreatedAt time.Time
 }
+
+type APIKey struct {
+	ID          string
+	UserID      string
+	Name        string
+	TokenPrefix string
+	JTI         string
+	TokenHash   string
+	ExpiresAt   time.Time
+	RevokedAt   *time.Time
+	CreatedAt   time.Time
+}

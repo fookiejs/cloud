@@ -42,12 +42,32 @@ func (s *Store) Close() {
 }
 
 func (s *Store) Migrate(ctx context.Context) error {
-	data, err := migrationsFS.ReadFile("migrations/001_init.sql")
+	entries, err := migrationsFS.ReadDir("migrations")
 	if err != nil {
-		return fmt.Errorf("read migrations: %w", err)
+		return fmt.Errorf("read migrations dir: %w", err)
 	}
-	if _, err := s.pool.Exec(ctx, string(data)); err != nil {
-		return fmt.Errorf("apply migrations: %w", err)
+	names := make([]string, 0, len(entries))
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".sql") {
+			continue
+		}
+		names = append(names, e.Name())
+	}
+	for i := 0; i < len(names); i++ {
+		for j := i + 1; j < len(names); j++ {
+			if names[j] < names[i] {
+				names[i], names[j] = names[j], names[i]
+			}
+		}
+	}
+	for _, name := range names {
+		data, err := migrationsFS.ReadFile("migrations/" + name)
+		if err != nil {
+			return fmt.Errorf("read migration %s: %w", name, err)
+		}
+		if _, err := s.pool.Exec(ctx, string(data)); err != nil {
+			return fmt.Errorf("apply migration %s: %w", name, err)
+		}
 	}
 	return nil
 }
@@ -213,5 +233,86 @@ func (s *Store) RevokeUserRefreshTokens(ctx context.Context, userID, clientID st
 		args = append(args, clientID)
 	}
 	_, err := s.pool.Exec(ctx, query, args...)
+	return err
+}
+
+func (s *Store) CreateAPIKey(ctx context.Context, key domain.APIKey) error {
+	_, err := s.pool.Exec(ctx, `
+		INSERT INTO api_keys (id, user_id, name, token_prefix, jti, token_hash, expires_at, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+	`, key.ID, key.UserID, key.Name, key.TokenPrefix, key.JTI, key.TokenHash, key.ExpiresAt, key.CreatedAt)
+	return err
+}
+
+func (s *Store) ListAPIKeys(ctx context.Context, userID string) ([]domain.APIKey, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, user_id, name, token_prefix, jti, token_hash, expires_at, revoked_at, created_at
+		FROM api_keys
+		WHERE user_id = $1
+		ORDER BY created_at DESC
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	out := make([]domain.APIKey, 0)
+	for rows.Next() {
+		var k domain.APIKey
+		if err := rows.Scan(
+			&k.ID, &k.UserID, &k.Name, &k.TokenPrefix, &k.JTI, &k.TokenHash,
+			&k.ExpiresAt, &k.RevokedAt, &k.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		out = append(out, k)
+	}
+	return out, rows.Err()
+}
+
+func (s *Store) GetAPIKeyByID(ctx context.Context, id string) (*domain.APIKey, error) {
+	row := s.pool.QueryRow(ctx, `
+		SELECT id, user_id, name, token_prefix, jti, token_hash, expires_at, revoked_at, created_at
+		FROM api_keys
+		WHERE id = $1
+	`, id)
+	var k domain.APIKey
+	if err := row.Scan(
+		&k.ID, &k.UserID, &k.Name, &k.TokenPrefix, &k.JTI, &k.TokenHash,
+		&k.ExpiresAt, &k.RevokedAt, &k.CreatedAt,
+	); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &k, nil
+}
+
+func (s *Store) GetAPIKeyByJTI(ctx context.Context, jti string) (*domain.APIKey, error) {
+	row := s.pool.QueryRow(ctx, `
+		SELECT id, user_id, name, token_prefix, jti, token_hash, expires_at, revoked_at, created_at
+		FROM api_keys
+		WHERE jti = $1
+	`, jti)
+	var k domain.APIKey
+	if err := row.Scan(
+		&k.ID, &k.UserID, &k.Name, &k.TokenPrefix, &k.JTI, &k.TokenHash,
+		&k.ExpiresAt, &k.RevokedAt, &k.CreatedAt,
+	); err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &k, nil
+}
+
+func (s *Store) RevokeAPIKey(ctx context.Context, id, userID string) error {
+	_, err := s.pool.Exec(ctx, `
+		UPDATE api_keys
+		SET revoked_at = NOW()
+		WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL
+	`, id, userID)
 	return err
 }

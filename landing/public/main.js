@@ -12,8 +12,11 @@ const APPS = {
 };
 
 const sheet = document.getElementById("signin-sheet");
+const keySheet = document.getElementById("key-sheet");
 const authSlot = document.getElementById("auth-slot");
 const googleLogin = document.getElementById("google-login");
+const keysPanel = document.getElementById("keys-panel");
+const keysList = document.getElementById("keys-list");
 
 function loginUrl() {
   const state = crypto.randomUUID();
@@ -36,12 +39,31 @@ function closeSheet() {
   document.body.style.overflow = "";
 }
 
+function openKeySheet() {
+  document.getElementById("key-form").hidden = false;
+  document.getElementById("key-reveal").hidden = true;
+  document.getElementById("key-name").value = "";
+  document.getElementById("key-value").textContent = "";
+  keySheet.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeKeySheet() {
+  keySheet.hidden = true;
+  document.body.style.overflow = "";
+}
+
 function getUser() {
   try {
     return JSON.parse(localStorage.getItem(USER_KEY) || "null");
   } catch {
     return null;
   }
+}
+
+function authHeader() {
+  const token = localStorage.getItem(ACCESS_KEY);
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 function clearSession() {
@@ -85,6 +107,89 @@ async function fetchUser(token) {
   return res.json();
 }
 
+async function loadKeys() {
+  const res = await fetch(`${AUTH}/v1/api-keys`, {
+    headers: { ...authHeader() },
+  });
+  if (!res.ok) throw new Error("failed to load keys");
+  return res.json();
+}
+
+async function createKey(name) {
+  const res = await fetch(`${AUTH}/v1/api-keys`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...authHeader(),
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || "create failed");
+  }
+  return res.json();
+}
+
+async function revokeKey(id) {
+  const res = await fetch(`${AUTH}/v1/api-keys/${id}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  if (!res.ok) throw new Error("revoke failed");
+}
+
+function renderKeys(keys) {
+  if (!keysList) return;
+  if (!keys.length) {
+    keysList.innerHTML = `<li class="keys-empty">No API keys yet.</li>`;
+    return;
+  }
+  keysList.innerHTML = keys
+    .map((k) => {
+      const status = k.revoked ? "revoked" : `expires ${k.expires_at.slice(0, 10)}`;
+      const action = k.revoked
+        ? ""
+        : `<button type="button" class="btn-quiet" data-revoke="${k.id}">Revoke</button>`;
+      return `<li class="key-row${k.revoked ? " revoked" : ""}">
+        <div class="meta">
+          <strong>${escapeHtml(k.name)}</strong>
+          <span>${escapeHtml(k.prefix)}… · ${escapeHtml(status)}</span>
+        </div>
+        ${action}
+      </li>`;
+    })
+    .join("");
+
+  keysList.querySelectorAll("[data-revoke]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-revoke");
+      if (!id || !confirm("Revoke this API key?")) return;
+      try {
+        await revokeKey(id);
+        await refreshKeysPanel();
+      } catch {
+        alert("Could not revoke key");
+      }
+    });
+  });
+}
+
+async function refreshKeysPanel() {
+  if (!keysPanel) return;
+  keysPanel.hidden = false;
+  try {
+    const data = await loadKeys();
+    renderKeys(data.keys || []);
+  } catch {
+    keysList.innerHTML = `<li class="keys-empty">Could not load API keys.</li>`;
+  }
+}
+
+function hideKeysPanel() {
+  if (keysPanel) keysPanel.hidden = true;
+}
+
 function renderAuthed(user) {
   const initials = (user.name || user.email || "?")
     .split(/\s+/)
@@ -126,6 +231,7 @@ function renderAuthed(user) {
   document.addEventListener("click", (e) => {
     if (!menu.contains(e.target)) menu.classList.remove("open");
   });
+  void refreshKeysPanel();
 }
 
 function renderGuest() {
@@ -134,6 +240,7 @@ function renderGuest() {
     <button class="btn-solid" type="button" data-open-signin>Get started</button>
   `;
   bindOpeners();
+  hideKeysPanel();
 }
 
 function escapeHtml(v) {
@@ -160,14 +267,58 @@ document.querySelectorAll("[data-close-signin]").forEach((el) => {
   el.addEventListener("click", closeSheet);
 });
 
+document.querySelectorAll("[data-close-key]").forEach((el) => {
+  el.addEventListener("click", closeKeySheet);
+});
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !sheet.hidden) closeSheet();
+  if (e.key === "Escape") {
+    if (!sheet.hidden) closeSheet();
+    if (keySheet && !keySheet.hidden) closeKeySheet();
+  }
 });
 
 if (googleLogin) {
   googleLogin.addEventListener("click", (e) => {
     e.preventDefault();
     location.href = loginUrl();
+  });
+}
+
+const createKeyBtn = document.getElementById("create-key");
+if (createKeyBtn) {
+  createKeyBtn.addEventListener("click", openKeySheet);
+}
+
+const keySubmit = document.getElementById("key-submit");
+if (keySubmit) {
+  keySubmit.addEventListener("click", async () => {
+    const name = document.getElementById("key-name").value.trim();
+    if (!name) return;
+    keySubmit.disabled = true;
+    try {
+      const created = await createKey(name);
+      document.getElementById("key-form").hidden = true;
+      document.getElementById("key-reveal").hidden = false;
+      document.getElementById("key-value").textContent = created.key;
+      await refreshKeysPanel();
+    } catch {
+      alert("Could not create key");
+    } finally {
+      keySubmit.disabled = false;
+    }
+  });
+}
+
+const keyCopy = document.getElementById("key-copy");
+if (keyCopy) {
+  keyCopy.addEventListener("click", async () => {
+    const value = document.getElementById("key-value").textContent;
+    await navigator.clipboard.writeText(value);
+    keyCopy.textContent = "Copied";
+    setTimeout(() => {
+      keyCopy.textContent = "Copy";
+    }, 1500);
   });
 }
 

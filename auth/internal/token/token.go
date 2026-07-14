@@ -25,10 +25,14 @@ type Manager struct {
 	refreshTTL time.Duration
 }
 
+const PlatformClientID = "fookie"
+const TokenUseAPIKey = "api_key"
+
 type AccessClaims struct {
 	Email    string `json:"email"`
 	Name     string `json:"name"`
 	ClientID string `json:"client_id"`
+	TokenUse string `json:"token_use,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -95,6 +99,32 @@ func (m *Manager) IssueAccessToken(userID, email, name, clientID string) (string
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(exp),
 			ID:        uuid.NewString(),
+		},
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t.Header["kid"] = m.keyID
+	signed, err := t.SignedString(m.privateKey)
+	if err != nil {
+		return "", time.Time{}, err
+	}
+	return signed, exp, nil
+}
+
+func (m *Manager) IssueAPIKeyToken(userID, email, name, jti string, ttl time.Duration) (string, time.Time, error) {
+	now := time.Now().UTC()
+	exp := now.Add(ttl)
+	claims := AccessClaims{
+		Email:    email,
+		Name:     name,
+		ClientID: PlatformClientID,
+		TokenUse: TokenUseAPIKey,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    m.issuer,
+			Subject:   userID,
+			Audience:  []string{PlatformClientID},
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(exp),
+			ID:        jti,
 		},
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)

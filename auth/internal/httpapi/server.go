@@ -56,7 +56,7 @@ func (s *Server) Router() http.Handler {
 	}
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   origins,
-		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
 		MaxAge:           300,
@@ -74,6 +74,10 @@ func (s *Server) Router() http.Handler {
 		r.Get("/userinfo", s.handleUserInfo)
 		r.Post("/logout", s.handleLogout)
 		r.Get("/clients", s.handleListClients)
+		r.Get("/api-keys", s.handleListAPIKeys)
+		r.Post("/api-keys", s.handleCreateAPIKey)
+		r.Delete("/api-keys/{id}", s.handleRevokeAPIKey)
+		r.Post("/introspect", s.handleIntrospect)
 	})
 
 	return r
@@ -394,6 +398,13 @@ func (s *Server) handleUserInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if claims.TokenUse == token.TokenUseAPIKey {
+		if err := s.ensureAPIKeyActive(r.Context(), claims); err != nil {
+			writeError(w, http.StatusUnauthorized, "invalid_token", err.Error())
+			return
+		}
+	}
+
 	user, err := s.store.GetUser(r.Context(), claims.Subject)
 	if err != nil || user == nil {
 		writeError(w, http.StatusUnauthorized, "invalid_token", "user not found")
@@ -406,6 +417,7 @@ func (s *Server) handleUserInfo(w http.ResponseWriter, r *http.Request) {
 		"name":       user.Name,
 		"picture":    user.AvatarURL,
 		"client_id":  claims.ClientID,
+		"token_use":  claims.TokenUse,
 		"created_at": user.CreatedAt.UTC().Format(time.RFC3339),
 	})
 }
@@ -522,6 +534,197 @@ func (s *Server) bearerClaims(r *http.Request) (*token.AccessClaims, error) {
 	}
 	raw := strings.TrimSpace(h[7:])
 	return s.tokens.ParseAccessToken(raw)
+}
+
+func (s *Server) requireUser(r *http.Request) (*domain.User, error) {
+	claims, err := s.bearerClaims(r)
+	if err != nil {
+		return nil, err
+	}
+	if claims.TokenUse == token.TokenUseAPIKey {
+		return nil, errors.New("api keys cannot manage api keys")
+	}
+	user, err := s.store.GetUser(r.Context(), claims.Subject)
+	if err != nil || user == nil {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}
+
+func (s *Server) ensureAPIKeyActive(ctx context.Context, claims *token.AccessClaims) error {
+	if claims.ID == "" {
+		return errors.New("api key missing jti")
+	}
+	key, err := s.store.GetAPIKeyByJTI(ctx, claims.ID)
+	if err != nil {
+		return errors.New("failed to load api key")
+	}
+	if key == nil || key.RevokedAt != nil {
+		return errors.New("api key revoked")
+	}
+	if time.Now().UTC().After(key.ExpiresAt) {
+		return errors.New("api key expired")
+	}
+	return nil
+}
+
+func (s *Server) handleListAPIKeys(w http.ResponseWriter, r *http.Request) {
+	user, err := s.requireUser(r)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "invalid_token", err.Error())
+		return
+	}
+	keys, err := s.store.ListAPIKeys(r.Context(), user.ID)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to list api keys")
+		return
+	}
+	out := make([]map[string]any, 0, len(keys))
+	for _, k := range keys {
+		out = append(out, map[string]any{
+			"id":         k.ID,
+			"name":       k.Name,
+			"prefix":     k.TokenPrefix,
+			"created_at": k.CreatedAt.UTC().Format(time.RFC3339),
+			"expires_at": k.ExpiresAt.UTC().Format(time.RFC3339),
+			"revoked":    k.RevokedAt != nil,
+		})
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"keys": out})
+}
+
+func (s *Server) handleCreateAPIKey(w http.ResponseWriter, r *http.Request) {
+	user, err := s.requireUser(r)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "invalid_token", err.Error())
+		return
+	}
+
+	var body struct {
+		Name           string `json:"name"`
+		ExpiresInDays  int    `json:"expires_in_days"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid_request", "invalid json body")
+		return
+	}
+	name := strings.TrimSpace(body.Name)
+	if name == "" {
+		writeError(w, http.StatusBadRequest, "invalid_request", "name is required")
+		return
+	}
+	days := body.ExpiresInDays
+	if days <= 0 {
+		days = 365
+	}
+	if days > 3650 {
+		days = 3650
+	}
+
+	jti := uuid.NewString()
+	ttl := time.Duration(days) * 24 * time.Hour
+	raw, exp, err := s.tokens.IssueAPIKeyToken(user.ID, user.Email, user.Name, jti, ttl)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to issue api key")
+		return
+	}
+
+	prefix := raw
+	if len(prefix) > 16 {
+		prefix = prefix[:16]
+	}
+	now := time.Now().UTC()
+	id := uuid.NewString()
+	if err := s.store.CreateAPIKey(r.Context(), domain.APIKey{
+		ID:          id,
+		UserID:      user.ID,
+		Name:        name,
+		TokenPrefix: prefix,
+		JTI:         jti,
+		TokenHash:   token.HashToken(raw),
+		ExpiresAt:   exp,
+		CreatedAt:   now,
+	}); err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to store api key")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"id":         id,
+		"name":       name,
+		"prefix":     prefix,
+		"key":        raw,
+		"created_at": now.Format(time.RFC3339),
+		"expires_at": exp.UTC().Format(time.RFC3339),
+	})
+}
+
+func (s *Server) handleRevokeAPIKey(w http.ResponseWriter, r *http.Request) {
+	user, err := s.requireUser(r)
+	if err != nil {
+		writeError(w, http.StatusUnauthorized, "invalid_token", err.Error())
+		return
+	}
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		writeError(w, http.StatusBadRequest, "invalid_request", "id is required")
+		return
+	}
+	key, err := s.store.GetAPIKeyByID(r.Context(), id)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to load api key")
+		return
+	}
+	if key == nil || key.UserID != user.ID {
+		writeError(w, http.StatusNotFound, "not_found", "api key not found")
+		return
+	}
+	if err := s.store.RevokeAPIKey(r.Context(), id, user.ID); err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to revoke api key")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+func (s *Server) handleIntrospect(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Token string `json:"token"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || strings.TrimSpace(body.Token) == "" {
+		writeError(w, http.StatusBadRequest, "invalid_request", "token is required")
+		return
+	}
+
+	claims, err := s.tokens.ParseAccessToken(strings.TrimSpace(body.Token))
+	if err != nil {
+		writeJSON(w, http.StatusOK, map[string]any{"active": false})
+		return
+	}
+
+	active := true
+	if claims.TokenUse == token.TokenUseAPIKey {
+		if err := s.ensureAPIKeyActive(r.Context(), claims); err != nil {
+			active = false
+		}
+	} else if claims.ExpiresAt != nil && time.Now().UTC().After(claims.ExpiresAt.Time) {
+		active = false
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"active":    active,
+		"sub":       claims.Subject,
+		"client_id": claims.ClientID,
+		"token_use": claims.TokenUse,
+		"email":     claims.Email,
+		"name":      claims.Name,
+		"jti":       claims.ID,
+		"exp": func() any {
+			if claims.ExpiresAt == nil {
+				return nil
+			}
+			return claims.ExpiresAt.Unix()
+		}(),
+	})
 }
 
 func parseTokenRequest(r *http.Request) (tokenRequest, error) {
