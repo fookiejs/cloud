@@ -32,7 +32,7 @@
           </div>
         </nav>
         <div class="sidebar-foot">
-          <div id="profile-slot">
+          <div class="sidebar-foot-profile" id="profile-slot">
             <a class="nav-item is-active" href="/profile" data-signin>Sign in</a>
           </div>
         </div>
@@ -52,11 +52,21 @@
           <div class="panel-head">
             <div>
               <h2>API keys</h2>
-              <p>Long-lived Bearer tokens for agents and integrations.</p>
+              <p>Long-lived Bearer tokens for Lotaru, Task Bridge, and Cursor MCP.</p>
             </div>
             <button class="btn-solid" type="button" id="create-key">Create key</button>
           </div>
           <ul class="keys-list" id="keys-list"></ul>
+        </section>
+
+        <section class="panel mcp-panel" id="mcp-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Cursor MCP</h2>
+              <p>Add both servers to <code>.cursor/mcp.json</code> and reload MCP in Cursor.</p>
+            </div>
+          </div>
+          <div class="mcp-snippets" id="mcp-snippets"></div>
         </section>
       </main>
     </div>

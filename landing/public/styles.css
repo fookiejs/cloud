@@ -167,11 +167,15 @@ input {
 
 .sidebar-foot {
   flex-shrink: 0;
-  border-top: 1px solid var(--line);
-  padding: 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+}
+
+.sidebar-foot-cloud,
+.sidebar-foot-profile {
+  flex-shrink: 0;
+  border-top: 1px solid var(--line);
+  padding: 0.5rem;
 }
 
 .profile-user {
@@ -522,6 +526,45 @@ input {
 }
 
 .panel { padding: 1.05rem 1.05rem 1.15rem; }
+
+.mcp-panel { margin-top: 0.75rem; }
+
+.mcp-snippets {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mcp-snippet-block {
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
+}
+
+.mcp-snippet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+
+.mcp-snippet-pre {
+  margin: 0;
+  padding: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--muted);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.55rem;
+  font-size: 0.72rem;
+}
 
 .panel-head {
   display: flex;

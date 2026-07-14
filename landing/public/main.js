@@ -6,6 +6,8 @@ const REFRESH_KEY = "fookie_refresh_token";
 const USER_KEY = "fookie_user";
 const PENDING_APP_KEY = "fookie_pending_app";
 const AFTER_LOGIN_KEY = "fookie_after_login";
+const OAUTH_STATE_KEY = "fookie_oauth_state";
+const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
 
 const APPS = {
   lotaru: "https://lotaru.fookiecloud.com",
@@ -19,21 +21,65 @@ const profileSlot = document.getElementById("profile-slot");
 const googleLogin = document.getElementById("google-login");
 const keysList = document.getElementById("keys-list");
 const profileCard = document.getElementById("profile-card");
+const mcpSnippets = document.getElementById("mcp-snippets");
 
-function loginUrl() {
+const LOTARU_MCP = `{
+  "mcpServers": {
+    "lotaru": {
+      "command": "npx",
+      "args": ["-y", "@umudik/lotaru-mcp"],
+      "env": {
+        "LOTARU_API_URL": "https://lotaru.fookiecloud.com",
+        "FOOKIE_API_KEY": "<paste-key>"
+      }
+    }
+  }
+}`;
+
+const TASK_BRIDGE_MCP = `{
+  "mcpServers": {
+    "task-bridge": {
+      "command": "npx",
+      "args": ["-y", "@umudik/task-bridge-mcp"],
+      "env": {
+        "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
+        "FOOKIE_API_KEY": "<paste-key>"
+      }
+    }
+  }
+}`;
+
+function base64url(bytes) {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function sha256(input) {
+  const data = new TextEncoder().encode(input);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return base64url(new Uint8Array(hash));
+}
+
+async function loginUrl() {
+  const verifier = base64url(crypto.getRandomValues(new Uint8Array(32)));
+  const challenge = await sha256(verifier);
   const state = crypto.randomUUID();
-  localStorage.setItem("fookie_oauth_state", state);
+  sessionStorage.setItem(PKCE_VERIFIER_KEY, verifier);
+  sessionStorage.setItem(OAUTH_STATE_KEY, state);
   const q = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
     state,
+    code_challenge: challenge,
+    code_challenge_method: "S256",
   });
   return `${AUTH}/v1/login?${q.toString()}`;
 }
 
-function startSignIn() {
+async function startSignIn() {
   if (isProfile) sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
-  location.href = loginUrl();
+  location.href = await loginUrl();
 }
 
 function closeSheet() {
@@ -204,6 +250,41 @@ async function refreshKeysPanel() {
   }
 }
 
+function renderMcpSnippets() {
+  if (!mcpSnippets) return;
+  mcpSnippets.innerHTML = `
+    <div class="mcp-snippet-block">
+      <div class="mcp-snippet-head">
+        <strong>Lotaru</strong>
+        <button class="btn-outline btn-sm" type="button" data-copy-mcp="lotaru">Copy</button>
+      </div>
+      <pre class="mcp-snippet-pre">${escapeHtml(LOTARU_MCP)}</pre>
+    </div>
+    <div class="mcp-snippet-block">
+      <div class="mcp-snippet-head">
+        <strong>Task Bridge</strong>
+        <button class="btn-outline btn-sm" type="button" data-copy-mcp="task-bridge">Copy</button>
+      </div>
+      <pre class="mcp-snippet-pre">${escapeHtml(TASK_BRIDGE_MCP)}</pre>
+    </div>
+  `;
+  mcpSnippets.querySelectorAll("[data-copy-mcp]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const which = btn.getAttribute("data-copy-mcp");
+      const text = which === "task-bridge" ? TASK_BRIDGE_MCP : LOTARU_MCP;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = "Copied";
+        setTimeout(() => {
+          btn.textContent = "Copy";
+        }, 2000);
+      } catch {
+        alert("Could not copy");
+      }
+    });
+  });
+}
+
 function renderProfileCard(user) {
   if (!profileCard) return;
   profileCard.innerHTML = `
@@ -246,6 +327,7 @@ function renderAuthed(user) {
 
   if (isProfile) {
     renderProfileCard(user);
+    renderMcpSnippets();
     void refreshKeysPanel();
   }
 }
