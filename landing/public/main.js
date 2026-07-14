@@ -16,6 +16,7 @@ const isProfile = document.body?.dataset?.page === "profile";
 const sheet = document.getElementById("signin-sheet");
 const keySheet = document.getElementById("key-sheet");
 const authSlot = document.getElementById("auth-slot");
+const profileSlot = document.getElementById("profile-slot");
 const googleLogin = document.getElementById("google-login");
 const keysList = document.getElementById("keys-list");
 const profileCard = document.getElementById("profile-card");
@@ -231,39 +232,54 @@ function setAdminNav(user) {
 
 function renderAuthed(user) {
   setAdminNav(user);
-  if (!authSlot) return;
   const label = escapeHtml(user.name || user.email || "Account");
   const mail = escapeHtml(user.email || "");
-  authSlot.innerHTML = `
-    <div class="user-menu" id="user-menu">
-      <button class="user-chip" type="button" id="user-chip" aria-label="${label}" aria-haspopup="true" aria-expanded="false">
-        <span class="mail">${mail}</span>
-        <span class="avatar-wrap">${avatarMarkup(user, 32)}</span>
-      </button>
-      <div class="user-menu-panel" role="menu">
-        <div class="user-menu-who">
-          <span class="name">${escapeHtml(user.name || "Signed in")}</span>
-          <span class="mail">${mail}</span>
-        </div>
-        <a href="/profile" role="menuitem">Profile</a>
-        <button type="button" class="sign-out" id="sign-out" role="menuitem">Sign out</button>
-      </div>
-    </div>
-  `;
+  const name = escapeHtml(user.name || "Signed in");
 
-  const menu = document.getElementById("user-menu");
-  const chip = document.getElementById("user-chip");
-  chip.addEventListener("click", () => {
-    const open = menu.classList.toggle("open");
-    chip.setAttribute("aria-expanded", open ? "true" : "false");
-  });
-  document.getElementById("sign-out").addEventListener("click", () => {
-    clearSession();
-    location.href = "/";
-  });
-  document.addEventListener("click", (e) => {
-    if (!menu.contains(e.target)) menu.classList.remove("open");
-  });
+  if (profileSlot) {
+    const active = isProfile ? " is-active" : "";
+    profileSlot.innerHTML = `
+      <a class="profile-user${active}" href="/profile" aria-label="${label}">
+        <span class="avatar-wrap">${avatarMarkup(user, 28)}</span>
+        <span class="who">
+          <strong>${name}</strong>
+          <span>${mail}</span>
+        </span>
+      </a>
+    `;
+  }
+
+  if (authSlot) {
+    authSlot.innerHTML = `
+      <div class="user-menu" id="user-menu">
+        <button class="user-chip" type="button" id="user-chip" aria-label="${label}" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar-wrap">${avatarMarkup(user, 32)}</span>
+        </button>
+        <div class="user-menu-panel" role="menu">
+          <div class="user-menu-who">
+            <span class="name">${name}</span>
+            <span class="mail">${mail}</span>
+          </div>
+          <a href="/profile" role="menuitem">Profile</a>
+          <button type="button" class="sign-out" id="sign-out" role="menuitem">Sign out</button>
+        </div>
+      </div>
+    `;
+
+    const menu = document.getElementById("user-menu");
+    const chip = document.getElementById("user-chip");
+    chip.addEventListener("click", () => {
+      const open = menu.classList.toggle("open");
+      chip.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.getElementById("sign-out").addEventListener("click", () => {
+      clearSession();
+      location.href = "/";
+    });
+    document.addEventListener("click", (e) => {
+      if (!menu.contains(e.target)) menu.classList.remove("open");
+    });
+  }
 
   if (isProfile) {
     renderProfileCard(user);
@@ -273,10 +289,15 @@ function renderAuthed(user) {
 
 function renderGuest() {
   setAdminNav(null);
-  if (!authSlot) return;
-  authSlot.innerHTML = `
-    <button class="btn-ghost" type="button" data-signin>Sign in</button>
-  `;
+  if (profileSlot) {
+    const active = isProfile ? " is-active" : "";
+    profileSlot.innerHTML = `<a class="nav-item${active}" href="/profile" data-signin>Profile</a>`;
+  }
+  if (authSlot) {
+    authSlot.innerHTML = `
+      <button class="btn-ghost" type="button" data-signin>Sign in</button>
+    `;
+  }
   bindOpeners();
 
   if (isProfile) {
