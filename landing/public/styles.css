@@ -225,7 +225,7 @@ input {
 .main {
   margin-left: var(--sidebar);
   min-height: 100dvh;
-  padding: 1.5rem 2rem 2.5rem;
+  padding: 2rem;
 }
 
 .page-head {
@@ -234,7 +234,7 @@ input {
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   border-bottom: 1px solid var(--line);
 }
 
