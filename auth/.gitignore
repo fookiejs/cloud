@@ -1,0 +1,4 @@
+.env
+.project-env.txt
+*.pem
+bin/

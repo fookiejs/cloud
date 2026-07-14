@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fookie Cloud</title>
+  <meta name="description" content="Fookie Cloud — one platform for your apps, identity, and observability." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="noise" aria-hidden="true"></div>
+
+  <header class="top">
+    <a class="brand-mark" href="/">Fookie Cloud</a>
+    <nav class="nav">
+      <a href="#apps">Apps</a>
+      <a href="#identity">Identity</a>
+      <a href="#signal">Signal</a>
+      <a class="nav-cta" href="https://auth.fookiecloud.com/v1/login?client_id=web&redirect_uri=https://fookiecloud.com/callback&state=home">Sign in</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-plane" aria-hidden="true">
+        <div class="orb orb-a"></div>
+        <div class="orb orb-b"></div>
+        <div class="grid-fade"></div>
+        <svg class="constellation" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+          <g class="lines" stroke="currentColor" stroke-width="1" fill="none">
+            <path d="M120 640 C320 420, 480 520, 720 360 S1120 220, 1320 300" />
+            <path d="M80 280 C260 340, 420 180, 640 240 S980 420, 1280 180" />
+            <path d="M200 780 C460 680, 620 760, 860 620 S1180 540, 1400 640" />
+          </g>
+          <g class="nodes" fill="currentColor">
+            <circle cx="720" cy="360" r="4" />
+            <circle cx="480" cy="520" r="3" />
+            <circle cx="1120" cy="220" r="3.5" />
+            <circle cx="640" cy="240" r="3" />
+            <circle cx="860" cy="620" r="4" />
+            <circle cx="320" cy="420" r="2.5" />
+          </g>
+        </svg>
+      </div>
+
+      <div class="hero-copy">
+        <p class="brand-hero">Fookie Cloud</p>
+        <h1>Apps that find each other.</h1>
+        <p class="lede">One place for identity, deploy, and signal — so Lotar, Tasks, and every next product share the same nervous system.</p>
+        <div class="cta-row">
+          <a class="btn primary" href="#apps">See the ecosystem</a>
+          <a class="btn ghost" href="https://grafana.fookiecloud.com">Open observatory</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="apps">
+      <div class="block-head">
+        <p class="eyebrow">Products</p>
+        <h2>Not separate SaaS islands. One cloud surface.</h2>
+        <p class="support">Each app registers, speaks the shared language, and appears under the same roof.</p>
+      </div>
+      <ul class="app-rail">
+        <li>
+          <a href="https://lotar.fookiecloud.com">
+            <span class="app-name">Lotar</span>
+            <span class="app-desc">Desktop automation that runs where you work.</span>
+            <span class="app-go">Open</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://tasks.fookiecloud.com">
+            <span class="app-name">Tasks</span>
+            <span class="app-desc">Lightweight task flow with the same identity.</span>
+            <span class="app-go">Open</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://bridge.fookiecloud.com">
+            <span class="app-name">Bridge</span>
+            <span class="app-desc">Connect tools without rewriting your stack.</span>
+            <span class="app-go">Open</span>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="block split" id="identity">
+      <div>
+        <p class="eyebrow">Identity</p>
+        <h2>Sign in once. Carry it everywhere.</h2>
+        <p class="support">Google through Fookie Auth. Lotar, Tasks, Bridge, and Grafana all trust the same tokens.</p>
+      </div>
+      <div class="identity-panel" aria-hidden="true">
+        <div class="flow-line">
+          <span>App</span>
+          <span class="arrow">→</span>
+          <span>auth.fookiecloud.com</span>
+          <span class="arrow">→</span>
+          <span>Google</span>
+          <span class="arrow">→</span>
+          <span>JWT</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="signal">
+      <div class="block-head">
+        <p class="eyebrow">Signal</p>
+        <h2>Logs, metrics, and traces already wired.</h2>
+        <p class="support">Prometheus, Loki, and Grafana sit behind the same cloud — ready for every registered app.</p>
+      </div>
+      <div class="signal-strip">
+        <span>Prometheus</span>
+        <span>Loki</span>
+        <span>OpenTelemetry</span>
+        <span>Grafana</span>
+      </div>
+      <a class="btn primary wide" href="https://grafana.fookiecloud.com">Enter Grafana</a>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p class="brand-mark">Fookie Cloud</p>
+    <p class="foot-note">Runtime for Fookie apps. Auth, signal, and presence — shared by design.</p>
+  </footer>
+
+  <script src="/main.js"></script>
+</body>
+</html>
