@@ -14,36 +14,81 @@
 <body>
   <div class="shell">
     <header class="top" id="top">
-      <a class="mark" href="/">Fookie<span>Cloud</span></a>
-      <div class="top-right" id="auth-slot">
-        <button class="btn-ghost" type="button" data-signin>Sign in</button>
+      <div class="top-inner">
+        <a class="mark" href="/">Fookie<span>Cloud</span></a>
+        <div class="top-right" id="auth-slot">
+          <button class="btn-ghost" type="button" data-signin>Sign in</button>
+        </div>
       </div>
     </header>
 
     <main class="page">
-      <div class="page-head">
-        <h1>Apps</h1>
-        <p>Open Lotaru or Task Bridge with the same account.</p>
+      <div class="page-inner">
+        <div class="page-head">
+          <h1>Apps</h1>
+          <p>Open Lotaru or Task Bridge with the same account.</p>
+        </div>
+
+        <section class="apps" id="apps" aria-label="Applications">
+          <article class="app-card">
+            <div class="app-card-top">
+              <span class="app-icon" aria-hidden="true">L</span>
+              <div class="app-badges">
+                <span class="pill">Local Task Runner</span>
+                <span class="pill pill-mcp" title="Cursor MCP">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  MCP
+                </span>
+              </div>
+            </div>
+            <div class="app-card-body">
+              <h2>Lotaru</h2>
+              <p>Runs remote calls, scheduled jobs, and on-save shell scripts on your machine — organised per project.</p>
+            </div>
+            <div class="app-card-foot">
+              <button class="btn-open" type="button" data-app="lotaru">Open <span aria-hidden="true">→</span></button>
+            </div>
+          </article>
+
+          <article class="app-card">
+            <div class="app-card-top">
+              <span class="app-icon" aria-hidden="true">T</span>
+              <div class="app-badges">
+                <span class="pill">Planning</span>
+                <span class="pill pill-mcp" title="Cursor MCP">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M8 7h8M8 12h8M8 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  MCP
+                </span>
+              </div>
+            </div>
+            <div class="app-card-body">
+              <h2>Task Bridge</h2>
+              <p>Epics and task board — a lightweight Jira alternative for planning and tracking work.</p>
+            </div>
+            <div class="app-card-foot">
+              <button class="btn-open" type="button" data-app="task-bridge">Open <span aria-hidden="true">→</span></button>
+            </div>
+          </article>
+        </section>
       </div>
-      <section class="apps" id="apps" aria-label="Applications">
-        <button class="app" type="button" data-app="lotaru">
-          <span class="app-mark" aria-hidden="true">L</span>
-          <span class="app-text">
-            <strong>Lotaru</strong>
-            <span>Local Task Runner</span>
-          </span>
-          <span class="app-go" aria-hidden="true">Open</span>
-        </button>
-        <button class="app" type="button" data-app="task-bridge">
-          <span class="app-mark app-mark-tb" aria-hidden="true">T</span>
-          <span class="app-text">
-            <strong>Task Bridge</strong>
-            <span>Epics and task board</span>
-          </span>
-          <span class="app-go" aria-hidden="true">Open</span>
-        </button>
-      </section>
     </main>
+
+    <footer class="foot">
+      <div class="foot-inner">
+        <div class="mark mark-sm">Fookie<span>Cloud</span></div>
+        <div class="foot-meta">
+          <span>© 2026 fookiecloud.com</span>
+          <span class="dot" aria-hidden="true"></span>
+          <span>One account for every app</span>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script src="/main.js"></script>

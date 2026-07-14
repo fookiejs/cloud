@@ -13,28 +13,32 @@
 <body data-page="profile">
   <div class="shell">
     <header class="top" id="top">
-      <a class="mark" href="/">Fookie<span>Cloud</span></a>
-      <div class="top-right" id="auth-slot"></div>
+      <div class="top-inner">
+        <a class="mark" href="/">Fookie<span>Cloud</span></a>
+        <div class="top-right" id="auth-slot"></div>
+      </div>
     </header>
 
-    <main class="page page-narrow">
-      <div class="page-head">
-        <h1>Profile</h1>
-        <p>Account and API keys for Lotaru, Task Bridge, and MCP.</p>
-      </div>
-
-      <div class="profile-card" id="profile-card"></div>
-
-      <section class="panel" id="keys-panel">
-        <div class="panel-head">
-          <div>
-            <h2>API keys</h2>
-            <p>Long-lived Bearer tokens for agents and integrations.</p>
-          </div>
-          <button class="btn-solid" type="button" id="create-key">Create key</button>
+    <main class="page">
+      <div class="page-inner page-narrow">
+        <div class="page-head">
+          <h1>Profile</h1>
+          <p>Account and API keys for Lotaru, Task Bridge, and MCP.</p>
         </div>
-        <ul class="keys-list" id="keys-list"></ul>
-      </section>
+
+        <div class="profile-card" id="profile-card"></div>
+
+        <section class="panel" id="keys-panel">
+          <div class="panel-head">
+            <div>
+              <h2>API keys</h2>
+              <p>Long-lived Bearer tokens for agents and integrations.</p>
+            </div>
+            <button class="btn-solid" type="button" id="create-key">Create key</button>
+          </div>
+          <ul class="keys-list" id="keys-list"></ul>
+        </section>
+      </div>
     </main>
   </div>
 

@@ -219,15 +219,17 @@ function renderProfileCard(user) {
 function renderAuthed(user) {
   if (!authSlot) return;
   const label = escapeHtml(user.name || user.email || "Account");
+  const mail = escapeHtml(user.email || "");
   authSlot.innerHTML = `
     <div class="user-menu" id="user-menu">
-      <button class="user-avatar-btn" type="button" id="user-chip" aria-label="${label}" aria-haspopup="true" aria-expanded="false">
-        ${avatarMarkup(user, 32)}
+      <button class="user-chip" type="button" id="user-chip" aria-label="${label}" aria-haspopup="true" aria-expanded="false">
+        <span class="mail">${mail}</span>
+        <span class="avatar-wrap">${avatarMarkup(user, 32)}</span>
       </button>
       <div class="user-menu-panel" role="menu">
         <div class="user-menu-who">
           <span class="name">${escapeHtml(user.name || "Signed in")}</span>
-          <span class="mail">${escapeHtml(user.email || "")}</span>
+          <span class="mail">${mail}</span>
         </div>
         <a href="/profile" role="menuitem">Profile</a>
         <button type="button" class="sign-out" id="sign-out" role="menuitem">Sign out</button>
