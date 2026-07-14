@@ -318,31 +318,33 @@ input {
   border-color: #3f3f46;
 }
 
-.app-card-top {
-  padding: 1.5rem 1.5rem 0;
+.app-card-body {
+  padding: 1.5rem 1.5rem 1.25rem;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+}
+
+.app-card-title {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
 }
 
-.app-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  background: var(--surface-hover);
-  border: 1px solid var(--line);
-  display: grid;
-  place-items: center;
-  font-size: 1rem;
-  font-weight: 600;
+.app-card-body h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.app-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.35rem;
+.app-card-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .pill {
@@ -366,27 +368,6 @@ input {
 
 .pill-mcp svg {
   opacity: 0.9;
-}
-
-.app-card-body {
-  padding: 1rem 1.5rem 0;
-  display: grid;
-  gap: 0.35rem;
-  flex: 1;
-}
-
-.app-card-body h2 {
-  margin: 0;
-  font-size: 1.0625rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.app-card-body p {
-  margin: 0;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--muted);
 }
 
 .app-card-foot {
