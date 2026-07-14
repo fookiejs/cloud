@@ -33,7 +33,7 @@
         </nav>
         <div class="sidebar-foot">
           <div class="sidebar-foot-profile" id="profile-slot">
-            <a class="nav-item is-active" href="/profile" data-signin>Sign in</a>
+            <button class="nav-item is-active" type="button" data-signin>Sign in</button>
           </div>
         </div>
       </aside>
@@ -53,6 +53,7 @@
             <div>
               <h2>API keys</h2>
               <p>Long-lived Bearer tokens for Lotaru, Task Bridge, and Cursor MCP.</p>
+              <p class="panel-warning">API keys grant full control over your Lotaru agent when it is online, including remote shell and Docker execution on your machine. Store them like root passwords.</p>
             </div>
             <button class="btn-solid" type="button" id="create-key">Create key</button>
           </div>

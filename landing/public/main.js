@@ -77,7 +77,10 @@ async function loginUrl() {
   return `${AUTH}/v1/login?${q.toString()}`;
 }
 
-async function startSignIn() {
+async function startSignIn(event) {
+  if (event && typeof event.preventDefault === "function") {
+    event.preventDefault();
+  }
   if (isProfile) sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
   location.href = await loginUrl();
 }
@@ -146,14 +149,20 @@ function goToApp(appKey) {
   location.href = url;
 }
 
-function requestApp(appKey) {
+async function requestApp(appKey) {
   if (!APPS[appKey]) return;
-  if (isAuthed()) {
-    goToApp(appKey);
-    return;
+  const token = localStorage.getItem(ACCESS_KEY);
+  if (token) {
+    try {
+      await fetchUser(token);
+      goToApp(appKey);
+      return;
+    } catch {
+      clearSession();
+    }
   }
   sessionStorage.setItem(PENDING_APP_KEY, appKey);
-  startSignIn();
+  await startSignIn();
 }
 
 async function fetchUser(token) {
@@ -336,14 +345,19 @@ function renderGuest() {
   setAdminNav(null);
   if (profileSlot) {
     const active = isProfile ? " is-active" : "";
-    profileSlot.innerHTML = `<a class="nav-item${active}" href="/profile" data-signin>Sign in</a>`;
+    profileSlot.innerHTML = `<button class="nav-item${active}" type="button" data-signin>Sign in</button>`;
   }
-  bindOpeners();
 
   if (isProfile) {
     sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
     if (profileCard) {
-      profileCard.innerHTML = `<div class="who"><strong>Sign in required</strong><span>API keys live on your profile.</span></div>`;
+      profileCard.innerHTML = `
+        <div class="who">
+          <strong>Sign in required</strong>
+          <span>API keys live on your profile.</span>
+        </div>
+        <button class="btn-solid" type="button" data-signin>Sign in with Google</button>
+      `;
     }
     if (keysList) {
       keysList.innerHTML = `<li class="keys-empty">Sign in to manage API keys.</li>`;
@@ -351,17 +365,19 @@ function renderGuest() {
   }
 }
 
-function bindOpeners() {
-  document.querySelectorAll("[data-signin], [data-open-signin]").forEach((el) => {
-    el.addEventListener("click", startSignIn);
-  });
-}
-
-function bindApps() {
-  document.querySelectorAll("[data-app]").forEach((el) => {
-    el.addEventListener("click", () => requestApp(el.getAttribute("data-app")));
-  });
-}
+document.addEventListener("click", (event) => {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  const signInEl = target.closest("[data-signin], [data-open-signin], #google-login");
+  if (signInEl) {
+    void startSignIn(event);
+    return;
+  }
+  const appEl = target.closest("[data-app]");
+  if (appEl) {
+    void requestApp(appEl.getAttribute("data-app"));
+  }
+});
 
 document.querySelectorAll("[data-close-signin]").forEach((el) => {
   el.addEventListener("click", closeSheet);
@@ -380,7 +396,7 @@ document.addEventListener("keydown", (e) => {
 if (googleLogin) {
   googleLogin.addEventListener("click", (e) => {
     e.preventDefault();
-    startSignIn();
+    void startSignIn(e);
   });
 }
 
@@ -421,17 +437,19 @@ if (keyCopy) {
   });
 }
 
-bindOpeners();
-bindApps();
-
 (async () => {
   const pending = sessionStorage.getItem(PENDING_APP_KEY);
   const token = localStorage.getItem(ACCESS_KEY);
 
   if (!isProfile && token && pending && APPS[pending]) {
-    sessionStorage.removeItem(PENDING_APP_KEY);
-    goToApp(pending);
-    return;
+    try {
+      await fetchUser(token);
+      sessionStorage.removeItem(PENDING_APP_KEY);
+      goToApp(pending);
+      return;
+    } catch {
+      clearSession();
+    }
   }
 
   if (!token) {

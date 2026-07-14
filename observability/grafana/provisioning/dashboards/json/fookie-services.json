@@ -4,7 +4,13 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "title": "HTTP Paths",
+      "type": "link",
+      "url": "/d/fookie-http-paths/fookie-http-paths"
+    }
+  ],
   "liveNow": true,
   "panels": [
     {
@@ -119,6 +125,46 @@
       ],
       "title": "Error ratio (5xx)",
       "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": { "type": "auto" },
+            "inspect": false
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 16 },
+      "id": 4,
+      "options": {
+        "cellHeight": "sm",
+        "footer": { "show": false },
+        "showHeader": true,
+        "sortBy": [{ "desc": true, "displayName": "Value" }]
+      },
+      "targets": [
+        {
+          "expr": "topk(20, sum by (route, method) (increase(http_requests_total{service=~\"$service\"}[$__range])))",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Requests by route",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": { "Time": true },
+            "renameByName": { "Value": "Requests", "method": "Method", "route": "Route" }
+          }
+        }
+      ],
+      "type": "table"
     }
   ],
   "refresh": "10s",

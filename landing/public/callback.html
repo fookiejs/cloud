@@ -21,8 +21,12 @@
   <script>
     (async () => {
       const AUTH = "https://auth.fookiecloud.com";
+      const OAUTH_STATE_KEY = "fookie_oauth_state";
+      const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
+      const CODE_LOCK_KEY = "fookie_oauth_code_lock";
       const params = new URLSearchParams(location.search);
       const code = params.get("code");
+      const state = params.get("state");
       const err = params.get("error");
       const status = document.getElementById("status");
       const detail = document.getElementById("detail");
@@ -37,6 +41,28 @@
         return;
       }
 
+      const expected = sessionStorage.getItem(OAUTH_STATE_KEY);
+      const verifier = sessionStorage.getItem(PKCE_VERIFIER_KEY);
+      if (!expected || !state || state !== expected || !verifier) {
+        status.textContent = "Couldn’t finish sign-in";
+        detail.textContent = "Invalid OAuth state. Try again.";
+        sessionStorage.removeItem(OAUTH_STATE_KEY);
+        sessionStorage.removeItem(PKCE_VERIFIER_KEY);
+        return;
+      }
+
+      if (sessionStorage.getItem(CODE_LOCK_KEY) === code) {
+        if (localStorage.getItem("fookie_access_token")) {
+          location.replace(sessionStorage.getItem("fookie_after_login") || "/");
+          return;
+        }
+        status.textContent = "Couldn’t finish sign-in";
+        detail.textContent = "Sign-in already in progress. Try again.";
+        return;
+      }
+      sessionStorage.setItem(CODE_LOCK_KEY, code);
+      history.replaceState({}, "", "/callback");
+
       try {
         const res = await fetch(`${AUTH}/v1/token`, {
           method: "POST",
@@ -46,10 +72,14 @@
             code,
             client_id: "web",
             redirect_uri: "https://fookiecloud.com/callback",
+            code_verifier: verifier,
           }),
         });
+        sessionStorage.removeItem(OAUTH_STATE_KEY);
+        sessionStorage.removeItem(PKCE_VERIFIER_KEY);
         const data = await res.json();
         if (!res.ok) {
+          sessionStorage.removeItem(CODE_LOCK_KEY);
           status.textContent = "Couldn’t finish sign-in";
           detail.textContent = data.error_description || data.error || "Try again.";
           return;
@@ -67,10 +97,15 @@
           localStorage.setItem("fookie_user", JSON.stringify(await me.json()));
         }
 
-        const next = sessionStorage.getItem("fookie_after_login") || "/";
+        let next = sessionStorage.getItem("fookie_after_login") || "/";
         sessionStorage.removeItem("fookie_after_login");
+        sessionStorage.removeItem(CODE_LOCK_KEY);
+        if (!next.startsWith("/") || next.startsWith("//")) {
+          next = "/";
+        }
         location.replace(next);
       } catch (e) {
+        sessionStorage.removeItem(CODE_LOCK_KEY);
         status.textContent = "Auth unreachable";
         detail.textContent = String(e);
       }

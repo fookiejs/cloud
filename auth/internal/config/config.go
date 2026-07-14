@@ -30,6 +30,8 @@ type Config struct {
 	Clients            []Client
 	AllowedOrigins     []string
 	AdminEmails        []string
+	IntrospectSecret   string
+	MetricsToken       string
 }
 
 func Load() (Config, error) {
@@ -47,10 +49,18 @@ func Load() (Config, error) {
 		AuthCodeTTL:        durationOr("AUTH_CODE_TTL", 5*time.Minute),
 		AllowedOrigins:     splitCSV(os.Getenv("ALLOWED_ORIGINS")),
 		AdminEmails:        splitCSV(os.Getenv("FOOKIE_ADMIN_EMAILS")),
+		IntrospectSecret:   os.Getenv("FOOKIE_INTROSPECT_SECRET"),
+		MetricsToken:       os.Getenv("METRICS_TOKEN"),
 	}
 
 	if cfg.PublicURL == "" {
 		return Config{}, fmt.Errorf("PUBLIC_URL is required")
+	}
+	if len(cfg.AllowedOrigins) == 0 {
+		return Config{}, fmt.Errorf("ALLOWED_ORIGINS is required")
+	}
+	if cfg.IntrospectSecret == "" {
+		return Config{}, fmt.Errorf("FOOKIE_INTROSPECT_SECRET is required")
 	}
 	if cfg.DatabaseURL == "" {
 		return Config{}, fmt.Errorf("DATABASE_URL is required")

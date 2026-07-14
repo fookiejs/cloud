@@ -61,6 +61,8 @@ loki.process "access" {
       client_ip   = "client_ip",
       method      = "method",
       path        = "path",
+      route       = "route",
+      query       = "query",
       status      = "status",
       duration_ms = "duration_ms",
       request_id  = "request_id",
@@ -81,6 +83,7 @@ loki.process "access" {
       values = {
         method      = "method",
         status      = "status",
+        route       = "route",
         geo_country = "geoip_country_code",
         geo_city    = "geoip_city_name",
       }
@@ -88,7 +91,7 @@ loki.process "access" {
 
     stage.template {
       source   = "line"
-      template = "{\"msg\":\"http_access\",\"service\":\"{{ .svc }}\",\"client_ip\":\"{{ .client_ip }}\",\"method\":\"{{ .method }}\",\"path\":\"{{ .path }}\",\"status\":{{ .status }},\"duration_ms\":{{ .duration_ms }},\"request_id\":\"{{ .request_id }}\",\"latitude\":{{ index . \"geoip_location_latitude\" }},\"longitude\":{{ index . \"geoip_location_longitude\" }},\"geo_country\":\"{{ index . \"geoip_country_code\" }}\",\"geo_city\":\"{{ index . \"geoip_city_name\" }}\"}"
+      template = "{\"msg\":\"http_access\",\"service\":\"{{ .svc }}\",\"client_ip\":\"{{ .client_ip }}\",\"method\":\"{{ .method }}\",\"path\":\"{{ .path }}\",\"route\":\"{{ .route }}\",\"query\":\"{{ .query }}\",\"status\":{{ .status }},\"duration_ms\":{{ .duration_ms }},\"request_id\":\"{{ .request_id }}\",\"latitude\":{{ index . \"geoip_location_latitude\" }},\"longitude\":{{ index . \"geoip_location_longitude\" }},\"geo_country\":\"{{ index . \"geoip_country_code\" }}\",\"geo_city\":\"{{ index . \"geoip_city_name\" }}\"}"
     }
 
     stage.output {

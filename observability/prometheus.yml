@@ -13,6 +13,9 @@ scrape_configs:
 
   - job_name: fookie-apps
     metrics_path: /metrics
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/metrics_token
     docker_sd_configs:
       - host: unix:///var/run/docker.sock
         refresh_interval: 15s

@@ -52,9 +52,6 @@ func (s *Server) Router() http.Handler {
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	origins := s.cfg.AllowedOrigins
-	if len(origins) == 0 {
-		origins = []string{"*"}
-	}
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   origins,
 		AllowedMethods:   []string{"GET", "POST", "DELETE", "OPTIONS"},
@@ -63,7 +60,7 @@ func (s *Server) Router() http.Handler {
 		MaxAge:           300,
 	}))
 
-	r.Handle("/metrics", metricsHandler())
+	r.Handle("/metrics", s.metricsAuth(metricsHandler()))
 	r.Get("/healthz", s.handleHealth)
 	r.Get("/.well-known/openid-configuration", s.handleOpenIDConfiguration)
 	r.Get("/.well-known/jwks.json", s.handleJWKS)
@@ -111,7 +108,7 @@ func (s *Server) handleOpenIDConfiguration(w http.ResponseWriter, _ *http.Reques
 		"id_token_signing_alg_values_supported": []string{"RS256"},
 		"scopes_supported":                      []string{"openid", "email", "profile"},
 		"token_endpoint_auth_methods_supported": []string{"none"},
-		"code_challenge_methods_supported":      []string{"S256", "plain"},
+		"code_challenge_methods_supported":      []string{"S256"},
 		"grant_types_supported":                 []string{"authorization_code", "refresh_token"},
 	})
 }
@@ -153,8 +150,16 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_request", "redirect_uri is not allowed for this client")
 		return
 	}
-	if codeChallenge != "" && codeChallengeMethod == "" {
+	if codeChallenge == "" {
+		writeError(w, http.StatusBadRequest, "invalid_request", "code_challenge is required")
+		return
+	}
+	if codeChallengeMethod == "" {
 		codeChallengeMethod = "S256"
+	}
+	if !strings.EqualFold(codeChallengeMethod, "S256") {
+		writeError(w, http.StatusBadRequest, "invalid_request", "code_challenge_method must be S256")
+		return
 	}
 
 	payload := loginState{
@@ -162,7 +167,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		RedirectURI:         redirectURI,
 		State:               state,
 		CodeChallenge:       codeChallenge,
-		CodeChallengeMethod: codeChallengeMethod,
+		CodeChallengeMethod: "S256",
 	}
 
 	if user := s.sessionUser(r); user != nil {
@@ -304,11 +309,9 @@ func (s *Server) exchangeCode(w http.ResponseWriter, r *http.Request, req tokenR
 		writeError(w, http.StatusBadRequest, "invalid_grant", "client_id or redirect_uri mismatch")
 		return
 	}
-	if ac.CodeChallenge != "" {
-		if req.CodeVerifier == "" || !token.VerifyPKCE(ac.CodeChallengeMethod, ac.CodeChallenge, req.CodeVerifier) {
-			writeError(w, http.StatusBadRequest, "invalid_grant", "pkce validation failed")
-			return
-		}
+	if ac.CodeChallenge == "" || req.CodeVerifier == "" || !token.VerifyPKCE(ac.CodeChallengeMethod, ac.CodeChallenge, req.CodeVerifier) {
+		writeError(w, http.StatusBadRequest, "invalid_grant", "pkce validation failed")
+		return
 	}
 
 	user, err := s.store.GetUser(r.Context(), ac.UserID)
@@ -714,6 +717,13 @@ func (s *Server) handleRevokeAPIKey(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleIntrospect(w http.ResponseWriter, r *http.Request) {
+	authz := strings.TrimSpace(r.Header.Get("Authorization"))
+	expected := "Bearer " + s.cfg.IntrospectSecret
+	if s.cfg.IntrospectSecret == "" || authz != expected {
+		writeError(w, http.StatusUnauthorized, "unauthorized", "introspect requires authorization")
+		return
+	}
+
 	var body struct {
 		Token string `json:"token"`
 	}

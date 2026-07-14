@@ -251,9 +251,6 @@ func HashToken(raw string) string {
 
 func VerifyPKCE(method, challenge, verifier string) bool {
 	method = strings.ToUpper(strings.TrimSpace(method))
-	if method == "" || method == "PLAIN" {
-		return challenge == verifier
-	}
 	if method != "S256" {
 		return false
 	}

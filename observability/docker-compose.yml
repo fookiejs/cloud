@@ -12,6 +12,7 @@ services:
       - --web.external-url=https://prometheus.fookiecloud.com
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./metrics_token:/etc/prometheus/metrics_token:ro
       - prometheus-data:/prometheus
       - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped

@@ -64,6 +64,8 @@ loki.process "access" {
         client_ip   = "client_ip",
         method      = "method",
         path        = "path",
+        route       = "route",
+        query       = "query",
         status      = "status",
         duration_ms = "duration_ms",
         request_id  = "request_id",
@@ -77,6 +79,7 @@ loki.process "access" {
         values = {
           method = "",
           status = "",
+          route  = "",
         }
       }
 
@@ -84,6 +87,7 @@ loki.process "access" {
         values = {
           client_ip = "client_ip",
           path      = "path",
+          query     = "query",
         }
       }
     }

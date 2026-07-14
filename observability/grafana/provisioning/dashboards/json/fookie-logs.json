@@ -4,7 +4,13 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [
+    {
+      "title": "HTTP Paths",
+      "type": "link",
+      "url": "/d/fookie-http-paths/fookie-http-paths"
+    }
+  ],
   "liveNow": true,
   "panels": [
     {
@@ -25,7 +31,7 @@
         {
           "datasource": { "type": "loki", "uid": "loki" },
           "editorMode": "code",
-          "expr": "{service=~\"$service\"} |= \"$search\"",
+          "expr": "{service=~\"$service\"} |= \"http_access\" | json | line_format \"{{.method}} {{.route}} {{.duration_ms}}ms status={{.status}} query={{.query}}\"",
           "queryType": "range",
           "refId": "A",
           "maxLines": 200
@@ -51,13 +57,6 @@
         "query": "label_values(service)",
         "refresh": 2,
         "type": "query"
-      },
-      {
-        "current": { "selected": false, "text": "http_access", "value": "http_access" },
-        "label": "Search",
-        "name": "search",
-        "query": "http_access",
-        "type": "textbox"
       }
     ]
   },
