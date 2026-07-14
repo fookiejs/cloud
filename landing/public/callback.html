@@ -4,13 +4,19 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Signing in — Fookie Cloud</title>
+  <meta name="color-scheme" content="dark" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Syne:wght@700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <main class="hero" style="min-height:100vh;justify-content:center;">
-    <p class="brand-display" style="font-size:clamp(2rem,8vw,3.5rem)">Fookie Cloud</p>
-    <h1 id="status">Signing you in…</h1>
-    <p class="lede" id="detail">One moment.</p>
+  <main class="callback-wrap">
+    <div>
+      <p class="page-kicker">Fookie Cloud</p>
+      <h1 id="status">Signing you in…</h1>
+      <p id="detail">One moment.</p>
+    </div>
   </main>
   <script>
     (async () => {
@@ -61,7 +67,9 @@
           localStorage.setItem("fookie_user", JSON.stringify(await me.json()));
         }
 
-        location.replace("/");
+        const next = sessionStorage.getItem("fookie_after_login") || "/";
+        sessionStorage.removeItem("fookie_after_login");
+        location.replace(next);
       } catch (e) {
         status.textContent = "Auth unreachable";
         detail.textContent = String(e);

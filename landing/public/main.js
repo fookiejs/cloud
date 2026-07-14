@@ -5,18 +5,21 @@ const ACCESS_KEY = "fookie_access_token";
 const REFRESH_KEY = "fookie_refresh_token";
 const USER_KEY = "fookie_user";
 const PENDING_APP_KEY = "fookie_pending_app";
+const AFTER_LOGIN_KEY = "fookie_after_login";
 
 const APPS = {
   lotaru: "https://lotaru.fookiecloud.com",
   "task-bridge": "https://task-bridge.fookiecloud.com",
 };
 
+const isProfile = document.body?.dataset?.page === "profile";
 const sheet = document.getElementById("signin-sheet");
 const keySheet = document.getElementById("key-sheet");
 const authSlot = document.getElementById("auth-slot");
 const googleLogin = document.getElementById("google-login");
-const keysPanel = document.getElementById("keys-panel");
 const keysList = document.getElementById("keys-list");
+const profileCard = document.getElementById("profile-card");
+const top = document.getElementById("top");
 
 function loginUrl() {
   const state = crypto.randomUUID();
@@ -30,16 +33,19 @@ function loginUrl() {
 }
 
 function openSheet() {
+  if (!sheet) return;
   sheet.hidden = false;
   document.body.style.overflow = "hidden";
 }
 
 function closeSheet() {
+  if (!sheet) return;
   sheet.hidden = true;
   document.body.style.overflow = "";
 }
 
 function openKeySheet() {
+  if (!keySheet) return;
   document.getElementById("key-form").hidden = false;
   document.getElementById("key-reveal").hidden = true;
   document.getElementById("key-name").value = "";
@@ -49,6 +55,7 @@ function openKeySheet() {
 }
 
 function closeKeySheet() {
+  if (!keySheet) return;
   keySheet.hidden = true;
   document.body.style.overflow = "";
 }
@@ -139,6 +146,20 @@ async function revokeKey(id) {
   if (!res.ok) throw new Error("revoke failed");
 }
 
+function avatarMarkup(user, size) {
+  const initials = (user.name || user.email || "?")
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase() || "")
+    .join("");
+  if (user.picture) {
+    return `<img src="${user.picture}" alt="" width="${size}" height="${size}" referrerpolicy="no-referrer" />`;
+  }
+  return `<img alt="" width="${size}" height="${size}" src="data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect fill='%2327272a' width='64' height='64'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' fill='%23fafafa' font-family='sans-serif' font-size='22' font-weight='700'>${initials}</text></svg>`,
+  )}" />`;
+}
+
 function renderKeys(keys) {
   if (!keysList) return;
   if (!keys.length) {
@@ -150,7 +171,7 @@ function renderKeys(keys) {
       const status = k.revoked ? "revoked" : `expires ${k.expires_at.slice(0, 10)}`;
       const action = k.revoked
         ? ""
-        : `<button type="button" class="btn-quiet" data-revoke="${k.id}">Revoke</button>`;
+        : `<button type="button" class="btn-danger" data-revoke="${k.id}">Revoke</button>`;
       return `<li class="key-row${k.revoked ? " revoked" : ""}">
         <div class="meta">
           <strong>${escapeHtml(k.name)}</strong>
@@ -176,8 +197,7 @@ function renderKeys(keys) {
 }
 
 async function refreshKeysPanel() {
-  if (!keysPanel) return;
-  keysPanel.hidden = false;
+  if (!keysList) return;
   try {
     const data = await loadKeys();
     renderKeys(data.keys || []);
@@ -186,33 +206,30 @@ async function refreshKeysPanel() {
   }
 }
 
-function hideKeysPanel() {
-  if (keysPanel) keysPanel.hidden = true;
+function renderProfileCard(user) {
+  if (!profileCard) return;
+  profileCard.innerHTML = `
+    ${avatarMarkup(user, 52)}
+    <div class="who">
+      <strong>${escapeHtml(user.name || "Signed in")}</strong>
+      <span>${escapeHtml(user.email || "")}</span>
+    </div>
+  `;
 }
 
 function renderAuthed(user) {
-  const initials = (user.name || user.email || "?")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() || "")
-    .join("");
-
+  if (!authSlot) return;
   authSlot.innerHTML = `
     <div class="user-menu" id="user-menu">
       <button class="user-chip" type="button" id="user-chip" aria-haspopup="true" aria-expanded="false">
-        ${
-          user.picture
-            ? `<img src="${user.picture}" alt="" referrerpolicy="no-referrer" />`
-            : `<img alt="" src="data:image/svg+xml,${encodeURIComponent(
-                `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect fill='%231f4d3a' width='64' height='64'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' fill='%23fff' font-family='sans-serif' font-size='24' font-weight='700'>${initials}</text></svg>`
-              )}" />`
-        }
+        ${avatarMarkup(user, 28)}
         <span class="meta">
           <span class="name">${escapeHtml(user.name || "Signed in")}</span>
           <span class="mail">${escapeHtml(user.email || "")}</span>
         </span>
       </button>
       <div class="user-menu-panel" role="menu">
+        <a href="/profile">Profile</a>
         <button type="button" id="sign-out">Sign out</button>
       </div>
     </div>
@@ -226,21 +243,35 @@ function renderAuthed(user) {
   });
   document.getElementById("sign-out").addEventListener("click", () => {
     clearSession();
-    location.reload();
+    location.href = "/";
   });
   document.addEventListener("click", (e) => {
     if (!menu.contains(e.target)) menu.classList.remove("open");
   });
-  void refreshKeysPanel();
+
+  if (isProfile) {
+    renderProfileCard(user);
+    void refreshKeysPanel();
+  }
 }
 
 function renderGuest() {
+  if (!authSlot) return;
   authSlot.innerHTML = `
-    <button class="btn-text" type="button" data-open-signin>Sign in</button>
+    <button class="btn-ghost" type="button" data-open-signin>Sign in</button>
     <button class="btn-solid" type="button" data-open-signin>Get started</button>
   `;
   bindOpeners();
-  hideKeysPanel();
+
+  if (isProfile) {
+    sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
+    if (profileCard) {
+      profileCard.innerHTML = `<div class="who"><strong>Sign in required</strong><span>API keys live on your profile.</span></div>`;
+    }
+    if (keysList) {
+      keysList.innerHTML = `<li class="keys-empty">Sign in to manage API keys.</li>`;
+    }
+  }
 }
 
 function escapeHtml(v) {
@@ -253,7 +284,10 @@ function escapeHtml(v) {
 
 function bindOpeners() {
   document.querySelectorAll("[data-open-signin]").forEach((el) => {
-    el.addEventListener("click", openSheet);
+    el.addEventListener("click", () => {
+      if (isProfile) sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
+      openSheet();
+    });
   });
 }
 
@@ -261,6 +295,14 @@ function bindApps() {
   document.querySelectorAll("[data-app]").forEach((el) => {
     el.addEventListener("click", () => requestApp(el.getAttribute("data-app")));
   });
+}
+
+if (top) {
+  const onScroll = () => {
+    top.classList.toggle("is-scrolled", window.scrollY > 4);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 }
 
 document.querySelectorAll("[data-close-signin]").forEach((el) => {
@@ -272,10 +314,9 @@ document.querySelectorAll("[data-close-key]").forEach((el) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    if (!sheet.hidden) closeSheet();
-    if (keySheet && !keySheet.hidden) closeKeySheet();
-  }
+  if (e.key !== "Escape") return;
+  if (sheet && !sheet.hidden) closeSheet();
+  if (keySheet && !keySheet.hidden) closeKeySheet();
 });
 
 if (googleLogin) {
@@ -329,7 +370,7 @@ bindApps();
   const pending = sessionStorage.getItem(PENDING_APP_KEY);
   const token = localStorage.getItem(ACCESS_KEY);
 
-  if (token && pending && APPS[pending]) {
+  if (!isProfile && token && pending && APPS[pending]) {
     sessionStorage.removeItem(PENDING_APP_KEY);
     goToApp(pending);
     return;
