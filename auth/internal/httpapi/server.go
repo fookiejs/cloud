@@ -428,7 +428,21 @@ func (s *Server) handleUserInfo(w http.ResponseWriter, r *http.Request) {
 		"client_id":      claims.ClientID,
 		"token_use":      claims.TokenUse,
 		"created_at":     user.CreatedAt.UTC().Format(time.RFC3339),
+		"is_admin":       s.isAdminEmail(user.Email),
 	})
+}
+
+func (s *Server) isAdminEmail(email string) bool {
+	want := strings.ToLower(strings.TrimSpace(email))
+	if want == "" {
+		return false
+	}
+	for _, e := range s.cfg.AdminEmails {
+		if strings.ToLower(strings.TrimSpace(e)) == want {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {

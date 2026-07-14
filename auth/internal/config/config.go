@@ -29,6 +29,7 @@ type Config struct {
 	CookieDomain       string
 	Clients            []Client
 	AllowedOrigins     []string
+	AdminEmails        []string
 }
 
 func Load() (Config, error) {
@@ -45,6 +46,7 @@ func Load() (Config, error) {
 		RefreshTokenTTL:    durationOr("REFRESH_TOKEN_TTL", 30*24*time.Hour),
 		AuthCodeTTL:        durationOr("AUTH_CODE_TTL", 5*time.Minute),
 		AllowedOrigins:     splitCSV(os.Getenv("ALLOWED_ORIGINS")),
+		AdminEmails:        splitCSV(os.Getenv("FOOKIE_ADMIN_EMAILS")),
 	}
 
 	if cfg.PublicURL == "" {

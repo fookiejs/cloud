@@ -190,6 +190,10 @@ input {
   background: #3b82f6;
 }
 
+.nav-dot.is-grafana {
+  background: #f59e0b;
+}
+
 .sidebar-foot {
   flex-shrink: 0;
   border-top: 1px solid var(--line);

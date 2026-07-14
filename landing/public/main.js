@@ -222,7 +222,15 @@ function renderProfileCard(user) {
   `;
 }
 
+function setAdminNav(user) {
+  const show = Boolean(user && user.is_admin);
+  document.querySelectorAll("[data-admin-app]").forEach((el) => {
+    el.hidden = !show;
+  });
+}
+
 function renderAuthed(user) {
+  setAdminNav(user);
   if (!authSlot) return;
   const label = escapeHtml(user.name || user.email || "Account");
   const mail = escapeHtml(user.email || "");
@@ -264,6 +272,7 @@ function renderAuthed(user) {
 }
 
 function renderGuest() {
+  setAdminNav(null);
   if (!authSlot) return;
   authSlot.innerHTML = `
     <button class="btn-ghost" type="button" data-signin>Sign in</button>
