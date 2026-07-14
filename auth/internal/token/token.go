@@ -172,6 +172,7 @@ func VerifyPKCE(method, challenge, verifier string) bool {
 
 func normalizePEM(v string) string {
 	v = strings.TrimSpace(v)
+	v = strings.Trim(v, `"'`)
 	v = strings.ReplaceAll(v, `\n`, "\n")
 	return v
 }
