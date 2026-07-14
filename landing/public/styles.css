@@ -500,19 +500,11 @@ input {
   margin-bottom: 0.75rem;
 }
 
-.profile-card img {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--line);
-  flex-shrink: 0;
-}
-
 .profile-card .who {
   display: grid;
   gap: 0.1rem;
   min-width: 0;
+  flex: 1;
 }
 
 .profile-card .who strong {
