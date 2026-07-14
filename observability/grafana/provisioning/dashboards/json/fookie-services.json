@@ -80,12 +80,12 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, service) (rate(http_request_duration_seconds_bucket{service=~\"$service\"}[5m])))",
-          "legendFormat": "{{service}} p95",
+          "expr": "rate(http_request_duration_seconds_sum{service=~\"$service\"}[5m]) / clamp_min(rate(http_request_duration_seconds_count{service=~\"$service\"}[5m]), 1e-9)",
+          "legendFormat": "{{service}} avg",
           "refId": "A"
         }
       ],
-      "title": "Latency p95",
+      "title": "Latency avg",
       "type": "timeseries"
     },
     {
