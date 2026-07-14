@@ -88,10 +88,10 @@ services:
       GF_AUTH_BASIC_ENABLED: "false"
       GF_AUTH_ANONYMOUS_ENABLED: "false"
       GF_AUTH_PROXY_ENABLED: "true"
-      GF_AUTH_PROXY_HEADER_NAME: X-Auth-Request-Email
+      GF_AUTH_PROXY_HEADER_NAME: X-Forwarded-Email
       GF_AUTH_PROXY_HEADER_PROPERTY: email
       GF_AUTH_PROXY_AUTO_SIGN_UP: "true"
-      GF_AUTH_PROXY_HEADERS: "Name:X-Auth-Request-User Email:X-Auth-Request-Email"
+      GF_AUTH_PROXY_HEADERS: "Name:X-Forwarded-User Email:X-Forwarded-Email"
       GF_AUTH_PROXY_ENABLE_LOGIN_TOKEN: "false"
       GF_INSTALL_PLUGINS: ""
       GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/json/fookie-live-map.json
