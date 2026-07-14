@@ -8,25 +8,48 @@
   <meta name="color-scheme" content="dark" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="shell">
     <header class="top" id="top">
       <div class="top-inner">
-        <span class="top-title">Apps</span>
+        <a class="top-left" href="/">Apps</a>
         <div class="top-right" id="auth-slot">
           <button class="btn-ghost" type="button" data-signin>Sign in</button>
         </div>
       </div>
     </header>
 
-    <main class="page">
-      <div class="page-inner">
+    <div class="layout">
+      <aside class="sidebar">
+        <a class="sidebar-brand" href="/">Cloud</a>
+        <nav class="sidebar-nav" aria-label="Cloud">
+          <div class="nav-block">
+            <div class="nav-section-label">Apps</div>
+            <button class="nav-item" type="button" data-app="lotaru">
+              <span class="nav-dot" aria-hidden="true"></span>
+              <span>Lotaru</span>
+            </button>
+            <button class="nav-item" type="button" data-app="task-bridge">
+              <span class="nav-dot is-bridge" aria-hidden="true"></span>
+              <span>Task Bridge</span>
+            </button>
+          </div>
+        </nav>
+        <div class="sidebar-foot">
+          <a class="nav-item" href="/profile">Profile</a>
+          <a class="mark mark-sm" href="/">Fookie<span>Cloud</span></a>
+        </div>
+      </aside>
+
+      <main class="main">
         <div class="page-head">
-          <h1>Apps</h1>
-          <p>Open Lotaru or Task Bridge with the same account.</p>
+          <div>
+            <h1>Apps</h1>
+            <p>Open Lotaru or Task Bridge with the same account.</p>
+          </div>
         </div>
 
         <section class="apps" id="apps" aria-label="Applications">
@@ -34,7 +57,7 @@
             <div class="app-card-body">
               <div class="app-card-title">
                 <h2>Lotaru</h2>
-                <span class="pill pill-mcp" title="Cursor MCP">MCP</span>
+                <span class="pill">MCP</span>
               </div>
               <p>Runs remote calls, scheduled jobs, and on-save shell scripts on your machine — organised per project.</p>
             </div>
@@ -47,7 +70,7 @@
             <div class="app-card-body">
               <div class="app-card-title">
                 <h2>Task Bridge</h2>
-                <span class="pill pill-mcp" title="Cursor MCP">MCP</span>
+                <span class="pill">MCP</span>
               </div>
               <p>Epics and task board — a lightweight Jira alternative for planning and tracking work.</p>
             </div>
@@ -56,17 +79,8 @@
             </div>
           </article>
         </section>
-      </div>
-    </main>
-
-    <footer class="foot">
-      <div class="foot-inner">
-        <a class="mark mark-sm" href="/">Fookie<span>Cloud</span></a>
-        <div class="foot-meta">
-          <span>© 2026 fookiecloud.com</span>
-        </div>
-      </div>
-    </footer>
+      </main>
+    </div>
   </div>
 
   <script src="/main.js"></script>

@@ -7,23 +7,46 @@
   <meta name="color-scheme" content="dark" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body data-page="profile">
   <div class="shell">
     <header class="top" id="top">
       <div class="top-inner">
-        <a class="top-title" href="/">Apps</a>
+        <a class="top-left" href="/">Apps</a>
         <div class="top-right" id="auth-slot"></div>
       </div>
     </header>
 
-    <main class="page">
-      <div class="page-inner page-narrow">
+    <div class="layout">
+      <aside class="sidebar">
+        <a class="sidebar-brand" href="/">Cloud</a>
+        <nav class="sidebar-nav" aria-label="Cloud">
+          <div class="nav-block">
+            <div class="nav-section-label">Apps</div>
+            <button class="nav-item" type="button" data-app="lotaru">
+              <span class="nav-dot" aria-hidden="true"></span>
+              <span>Lotaru</span>
+            </button>
+            <button class="nav-item" type="button" data-app="task-bridge">
+              <span class="nav-dot is-bridge" aria-hidden="true"></span>
+              <span>Task Bridge</span>
+            </button>
+          </div>
+        </nav>
+        <div class="sidebar-foot">
+          <a class="nav-item is-active" href="/profile">Profile</a>
+          <a class="mark mark-sm" href="/">Fookie<span>Cloud</span></a>
+        </div>
+      </aside>
+
+      <main class="main page-narrow">
         <div class="page-head">
-          <h1>Profile</h1>
-          <p>Account and API keys for Lotaru, Task Bridge, and MCP.</p>
+          <div>
+            <h1>Profile</h1>
+            <p>Account and API keys for Lotaru, Task Bridge, and MCP.</p>
+          </div>
         </div>
 
         <div class="profile-card" id="profile-card"></div>
@@ -38,17 +61,8 @@
           </div>
           <ul class="keys-list" id="keys-list"></ul>
         </section>
-      </div>
-    </main>
-
-    <footer class="foot">
-      <div class="foot-inner">
-        <a class="mark mark-sm" href="/">Fookie<span>Cloud</span></a>
-        <div class="foot-meta">
-          <span>© 2026 fookiecloud.com</span>
-        </div>
-      </div>
-    </footer>
+      </main>
+    </div>
   </div>
 
   <div class="sheet" id="signin-sheet" hidden>
@@ -79,7 +93,7 @@
           <span>Name</span>
           <input id="key-name" type="text" placeholder="Cursor MCP" maxlength="80" />
         </label>
-        <button class="btn-solid" type="button" id="key-submit" style="width:100%;margin-top:1rem">Create</button>
+        <button class="btn-solid btn-block" type="button" id="key-submit">Create</button>
       </div>
       <div id="key-reveal" hidden>
         <p class="sheet-copy">Copy this key now. It won’t be shown again.</p>
