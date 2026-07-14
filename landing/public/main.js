@@ -32,10 +32,9 @@ function loginUrl() {
   return `${AUTH}/v1/login?${q.toString()}`;
 }
 
-function openSheet() {
-  if (!sheet) return;
-  sheet.hidden = false;
-  document.body.style.overflow = "hidden";
+function startSignIn() {
+  if (isProfile) sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
+  location.href = loginUrl();
 }
 
 function closeSheet() {
@@ -103,7 +102,7 @@ function requestApp(appKey) {
     return;
   }
   sessionStorage.setItem(PENDING_APP_KEY, appKey);
-  openSheet();
+  startSignIn();
 }
 
 async function fetchUser(token) {
@@ -258,7 +257,7 @@ function renderAuthed(user) {
 function renderGuest() {
   if (!authSlot) return;
   authSlot.innerHTML = `
-    <button class="btn-solid" type="button" data-open-signin>Sign in</button>
+    <button class="btn-solid" type="button" data-signin>Sign in</button>
   `;
   bindOpeners();
 
@@ -282,11 +281,8 @@ function escapeHtml(v) {
 }
 
 function bindOpeners() {
-  document.querySelectorAll("[data-open-signin]").forEach((el) => {
-    el.addEventListener("click", () => {
-      if (isProfile) sessionStorage.setItem(AFTER_LOGIN_KEY, "/profile");
-      openSheet();
-    });
+  document.querySelectorAll("[data-signin], [data-open-signin]").forEach((el) => {
+    el.addEventListener("click", startSignIn);
   });
 }
 
@@ -321,7 +317,7 @@ document.addEventListener("keydown", (e) => {
 if (googleLogin) {
   googleLogin.addEventListener("click", (e) => {
     e.preventDefault();
-    location.href = loginUrl();
+    startSignIn();
   });
 }
 
