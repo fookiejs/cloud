@@ -84,6 +84,30 @@ func looksLikeID(s string) bool {
 }
 
 func clientIP(r *http.Request) string {
+	candidates := []string{
+		r.Header.Get("CF-Connecting-IP"),
+		r.Header.Get("True-Client-IP"),
+		r.Header.Get("X-Real-IP"),
+	}
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		for _, part := range strings.Split(xff, ",") {
+			candidates = append(candidates, strings.TrimSpace(part))
+		}
+	}
+	for _, raw := range candidates {
+		if raw == "" {
+			continue
+		}
+		host := raw
+		if h, _, err := net.SplitHostPort(raw); err == nil {
+			host = h
+		}
+		ip := net.ParseIP(host)
+		if ip == nil || ip.IsLoopback() || ip.IsPrivate() || ip.IsLinkLocalUnicast() || ip.IsUnspecified() {
+			continue
+		}
+		return host
+	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

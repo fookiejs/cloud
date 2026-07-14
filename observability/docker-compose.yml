@@ -94,6 +94,7 @@ services:
       GF_AUTH_PROXY_HEADERS: "Name:X-Forwarded-User Email:X-Forwarded-Email"
       GF_AUTH_PROXY_ENABLE_LOGIN_TOKEN: "false"
       GF_INSTALL_PLUGINS: ""
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/json/fookie-live-map.json
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro

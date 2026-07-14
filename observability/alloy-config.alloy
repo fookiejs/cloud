@@ -82,6 +82,7 @@ loki.process "access" {
         method      = "method",
         status      = "status",
         geo_country = "geoip_country_code",
+        geo_city    = "geoip_city_name",
       }
     }
 
