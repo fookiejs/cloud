@@ -15,12 +15,10 @@ const APPS = {
 const isProfile = document.body?.dataset?.page === "profile";
 const sheet = document.getElementById("signin-sheet");
 const keySheet = document.getElementById("key-sheet");
-const authSlot = document.getElementById("auth-slot");
 const profileSlot = document.getElementById("profile-slot");
 const googleLogin = document.getElementById("google-login");
 const keysList = document.getElementById("keys-list");
 const profileCard = document.getElementById("profile-card");
-const headerEl = document.getElementById("top");
 
 function loginUrl() {
   const state = crypto.randomUUID();
@@ -152,18 +150,12 @@ async function revokeKey(id) {
   if (!res.ok) throw new Error("revoke failed");
 }
 
-function avatarMarkup(user, size) {
-  const initials = (user.name || user.email || "?")
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((p) => p[0]?.toUpperCase() || "")
-    .join("");
-  if (user.picture) {
-    return `<img src="${user.picture}" alt="" width="${size}" height="${size}" referrerpolicy="no-referrer" />`;
-  }
-  return `<img alt="" width="${size}" height="${size}" src="data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect fill='%2327272a' width='64' height='64'/><text x='50%' y='54%' dominant-baseline='middle' text-anchor='middle' fill='%23fafafa' font-family='sans-serif' font-size='22' font-weight='700'>${initials}</text></svg>`,
-  )}" />`;
+function escapeHtml(v) {
+  return String(v)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
 }
 
 function renderKeys(keys) {
@@ -177,7 +169,7 @@ function renderKeys(keys) {
       const status = k.revoked ? "revoked" : `expires ${k.expires_at.slice(0, 10)}`;
       const action = k.revoked
         ? ""
-        : `<button type="button" class="btn-danger" data-revoke="${k.id}">Revoke</button>`;
+        : `<button class="btn-danger" data-revoke="${k.id}">Revoke</button>`;
       return `<li class="key-row${k.revoked ? " revoked" : ""}">
         <div class="meta">
           <strong>${escapeHtml(k.name)}</strong>
@@ -215,12 +207,16 @@ async function refreshKeysPanel() {
 function renderProfileCard(user) {
   if (!profileCard) return;
   profileCard.innerHTML = `
-    ${avatarMarkup(user, 52)}
     <div class="who">
       <strong>${escapeHtml(user.name || "Signed in")}</strong>
       <span>${escapeHtml(user.email || "")}</span>
     </div>
+    <button class="btn-ghost" type="button" id="sign-out">Sign out</button>
   `;
+  document.getElementById("sign-out").addEventListener("click", () => {
+    clearSession();
+    location.href = "/";
+  });
 }
 
 function setAdminNav(user) {
@@ -240,45 +236,12 @@ function renderAuthed(user) {
     const active = isProfile ? " is-active" : "";
     profileSlot.innerHTML = `
       <a class="profile-user${active}" href="/profile" aria-label="${label}">
-        <span class="avatar-wrap">${avatarMarkup(user, 28)}</span>
         <span class="who">
           <strong>${name}</strong>
           <span>${mail}</span>
         </span>
       </a>
     `;
-  }
-
-  if (authSlot) {
-    authSlot.innerHTML = `
-      <div class="user-menu" id="user-menu">
-        <button class="user-chip" type="button" id="user-chip" aria-label="${label}" aria-haspopup="true" aria-expanded="false">
-          <span class="avatar-wrap">${avatarMarkup(user, 32)}</span>
-        </button>
-        <div class="user-menu-panel" role="menu">
-          <div class="user-menu-who">
-            <span class="name">${name}</span>
-            <span class="mail">${mail}</span>
-          </div>
-          <a href="/profile" role="menuitem">Profile</a>
-          <button type="button" class="sign-out" id="sign-out" role="menuitem">Sign out</button>
-        </div>
-      </div>
-    `;
-
-    const menu = document.getElementById("user-menu");
-    const chip = document.getElementById("user-chip");
-    chip.addEventListener("click", () => {
-      const open = menu.classList.toggle("open");
-      chip.setAttribute("aria-expanded", open ? "true" : "false");
-    });
-    document.getElementById("sign-out").addEventListener("click", () => {
-      clearSession();
-      location.href = "/";
-    });
-    document.addEventListener("click", (e) => {
-      if (!menu.contains(e.target)) menu.classList.remove("open");
-    });
   }
 
   if (isProfile) {
@@ -291,12 +254,7 @@ function renderGuest() {
   setAdminNav(null);
   if (profileSlot) {
     const active = isProfile ? " is-active" : "";
-    profileSlot.innerHTML = `<a class="nav-item${active}" href="/profile" data-signin>Profile</a>`;
-  }
-  if (authSlot) {
-    authSlot.innerHTML = `
-      <button class="btn-ghost" type="button" data-signin>Sign in</button>
-    `;
+    profileSlot.innerHTML = `<a class="nav-item${active}" href="/profile" data-signin>Sign in</a>`;
   }
   bindOpeners();
 
@@ -311,14 +269,6 @@ function renderGuest() {
   }
 }
 
-function escapeHtml(v) {
-  return String(v)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
-}
-
 function bindOpeners() {
   document.querySelectorAll("[data-signin], [data-open-signin]").forEach((el) => {
     el.addEventListener("click", startSignIn);
@@ -329,14 +279,6 @@ function bindApps() {
   document.querySelectorAll("[data-app]").forEach((el) => {
     el.addEventListener("click", () => requestApp(el.getAttribute("data-app")));
   });
-}
-
-if (headerEl) {
-  const onScroll = () => {
-    headerEl.classList.toggle("is-scrolled", window.scrollY > 4);
-  };
-  window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
 }
 
 document.querySelectorAll("[data-close-signin]").forEach((el) => {
