@@ -101,18 +101,7 @@ async function fetchUser(token) {
   return res.json();
 }
 
-function setHeroAuthed(user) {
-  const actions = document.querySelector(".hero-actions");
-  if (!actions) return;
-  const first = user.name?.split(/\s+/)[0] || "there";
-  actions.innerHTML = `
-    <a class="btn-solid large" href="#apps">Open an app</a>
-    <span class="btn-quiet">Hi, ${escapeHtml(first)}</span>
-  `;
-}
-
 function renderAuthed(user) {
-  setHeroAuthed(user);
   const initials = (user.name || user.email || "?")
     .split(/\s+/)
     .slice(0, 2)
