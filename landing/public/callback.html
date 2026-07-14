@@ -3,64 +3,67 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Signed in — Fookie Cloud</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <title>Signing in — Fookie Cloud</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <main class="hero" style="min-height:100vh;align-items:center;">
-    <div class="hero-copy">
-      <p class="brand-hero" style="font-size:clamp(2.4rem,8vw,4.5rem)">Fookie Cloud</p>
-      <h1 id="status">Finishing sign-in…</h1>
-      <p class="lede" id="detail">Exchanging your authorization code.</p>
-      <div class="cta-row">
-        <a class="btn primary" href="/">Back home</a>
-        <a class="btn ghost" href="/#apps">Browse apps</a>
-      </div>
-    </div>
+  <main class="hero" style="min-height:100vh;justify-content:center;">
+    <p class="brand-display" style="font-size:clamp(2rem,8vw,3.5rem)">Fookie Cloud</p>
+    <h1 id="status">Signing you in…</h1>
+    <p class="lede" id="detail">One moment.</p>
   </main>
   <script>
     (async () => {
+      const AUTH = "https://auth.fookiecloud.com";
       const params = new URLSearchParams(location.search);
       const code = params.get("code");
       const err = params.get("error");
       const status = document.getElementById("status");
       const detail = document.getElementById("detail");
+
       if (err) {
         status.textContent = "Sign-in stopped";
         detail.textContent = err;
         return;
       }
       if (!code) {
-        status.textContent = "No code";
-        detail.textContent = "Start again from Sign in.";
+        location.replace("/");
         return;
       }
+
       try {
-        const res = await fetch("https://auth.fookiecloud.com/v1/token", {
+        const res = await fetch(`${AUTH}/v1/token`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             grant_type: "authorization_code",
             code,
             client_id: "web",
-            redirect_uri: "https://fookiecloud.com/callback"
-          })
+            redirect_uri: "https://fookiecloud.com/callback",
+          }),
         });
         const data = await res.json();
         if (!res.ok) {
-          status.textContent = "Token exchange failed";
-          detail.textContent = data.error_description || data.error || "Unknown error";
+          status.textContent = "Couldn’t finish sign-in";
+          detail.textContent = data.error_description || data.error || "Try again.";
           return;
         }
-        sessionStorage.setItem("fookie_access_token", data.access_token);
-        if (data.refresh_token) sessionStorage.setItem("fookie_refresh_token", data.refresh_token);
-        status.textContent = "You're in.";
-        detail.textContent = "Session stored for this browser tab. App access comes next.";
+
+        localStorage.setItem("fookie_access_token", data.access_token);
+        if (data.refresh_token) {
+          localStorage.setItem("fookie_refresh_token", data.refresh_token);
+        }
+
+        const me = await fetch(`${AUTH}/v1/userinfo`, {
+          headers: { Authorization: `Bearer ${data.access_token}` },
+        });
+        if (me.ok) {
+          localStorage.setItem("fookie_user", JSON.stringify(await me.json()));
+        }
+
+        location.replace("/");
       } catch (e) {
-        status.textContent = "Could not reach auth";
+        status.textContent = "Auth unreachable";
         detail.textContent = String(e);
       }
     })();

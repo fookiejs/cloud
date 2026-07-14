@@ -4,129 +4,83 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fookie Cloud</title>
-  <meta name="description" content="Fookie Cloud — one platform for your apps, identity, and observability." />
+  <meta name="description" content="Fookie Cloud — shared identity, apps, and observability for every Fookie product." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Syne:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <div class="noise" aria-hidden="true"></div>
+  <div class="aura" aria-hidden="true"></div>
 
   <header class="top">
-    <a class="brand-mark" href="/">Fookie Cloud</a>
-    <nav class="nav">
-      <a href="#apps">Apps</a>
-      <a href="#identity">Identity</a>
-      <a href="#signal">Signal</a>
-      <a class="nav-cta" href="https://auth.fookiecloud.com/v1/login?client_id=web&redirect_uri=https://fookiecloud.com/callback&state=home">Sign in</a>
-    </nav>
+    <a class="logo" href="/">Fookie<span>Cloud</span></a>
+    <div class="top-right" id="auth-slot">
+      <button class="btn-text" type="button" data-open-signin>Sign in</button>
+      <button class="btn-solid" type="button" data-open-signin>Get started</button>
+    </div>
   </header>
 
   <main>
     <section class="hero">
-      <div class="hero-plane" aria-hidden="true">
-        <div class="orb orb-a"></div>
-        <div class="orb orb-b"></div>
-        <div class="grid-fade"></div>
-        <svg class="constellation" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-          <g class="lines" stroke="currentColor" stroke-width="1" fill="none">
-            <path d="M120 640 C320 420, 480 520, 720 360 S1120 220, 1320 300" />
-            <path d="M80 280 C260 340, 420 180, 640 240 S980 420, 1280 180" />
-            <path d="M200 780 C460 680, 620 760, 860 620 S1180 540, 1400 640" />
-          </g>
-          <g class="nodes" fill="currentColor">
-            <circle cx="720" cy="360" r="4" />
-            <circle cx="480" cy="520" r="3" />
-            <circle cx="1120" cy="220" r="3.5" />
-            <circle cx="640" cy="240" r="3" />
-            <circle cx="860" cy="620" r="4" />
-            <circle cx="320" cy="420" r="2.5" />
-          </g>
-        </svg>
-      </div>
-
-      <div class="hero-copy">
-        <p class="brand-hero">Fookie Cloud</p>
-        <h1>Apps that find each other.</h1>
-        <p class="lede">One place for identity, deploy, and signal — so Lotar, Tasks, and every next product share the same nervous system.</p>
-        <div class="cta-row">
-          <a class="btn primary" href="#apps">See the ecosystem</a>
-          <a class="btn ghost" href="https://grafana.fookiecloud.com">Open observatory</a>
-        </div>
+      <p class="brand-display">Fookie Cloud</p>
+      <h1>One login. Every app.</h1>
+      <p class="lede">Lotar, Tasks, Bridge and what comes next live under the same identity and the same signal plane.</p>
+      <div class="hero-actions">
+        <button class="btn-solid large" type="button" data-open-signin>Continue with Google</button>
+        <a class="btn-quiet" href="#apps">See apps</a>
       </div>
     </section>
 
-    <section class="block" id="apps">
-      <div class="block-head">
-        <p class="eyebrow">Products</p>
-        <h2>Not separate SaaS islands. One cloud surface.</h2>
-        <p class="support">Each app registers, speaks the shared language, and appears under the same roof.</p>
-      </div>
-      <ul class="app-rail">
-        <li>
-          <a href="https://lotar.fookiecloud.com">
-            <span class="app-name">Lotar</span>
-            <span class="app-desc">Desktop automation that runs where you work.</span>
-            <span class="app-go">Open</span>
-          </a>
-        </li>
-        <li>
-          <a href="https://tasks.fookiecloud.com">
-            <span class="app-name">Tasks</span>
-            <span class="app-desc">Lightweight task flow with the same identity.</span>
-            <span class="app-go">Open</span>
-          </a>
-        </li>
-        <li>
-          <a href="https://bridge.fookiecloud.com">
-            <span class="app-name">Bridge</span>
-            <span class="app-desc">Connect tools without rewriting your stack.</span>
-            <span class="app-go">Open</span>
-          </a>
-        </li>
-      </ul>
+    <section class="strip" id="apps">
+      <a class="app" href="https://lotar.fookiecloud.com">
+        <strong>Lotar</strong>
+        <span>Desktop automation</span>
+      </a>
+      <a class="app" href="https://tasks.fookiecloud.com">
+        <strong>Tasks</strong>
+        <span>Shared work queue</span>
+      </a>
+      <a class="app" href="https://bridge.fookiecloud.com">
+        <strong>Bridge</strong>
+        <span>Tool connections</span>
+      </a>
+      <a class="app" href="https://grafana.fookiecloud.com">
+        <strong>Grafana</strong>
+        <span>Live observatory</span>
+      </a>
     </section>
 
-    <section class="block split" id="identity">
-      <div>
-        <p class="eyebrow">Identity</p>
-        <h2>Sign in once. Carry it everywhere.</h2>
-        <p class="support">Google through Fookie Auth. Lotar, Tasks, Bridge, and Grafana all trust the same tokens.</p>
-      </div>
-      <div class="identity-panel" aria-hidden="true">
-        <div class="flow-line">
-          <span>App</span>
-          <span class="arrow">→</span>
-          <span>auth.fookiecloud.com</span>
-          <span class="arrow">→</span>
-          <span>Google</span>
-          <span class="arrow">→</span>
-          <span>JWT</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="block" id="signal">
-      <div class="block-head">
-        <p class="eyebrow">Signal</p>
-        <h2>Logs, metrics, and traces already wired.</h2>
-        <p class="support">Prometheus, Loki, and Grafana sit behind the same cloud — ready for every registered app.</p>
-      </div>
-      <div class="signal-strip">
-        <span>Prometheus</span>
-        <span>Loki</span>
-        <span>OpenTelemetry</span>
-        <span>Grafana</span>
-      </div>
-      <a class="btn primary wide" href="https://grafana.fookiecloud.com">Enter Grafana</a>
+    <section class="statement">
+      <h2>Write once. Reach every product.</h2>
+      <p>Auth is separate. Apps don't reinvent login. They just trust Fookie Cloud.</p>
     </section>
   </main>
 
   <footer class="foot">
-    <p class="brand-mark">Fookie Cloud</p>
-    <p class="foot-note">Runtime for Fookie apps. Auth, signal, and presence — shared by design.</p>
+    <span>Fookie Cloud</span>
+    <span>Production runtime</span>
   </footer>
+
+  <div class="sheet" id="signin-sheet" hidden>
+    <button class="sheet-backdrop" type="button" data-close-signin aria-label="Close"></button>
+    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="signin-title">
+      <button class="sheet-x" type="button" data-close-signin aria-label="Close">×</button>
+      <p class="sheet-kicker">Fookie Cloud</p>
+      <h2 id="signin-title">Welcome back.</h2>
+      <p class="sheet-copy">Sign in to carry the same identity across Lotar, Tasks, Bridge, and the observatory.</p>
+      <a class="google-btn" id="google-login" href="#">
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 5.4 29.3 3.5 24 3.5 12.4 3.5 3 12.9 3 24.5S12.4 45.5 24 45.5 45 36.1 45 24.5c0-1.4-.1-2.7-.4-4z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12.5 24 12.5c3 0 5.8 1.1 7.9 3l5.7-5.7C34 5.4 29.3 3.5 24 3.5 16.1 3.5 9.3 7.9 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 45.5c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 36.9 26.7 38 24 38c-5.2 0-9.6-3.3-11.2-7.9l-6.5 5C9.2 41.2 16 45.5 24 45.5z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l.0.0 6.2 5.2C39.2 36.9 45 32 45 24.5c0-1.4-.1-2.7-.4-4z"/>
+        </svg>
+        Continue with Google
+      </a>
+      <p class="sheet-fine">No passwords here. Google only for now.</p>
+    </div>
+  </div>
 
   <script src="/main.js"></script>
 </body>
