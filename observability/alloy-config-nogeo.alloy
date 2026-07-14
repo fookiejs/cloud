@@ -1,0 +1,99 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+discovery.docker "fookie" {
+  host = "unix:///var/run/docker.sock"
+  refresh_interval = "10s"
+  filter {
+    name   = "name"
+    values = [".*auth.*", ".*lotaru.*", ".*task-bridge.*", ".*taskbridge.*"]
+  }
+}
+
+discovery.relabel "fookie" {
+  targets = discovery.docker.fookie.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/?(.*)"
+    target_label  = "container"
+  }
+
+  rule {
+    source_labels = ["container"]
+    regex         = "(?i).*(auth).*"
+    target_label  = "service"
+    replacement   = "auth"
+  }
+
+  rule {
+    source_labels = ["container"]
+    regex         = "(?i).*(lotaru).*"
+    target_label  = "service"
+    replacement   = "lotaru"
+  }
+
+  rule {
+    source_labels = ["container"]
+    regex         = "(?i).*(task-bridge|taskbridge).*"
+    target_label  = "service"
+    replacement   = "task-bridge"
+  }
+}
+
+loki.source.docker "fookie" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.relabel.fookie.output
+  forward_to = [loki.process.access.receiver]
+}
+
+loki.process "access" {
+  stage.match {
+    selector = "{service=~\".+\"}"
+
+    stage.drop {
+      expression = ".*(healthz|/health|/metrics).*"
+      drop_counter_reason = "health_or_metrics"
+    }
+
+    stage.json {
+      expressions = {
+        msg         = "msg",
+        client_ip   = "client_ip",
+        method      = "method",
+        path        = "path",
+        status      = "status",
+        duration_ms = "duration_ms",
+        request_id  = "request_id",
+      }
+    }
+
+    stage.match {
+      selector = "{service=~\".+\"} |~ \"http_access\""
+
+      stage.labels {
+        values = {
+          method = "",
+          status = "",
+        }
+      }
+
+      stage.structured_metadata {
+        values = {
+          client_ip = "client_ip",
+          path      = "path",
+        }
+      }
+    }
+  }
+
+  forward_to = [loki.write.local.receiver]
+}
+
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

@@ -47,6 +47,7 @@ func (s *Server) Router() http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
+	r.Use(accessAndMetrics)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(60 * time.Second))
 
@@ -62,6 +63,7 @@ func (s *Server) Router() http.Handler {
 		MaxAge:           300,
 	}))
 
+	r.Handle("/metrics", metricsHandler())
 	r.Get("/healthz", s.handleHealth)
 	r.Get("/.well-known/openid-configuration", s.handleOpenIDConfiguration)
 	r.Get("/.well-known/jwks.json", s.handleJWKS)
