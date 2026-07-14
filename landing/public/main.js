@@ -19,7 +19,7 @@ const authSlot = document.getElementById("auth-slot");
 const googleLogin = document.getElementById("google-login");
 const keysList = document.getElementById("keys-list");
 const profileCard = document.getElementById("profile-card");
-const top = document.getElementById("top");
+const headerEl = document.getElementById("top");
 
 function loginUrl() {
   const state = crypto.randomUUID();
@@ -258,8 +258,7 @@ function renderAuthed(user) {
 function renderGuest() {
   if (!authSlot) return;
   authSlot.innerHTML = `
-    <button class="btn-ghost" type="button" data-open-signin>Sign in</button>
-    <button class="btn-solid" type="button" data-open-signin>Get started</button>
+    <button class="btn-solid" type="button" data-open-signin>Sign in</button>
   `;
   bindOpeners();
 
@@ -297,9 +296,9 @@ function bindApps() {
   });
 }
 
-if (top) {
+if (headerEl) {
   const onScroll = () => {
-    top.classList.toggle("is-scrolled", window.scrollY > 4);
+    headerEl.classList.toggle("is-scrolled", window.scrollY > 4);
   };
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
