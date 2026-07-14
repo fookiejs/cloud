@@ -32,6 +32,11 @@ type AccessClaims struct {
 	jwt.RegisteredClaims
 }
 
+type SessionClaims struct {
+	Kind string `json:"kind"`
+	jwt.RegisteredClaims
+}
+
 type Pair struct {
 	AccessToken  string
 	RefreshToken string
@@ -114,6 +119,41 @@ func (m *Manager) ParseAccessToken(raw string) (*AccessClaims, error) {
 	claims, ok := parsed.Claims.(*AccessClaims)
 	if !ok || !parsed.Valid {
 		return nil, fmt.Errorf("invalid token")
+	}
+	return claims, nil
+}
+
+func (m *Manager) IssueSessionToken(userID string, ttl time.Duration) (string, error) {
+	now := time.Now().UTC()
+	claims := SessionClaims{
+		Kind: "session",
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    m.issuer,
+			Subject:   userID,
+			Audience:  []string{"fookie-sso"},
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
+			ID:        uuid.NewString(),
+		},
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t.Header["kid"] = m.keyID
+	return t.SignedString(m.privateKey)
+}
+
+func (m *Manager) ParseSessionToken(raw string) (*SessionClaims, error) {
+	parsed, err := jwt.ParseWithClaims(raw, &SessionClaims{}, func(t *jwt.Token) (any, error) {
+		if t.Method != jwt.SigningMethodRS256 {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+		return &m.privateKey.PublicKey, nil
+	}, jwt.WithIssuer(m.issuer), jwt.WithAudience("fookie-sso"))
+	if err != nil {
+		return nil, err
+	}
+	claims, ok := parsed.Claims.(*SessionClaims)
+	if !ok || !parsed.Valid || claims.Kind != "session" || claims.Subject == "" {
+		return nil, fmt.Errorf("invalid session")
 	}
 	return claims, nil
 }

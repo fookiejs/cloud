@@ -151,20 +151,29 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		codeChallengeMethod = "S256"
 	}
 
-	nonce, err := randomState(16)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "server_error", "failed to create state")
-		return
-	}
-
 	payload := loginState{
 		ClientID:            clientID,
 		RedirectURI:         redirectURI,
 		State:               state,
 		CodeChallenge:       codeChallenge,
 		CodeChallengeMethod: codeChallengeMethod,
-		Nonce:               nonce,
 	}
+
+	if user := s.sessionUser(r); user != nil {
+		if err := s.completeLogin(w, r, user, payload); err != nil {
+			writeError(w, http.StatusInternalServerError, "server_error", "failed to complete login")
+			return
+		}
+		return
+	}
+
+	nonce, err := randomState(16)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to create state")
+		return
+	}
+	payload.Nonce = nonce
+
 	encoded, err := encodeState(payload)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "server_error", "failed to encode state")
@@ -222,27 +231,6 @@ func (s *Server) handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authCode, err := token.RandomURLToken(32)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "server_error", "failed to create auth code")
-		return
-	}
-
-	now := time.Now().UTC()
-	if err := s.store.CreateAuthCode(r.Context(), domain.AuthCode{
-		Code:                authCode,
-		UserID:              user.ID,
-		ClientID:            payload.ClientID,
-		RedirectURI:         payload.RedirectURI,
-		CodeChallenge:       payload.CodeChallenge,
-		CodeChallengeMethod: payload.CodeChallengeMethod,
-		ExpiresAt:           now.Add(s.cfg.AuthCodeTTL),
-		CreatedAt:           now,
-	}); err != nil {
-		writeError(w, http.StatusInternalServerError, "server_error", "failed to store auth code")
-		return
-	}
-
 	http.SetCookie(w, &http.Cookie{
 		Name:     "fookie_oauth_state",
 		Value:    "",
@@ -254,18 +242,15 @@ func (s *Server) handleGoogleCallback(w http.ResponseWriter, r *http.Request) {
 		MaxAge:   -1,
 	})
 
-	redirectURL, err := url.Parse(payload.RedirectURI)
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "server_error", "invalid redirect_uri")
+	if err := s.setSessionCookie(w, user.ID); err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to create session")
 		return
 	}
-	q := redirectURL.Query()
-	q.Set("code", authCode)
-	if payload.State != "" {
-		q.Set("state", payload.State)
+
+	if err := s.completeLogin(w, r, user, payload); err != nil {
+		writeError(w, http.StatusInternalServerError, "server_error", "failed to complete login")
+		return
 	}
-	redirectURL.RawQuery = q.Encode()
-	http.Redirect(w, r, redirectURL.String(), http.StatusFound)
 }
 
 type tokenRequest struct {
@@ -445,7 +430,89 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 		_ = s.store.RevokeUserRefreshTokens(r.Context(), claims.Subject, body.ClientID)
 	}
 
+	s.clearSessionCookie(w)
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
+}
+
+func (s *Server) sessionUser(r *http.Request) *domain.User {
+	cookie, err := r.Cookie("fookie_session")
+	if err != nil || cookie.Value == "" {
+		return nil
+	}
+	claims, err := s.tokens.ParseSessionToken(cookie.Value)
+	if err != nil {
+		return nil
+	}
+	user, err := s.store.GetUser(r.Context(), claims.Subject)
+	if err != nil || user == nil {
+		return nil
+	}
+	return user
+}
+
+func (s *Server) setSessionCookie(w http.ResponseWriter, userID string) error {
+	raw, err := s.tokens.IssueSessionToken(userID, 30*24*time.Hour)
+	if err != nil {
+		return err
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "fookie_session",
+		Value:    raw,
+		Path:     "/",
+		Domain:   s.cfg.CookieDomain,
+		HttpOnly: true,
+		Secure:   strings.HasPrefix(s.cfg.PublicURL, "https://"),
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int((30 * 24 * time.Hour).Seconds()),
+	})
+	return nil
+}
+
+func (s *Server) clearSessionCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "fookie_session",
+		Value:    "",
+		Path:     "/",
+		Domain:   s.cfg.CookieDomain,
+		HttpOnly: true,
+		Secure:   strings.HasPrefix(s.cfg.PublicURL, "https://"),
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	})
+}
+
+func (s *Server) completeLogin(w http.ResponseWriter, r *http.Request, user *domain.User, payload loginState) error {
+	authCode, err := token.RandomURLToken(32)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UTC()
+	if err := s.store.CreateAuthCode(r.Context(), domain.AuthCode{
+		Code:                authCode,
+		UserID:              user.ID,
+		ClientID:            payload.ClientID,
+		RedirectURI:         payload.RedirectURI,
+		CodeChallenge:       payload.CodeChallenge,
+		CodeChallengeMethod: payload.CodeChallengeMethod,
+		ExpiresAt:           now.Add(s.cfg.AuthCodeTTL),
+		CreatedAt:           now,
+	}); err != nil {
+		return err
+	}
+
+	redirectURL, err := url.Parse(payload.RedirectURI)
+	if err != nil {
+		return err
+	}
+	q := redirectURL.Query()
+	q.Set("code", authCode)
+	if payload.State != "" {
+		q.Set("state", payload.State)
+	}
+	redirectURL.RawQuery = q.Encode()
+	http.Redirect(w, r, redirectURL.String(), http.StatusFound)
+	return nil
 }
 
 func (s *Server) bearerClaims(r *http.Request) (*token.AccessClaims, error) {
@@ -506,7 +573,7 @@ func decodeState(raw string) (loginState, error) {
 	if err := json.Unmarshal(b, &v); err != nil {
 		return loginState{}, err
 	}
-	if v.ClientID == "" || v.RedirectURI == "" || v.Nonce == "" {
+	if v.ClientID == "" || v.RedirectURI == "" {
 		return loginState{}, errors.New("incomplete state")
 	}
 	return v, nil

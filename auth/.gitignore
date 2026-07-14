@@ -1,4 +1,8 @@
 .env
 .project-env.txt
+.app-env.txt
+.env-payload.json
+.dokploy_env.txt
+.dokploy_payload.json
 *.pem
 bin/

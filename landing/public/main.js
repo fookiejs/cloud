@@ -4,6 +4,18 @@ const REDIRECT_URI = "https://fookiecloud.com/callback";
 const ACCESS_KEY = "fookie_access_token";
 const REFRESH_KEY = "fookie_refresh_token";
 const USER_KEY = "fookie_user";
+const PENDING_APP_KEY = "fookie_pending_app";
+
+const APPS = {
+  lotar: {
+    clientId: "lotar",
+    redirectUri: "https://lotar.fookiecloud.com/callback",
+  },
+  "task-bridge": {
+    clientId: "task-bridge",
+    redirectUri: "https://task-bridge.fookiecloud.com/callback",
+  },
+};
 
 const sheet = document.getElementById("signin-sheet");
 const authSlot = document.getElementById("auth-slot");
@@ -15,6 +27,16 @@ function loginUrl() {
   const q = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
+    state,
+  });
+  return `${AUTH}/v1/login?${q.toString()}`;
+}
+
+function appAuthUrl(app) {
+  const state = crypto.randomUUID();
+  const q = new URLSearchParams({
+    client_id: app.clientId,
+    redirect_uri: app.redirectUri,
     state,
   });
   return `${AUTH}/v1/login?${q.toString()}`;
@@ -39,9 +61,36 @@ function getUser() {
 }
 
 function clearSession() {
+  const refresh = localStorage.getItem(REFRESH_KEY);
   localStorage.removeItem(ACCESS_KEY);
   localStorage.removeItem(REFRESH_KEY);
   localStorage.removeItem(USER_KEY);
+  fetch(`${AUTH}/v1/logout`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ refresh_token: refresh || undefined, all_devices: true }),
+  }).catch(() => {});
+}
+
+function isAuthed() {
+  return Boolean(localStorage.getItem(ACCESS_KEY));
+}
+
+function goToApp(appKey) {
+  const app = APPS[appKey];
+  if (!app) return;
+  location.href = appAuthUrl(app);
+}
+
+function requestApp(appKey) {
+  if (!APPS[appKey]) return;
+  if (isAuthed()) {
+    goToApp(appKey);
+    return;
+  }
+  sessionStorage.setItem(PENDING_APP_KEY, appKey);
+  openSheet();
 }
 
 async function fetchUser(token) {
@@ -57,7 +106,7 @@ function setHeroAuthed(user) {
   if (!actions) return;
   const first = user.name?.split(/\s+/)[0] || "there";
   actions.innerHTML = `
-    <a class="btn-solid large" href="#apps">Browse apps</a>
+    <a class="btn-solid large" href="#apps">Open an app</a>
     <span class="btn-quiet">Hi, ${escapeHtml(first)}</span>
   `;
 }
@@ -128,6 +177,12 @@ function bindOpeners() {
   });
 }
 
+function bindApps() {
+  document.querySelectorAll("[data-app]").forEach((el) => {
+    el.addEventListener("click", () => requestApp(el.getAttribute("data-app")));
+  });
+}
+
 document.querySelectorAll("[data-close-signin]").forEach((el) => {
   el.addEventListener("click", closeSheet);
 });
@@ -144,9 +199,18 @@ if (googleLogin) {
 }
 
 bindOpeners();
+bindApps();
 
 (async () => {
+  const pending = sessionStorage.getItem(PENDING_APP_KEY);
   const token = localStorage.getItem(ACCESS_KEY);
+
+  if (token && pending && APPS[pending]) {
+    sessionStorage.removeItem(PENDING_APP_KEY);
+    goToApp(pending);
+    return;
+  }
+
   if (!token) {
     renderGuest();
     return;
