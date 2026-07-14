@@ -7,9 +7,9 @@ const USER_KEY = "fookie_user";
 const PENDING_APP_KEY = "fookie_pending_app";
 
 const APPS = {
-  lotar: {
-    clientId: "lotar",
-    redirectUri: "https://lotar.fookiecloud.com/callback",
+  lotaru: {
+    clientId: "lotaru",
+    redirectUri: "https://lotaru.fookiecloud.com/callback",
   },
   "task-bridge": {
     clientId: "task-bridge",
