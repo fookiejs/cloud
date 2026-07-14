@@ -8,25 +8,26 @@
   <meta name="color-scheme" content="dark" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Syne:wght@600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
   <div class="shell">
     <header class="top" id="top">
-      <a class="logo" href="/">Fookie<span>Cloud</span></a>
+      <a class="mark" href="/">Fookie<span>Cloud</span></a>
       <div class="top-right" id="auth-slot">
         <button class="btn-ghost" type="button" data-signin>Sign in</button>
       </div>
     </header>
 
     <main class="page">
-      <div class="hero">
-        <h1 class="hero-brand">Fookie<span>Cloud</span></h1>
-        <p class="hero-line">One account for Lotaru and Task Bridge.</p>
+      <div class="page-head">
+        <h1>Apps</h1>
+        <p>Open Lotaru or Task Bridge with the same account.</p>
       </div>
       <section class="apps" id="apps" aria-label="Applications">
         <button class="app" type="button" data-app="lotaru">
+          <span class="app-mark" aria-hidden="true">L</span>
           <span class="app-text">
             <strong>Lotaru</strong>
             <span>Local agent for Cursor</span>
@@ -34,6 +35,7 @@
           <span class="app-go" aria-hidden="true">Open</span>
         </button>
         <button class="app" type="button" data-app="task-bridge">
+          <span class="app-mark app-mark-tb" aria-hidden="true">T</span>
           <span class="app-text">
             <strong>Task Bridge</strong>
             <span>Epics and task board</span>
@@ -42,10 +44,6 @@
         </button>
       </section>
     </main>
-
-    <footer class="foot">
-      <span>Fookie Cloud</span>
-    </footer>
   </div>
 
   <script src="/main.js"></script>
