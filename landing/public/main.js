@@ -7,14 +7,8 @@ const USER_KEY = "fookie_user";
 const PENDING_APP_KEY = "fookie_pending_app";
 
 const APPS = {
-  lotaru: {
-    clientId: "lotaru",
-    redirectUri: "https://lotaru.fookiecloud.com/callback",
-  },
-  "task-bridge": {
-    clientId: "task-bridge",
-    redirectUri: "https://task-bridge.fookiecloud.com/callback",
-  },
+  lotaru: "https://lotaru.fookiecloud.com",
+  "task-bridge": "https://task-bridge.fookiecloud.com",
 };
 
 const sheet = document.getElementById("signin-sheet");
@@ -27,16 +21,6 @@ function loginUrl() {
   const q = new URLSearchParams({
     client_id: CLIENT_ID,
     redirect_uri: REDIRECT_URI,
-    state,
-  });
-  return `${AUTH}/v1/login?${q.toString()}`;
-}
-
-function appAuthUrl(app) {
-  const state = crypto.randomUUID();
-  const q = new URLSearchParams({
-    client_id: app.clientId,
-    redirect_uri: app.redirectUri,
     state,
   });
   return `${AUTH}/v1/login?${q.toString()}`;
@@ -78,9 +62,9 @@ function isAuthed() {
 }
 
 function goToApp(appKey) {
-  const app = APPS[appKey];
-  if (!app) return;
-  location.href = appAuthUrl(app);
+  const url = APPS[appKey];
+  if (!url) return;
+  location.href = url;
 }
 
 function requestApp(appKey) {
