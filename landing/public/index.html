@@ -16,29 +16,36 @@
     <header class="top" id="top">
       <a class="logo" href="/">Fookie<span>Cloud</span></a>
       <div class="top-right" id="auth-slot">
-        <button class="btn-solid" type="button" data-signin>Sign in</button>
+        <button class="btn-ghost" type="button" data-signin>Sign in</button>
       </div>
     </header>
 
     <main class="page">
-      <div class="page-head">
-        <p class="page-kicker">Apps</p>
-        <h1>Your workspace</h1>
-        <p>Open an app with the same Fookie account.</p>
+      <div class="hero">
+        <h1 class="hero-brand">Fookie<span>Cloud</span></h1>
+        <p class="hero-line">One account for Lotaru and Task Bridge.</p>
       </div>
-      <section class="apps" id="apps">
+      <section class="apps" id="apps" aria-label="Applications">
         <button class="app" type="button" data-app="lotaru">
-          <strong>Lotaru</strong>
-          <span>Local task runner</span>
+          <span class="app-text">
+            <strong>Lotaru</strong>
+            <span>Local agent for Cursor</span>
+          </span>
+          <span class="app-go" aria-hidden="true">Open</span>
         </button>
         <button class="app" type="button" data-app="task-bridge">
-          <strong>Task Bridge</strong>
-          <span>Epic / task board</span>
+          <span class="app-text">
+            <strong>Task Bridge</strong>
+            <span>Epics and task board</span>
+          </span>
+          <span class="app-go" aria-hidden="true">Open</span>
         </button>
       </section>
     </main>
 
-    <footer class="foot">Fookie Cloud</footer>
+    <footer class="foot">
+      <span>Fookie Cloud</span>
+    </footer>
   </div>
 
   <script src="/main.js"></script>

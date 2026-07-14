@@ -17,6 +17,13 @@
   --font: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Syne", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --cloud-grad: linear-gradient(
+    105deg,
+    #fb7185 0%,
+    #fb923c 32%,
+    #fbbf24 58%,
+    #38bdf8 100%
+  );
 }
 
 * { box-sizing: border-box; }
@@ -25,11 +32,11 @@ html { scroll-behavior: smooth; color-scheme: dark; }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100dvh;
   color: var(--ink);
   background:
-    radial-gradient(900px 480px at 85% -10%, rgba(52, 211, 153, 0.08), transparent 55%),
-    radial-gradient(700px 420px at -5% 30%, rgba(96, 165, 250, 0.05), transparent 50%),
+    radial-gradient(900px 480px at 85% -10%, rgba(52, 211, 153, 0.07), transparent 55%),
+    radial-gradient(700px 420px at -5% 30%, rgba(96, 165, 250, 0.045), transparent 50%),
     var(--bg);
   font-family: var(--font);
   line-height: 1.5;
@@ -52,8 +59,11 @@ input {
 }
 
 .shell {
-  width: min(100% - 2rem, 56rem);
+  width: min(100% - 2rem, 40rem);
   margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
 .top {
@@ -64,7 +74,9 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 0;
+  height: 2.75rem;
+  margin: 0 -0.15rem;
+  padding: 0 0.15rem;
   border-bottom: 1px solid transparent;
   background: color-mix(in srgb, var(--bg) 82%, transparent);
   backdrop-filter: blur(14px);
@@ -77,18 +89,13 @@ input {
 .logo {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 0.92rem;
   letter-spacing: -0.04em;
 }
 
-.logo span {
-  background-image: linear-gradient(
-    105deg,
-    #fb7185 0%,
-    #fb923c 32%,
-    #fbbf24 58%,
-    #38bdf8 100%
-  );
+.logo span,
+.hero-brand span {
+  background-image: var(--cloud-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -97,15 +104,15 @@ input {
 .top-right {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.35rem;
 }
 
 .btn-ghost {
-  padding: 0.5rem 0.8rem;
-  border-radius: 0.55rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.45rem;
   color: var(--muted);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
@@ -119,13 +126,13 @@ input {
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.95rem;
-  border-radius: 0.55rem;
+  min-height: 2.2rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
   background: var(--ink);
   color: #09090b;
   font-weight: 700;
-  font-size: 0.9rem;
+  font-size: 0.84rem;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -137,14 +144,14 @@ input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.35rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 0.55rem;
+  min-height: 2.2rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.5rem;
   border: 1px solid var(--line);
   background: transparent;
   color: var(--ink);
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
@@ -156,65 +163,62 @@ input {
 .btn-danger {
   color: var(--danger);
   font-weight: 600;
-  font-size: 0.84rem;
-  padding: 0.4rem 0.65rem;
-  border-radius: 0.45rem;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.4rem;
 }
 
 .btn-danger:hover { background: var(--danger-dim); }
 
 .user-menu { position: relative; }
 
-.user-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.22rem 0.55rem 0.22rem 0.22rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.user-chip:hover {
-  border-color: #3f3f46;
-  background: var(--surface-hover);
-}
-
-.user-chip img {
-  width: 28px;
-  height: 28px;
+.user-avatar-btn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   border-radius: 50%;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.user-avatar-btn:hover {
+  border-color: #3f3f46;
+}
+
+.user-avatar-btn:focus-visible {
+  outline: 2px solid #52525b;
+  outline-offset: 2px;
+}
+
+.user-avatar-btn img,
+.user-avatar-btn .avatar-fallback {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  background: var(--line);
+  border-radius: 50%;
 }
 
-.user-chip .meta {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-  padding-right: 0.25rem;
-  text-align: left;
-}
-
-.user-chip .name {
-  font-size: 0.82rem;
-  font-weight: 650;
-}
-
-.user-chip .mail {
-  font-size: 0.7rem;
-  color: var(--faint);
+.avatar-fallback {
+  display: grid;
+  place-items: center;
+  background: var(--surface-hover);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .user-menu-panel {
   position: absolute;
   right: 0;
-  top: calc(100% + 0.4rem);
-  min-width: 11.5rem;
-  padding: 0.3rem;
+  top: calc(100% + 0.45rem);
+  min-width: 13.5rem;
+  padding: 0.35rem;
   border: 1px solid var(--line);
-  border-radius: 0.7rem;
+  border-radius: 0.65rem;
   background: var(--surface);
   box-shadow: var(--shadow);
   display: none;
@@ -222,13 +226,36 @@ input {
 
 .user-menu.open .user-menu-panel { display: grid; }
 
+.user-menu-who {
+  padding: 0.55rem 0.65rem 0.65rem;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 0.2rem;
+}
+
+.user-menu-who .name {
+  display: block;
+  font-size: 0.84rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.user-menu-who .mail {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  color: var(--faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .user-menu-panel a,
 .user-menu-panel button {
   text-align: left;
-  padding: 0.6rem 0.7rem;
-  border-radius: 0.45rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.4rem;
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   color: var(--muted);
 }
 
@@ -238,84 +265,132 @@ input {
   color: var(--ink);
 }
 
-.page {
-  padding: 2.5rem 0 4rem;
+.user-menu-panel .sign-out {
+  color: var(--danger);
 }
 
-.page-head {
-  margin-bottom: 1.75rem;
+.user-menu-panel .sign-out:hover {
+  background: var(--danger-dim);
+  color: var(--danger);
+}
+
+.page {
+  flex: 1;
+  padding: 2.75rem 0 2rem;
+}
+
+.hero {
+  margin-bottom: 2.25rem;
   opacity: 0;
   transform: translateY(10px);
   animation: rise 0.55s ease 0.05s forwards;
 }
 
-.page-kicker {
-  margin: 0 0 0.45rem;
-  color: var(--accent);
-  font-size: 0.75rem;
+.hero-brand {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: clamp(2.1rem, 6vw, 2.85rem);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
+.hero-line {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  max-width: 22rem;
+}
+
+.page-head {
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: rise 0.55s ease 0.05s forwards;
 }
 
 .page-head h1 {
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.35rem;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-size: clamp(1.55rem, 3.5vw, 1.9rem);
   font-weight: 700;
-  letter-spacing: -0.045em;
-  line-height: 1.1;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
 }
 
 .page-head p {
   margin: 0;
   color: var(--muted);
   max-width: 32rem;
-  font-size: 0.98rem;
+  font-size: 0.92rem;
 }
 
 .apps {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 0.5rem;
   opacity: 0;
   transform: translateY(10px);
-  animation: rise 0.55s ease 0.16s forwards;
+  animation: rise 0.55s ease 0.14s forwards;
 }
 
 .app {
-  display: grid;
-  gap: 0.35rem;
-  padding: 1.15rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.05rem;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: transparent;
   text-align: left;
-  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.18s ease, background 0.18s ease;
 }
 
 .app:hover {
   border-color: #3f3f46;
-  background: var(--surface-hover);
-  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.app:focus-visible {
+  outline: 2px solid #52525b;
+  outline-offset: 2px;
+}
+
+.app-text {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
 }
 
 .app strong {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   letter-spacing: -0.03em;
 }
 
-.app span {
+.app-text > span {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.86rem;
+}
+
+.app-go {
+  flex-shrink: 0;
+  color: var(--faint);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.app:hover .app-go {
+  color: var(--ink);
 }
 
 .profile-card,
 .panel {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: transparent;
   opacity: 0;
   transform: translateY(10px);
   animation: rise 0.55s ease 0.14s forwards;
@@ -324,50 +399,52 @@ input {
 .profile-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.1rem 1.15rem;
-  margin-bottom: 1rem;
+  gap: 0.9rem;
+  padding: 1rem 1.05rem;
+  margin-bottom: 0.75rem;
 }
 
-.profile-card img {
-  width: 52px;
-  height: 52px;
+.profile-card img,
+.profile-card .avatar-fallback {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   background: var(--line);
+  flex-shrink: 0;
 }
 
 .profile-card .who {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.1rem;
   min-width: 0;
 }
 
 .profile-card .who strong {
-  font-size: 1.05rem;
+  font-size: 1rem;
   letter-spacing: -0.02em;
 }
 
 .profile-card .who span {
   color: var(--muted);
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.panel { padding: 1.1rem 1.15rem 1.2rem; }
+.panel { padding: 1.05rem 1.05rem 1.15rem; }
 
 .panel-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
 }
 
 .panel-head h2 {
-  margin: 0 0 0.2rem;
-  font-size: 1rem;
+  margin: 0 0 0.15rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -375,7 +452,7 @@ input {
 .panel-head p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .keys-list {
@@ -383,7 +460,7 @@ input {
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .key-row {
@@ -391,9 +468,9 @@ input {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.85rem 0.9rem;
+  padding: 0.75rem 0.8rem;
   border: 1px solid var(--line-soft);
-  border-radius: 0.6rem;
+  border-radius: 0.55rem;
   background: var(--bg-elevated);
 }
 
@@ -401,31 +478,32 @@ input {
 
 .key-row .meta {
   display: grid;
-  gap: 0.15rem;
+  gap: 0.12rem;
   min-width: 0;
 }
 
 .key-row .meta strong {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
 
 .key-row .meta span {
   color: var(--faint);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-family: var(--font-mono);
 }
 
 .keys-empty {
   color: var(--muted);
-  font-size: 0.9rem;
-  padding: 0.6rem 0.15rem;
+  font-size: 0.86rem;
+  padding: 0.5rem 0.1rem;
 }
 
 .foot {
+  margin-top: auto;
   border-top: 1px solid var(--line-soft);
-  padding: 1.2rem 0 1.8rem;
+  padding: 1rem 0 1.35rem;
   color: var(--faint);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
 }
 
 .sheet[hidden] { display: none; }
@@ -448,10 +526,10 @@ input {
 
 .sheet-card {
   position: relative;
-  width: min(100%, 400px);
-  padding: 1.45rem 1.3rem 1.3rem;
+  width: min(100%, 380px);
+  padding: 1.35rem 1.25rem 1.25rem;
   border: 1px solid var(--line);
-  border-radius: 1rem;
+  border-radius: 0.9rem;
   background: var(--surface);
   box-shadow: var(--shadow);
   animation: pop 0.22s ease;
@@ -459,11 +537,11 @@ input {
 
 .sheet-x {
   position: absolute;
-  top: 0.65rem;
-  right: 0.75rem;
+  top: 0.55rem;
+  right: 0.65rem;
   width: 2rem;
   height: 2rem;
-  border-radius: 0.45rem;
+  border-radius: 0.4rem;
   color: var(--muted);
   font-size: 1.35rem;
   line-height: 1;
@@ -474,26 +552,17 @@ input {
   color: var(--ink);
 }
 
-.sheet-kicker {
-  margin: 0 0 0.4rem;
-  color: var(--accent);
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
 .sheet-card h2 {
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   letter-spacing: -0.04em;
 }
 
 .sheet-copy {
   margin: 0 0 1rem;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .google-btn {
@@ -502,10 +571,10 @@ input {
   justify-content: center;
   gap: 0.65rem;
   width: 100%;
-  min-height: 2.85rem;
-  margin-top: 1rem;
+  min-height: 2.7rem;
+  margin-top: 0.25rem;
   border: 1px solid var(--line);
-  border-radius: 0.6rem;
+  border-radius: 0.55rem;
   background: var(--bg-elevated);
   font-weight: 700;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -523,15 +592,15 @@ input {
 }
 
 .field span {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--muted);
 }
 
 .field input {
-  padding: 0.7rem 0.8rem;
+  padding: 0.65rem 0.75rem;
   border: 1px solid var(--line);
-  border-radius: 0.55rem;
+  border-radius: 0.5rem;
   background: var(--bg);
   outline: none;
 }
@@ -550,12 +619,12 @@ input {
 .key-box code {
   flex: 1;
   min-width: 0;
-  padding: 0.7rem 0.75rem;
+  padding: 0.65rem 0.7rem;
   border: 1px solid var(--line);
-  border-radius: 0.55rem;
+  border-radius: 0.5rem;
   background: var(--bg);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   word-break: break-all;
   max-height: 7.5rem;
   overflow: auto;
@@ -573,7 +642,7 @@ input {
 .callback-wrap h1 {
   margin: 0 0 0.4rem;
   font-family: var(--font-display);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   letter-spacing: -0.04em;
 }
 
@@ -601,8 +670,6 @@ input {
 }
 
 @media (max-width: 640px) {
-  .apps { grid-template-columns: 1fr; }
-  .user-chip .mail { display: none; }
   .panel-head {
     flex-direction: column;
     align-items: stretch;

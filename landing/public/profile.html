@@ -19,9 +19,8 @@
 
     <main class="page">
       <div class="page-head">
-        <p class="page-kicker">Account</p>
         <h1>Profile</h1>
-        <p>Manage your Fookie account and developer API keys.</p>
+        <p>Account and API keys for Lotaru, Task Bridge, and MCP.</p>
       </div>
 
       <div class="profile-card" id="profile-card"></div>
@@ -30,7 +29,7 @@
         <div class="panel-head">
           <div>
             <h2>API keys</h2>
-            <p>Long-lived Bearer tokens for Lotaru, Task Bridge, and MCP.</p>
+            <p>Long-lived Bearer tokens for agents and integrations.</p>
           </div>
           <button class="btn-solid" type="button" id="create-key">Create key</button>
         </div>
@@ -38,14 +37,15 @@
       </section>
     </main>
 
-    <footer class="foot">Fookie Cloud</footer>
+    <footer class="foot">
+      <span>Fookie Cloud</span>
+    </footer>
   </div>
 
   <div class="sheet" id="signin-sheet" hidden>
     <button class="sheet-backdrop" type="button" data-close-signin aria-label="Close"></button>
     <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="signin-title">
       <button class="sheet-x" type="button" data-close-signin aria-label="Close">×</button>
-      <p class="sheet-kicker">Fookie Cloud</p>
       <h2 id="signin-title">Sign in</h2>
       <p class="sheet-copy">Continue with Google to open your profile.</p>
       <a class="google-btn" id="google-login" href="#">
@@ -64,7 +64,6 @@
     <button class="sheet-backdrop" type="button" data-close-key aria-label="Close"></button>
     <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="key-title">
       <button class="sheet-x" type="button" data-close-key aria-label="Close">×</button>
-      <p class="sheet-kicker">Developer</p>
       <h2 id="key-title">New API key</h2>
       <div id="key-form">
         <label class="field">

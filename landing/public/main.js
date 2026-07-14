@@ -218,18 +218,19 @@ function renderProfileCard(user) {
 
 function renderAuthed(user) {
   if (!authSlot) return;
+  const label = escapeHtml(user.name || user.email || "Account");
   authSlot.innerHTML = `
     <div class="user-menu" id="user-menu">
-      <button class="user-chip" type="button" id="user-chip" aria-haspopup="true" aria-expanded="false">
-        ${avatarMarkup(user, 28)}
-        <span class="meta">
-          <span class="name">${escapeHtml(user.name || "Signed in")}</span>
-          <span class="mail">${escapeHtml(user.email || "")}</span>
-        </span>
+      <button class="user-avatar-btn" type="button" id="user-chip" aria-label="${label}" aria-haspopup="true" aria-expanded="false">
+        ${avatarMarkup(user, 32)}
       </button>
       <div class="user-menu-panel" role="menu">
-        <a href="/profile">Profile</a>
-        <button type="button" id="sign-out">Sign out</button>
+        <div class="user-menu-who">
+          <span class="name">${escapeHtml(user.name || "Signed in")}</span>
+          <span class="mail">${escapeHtml(user.email || "")}</span>
+        </div>
+        <a href="/profile" role="menuitem">Profile</a>
+        <button type="button" class="sign-out" id="sign-out" role="menuitem">Sign out</button>
       </div>
     </div>
   `;
@@ -257,7 +258,7 @@ function renderAuthed(user) {
 function renderGuest() {
   if (!authSlot) return;
   authSlot.innerHTML = `
-    <button class="btn-solid" type="button" data-signin>Sign in</button>
+    <button class="btn-ghost" type="button" data-signin>Sign in</button>
   `;
   bindOpeners();
 
