@@ -29,10 +29,11 @@ const PlatformClientID = "fookie"
 const TokenUseAPIKey = "api_key"
 
 type AccessClaims struct {
-	Email    string `json:"email"`
-	Name     string `json:"name"`
-	ClientID string `json:"client_id"`
-	TokenUse string `json:"token_use,omitempty"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified,omitempty"`
+	Name          string `json:"name"`
+	ClientID      string `json:"client_id"`
+	TokenUse      string `json:"token_use,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -108,6 +109,27 @@ func (m *Manager) IssueAccessToken(userID, email, name, clientID string) (string
 		return "", time.Time{}, err
 	}
 	return signed, exp, nil
+}
+
+func (m *Manager) IssueIDToken(userID, email, name, clientID string) (string, error) {
+	now := time.Now().UTC()
+	claims := AccessClaims{
+		Email:         email,
+		EmailVerified: true,
+		Name:          name,
+		ClientID:      clientID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    m.issuer,
+			Subject:   userID,
+			Audience:  []string{clientID},
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(m.accessTTL)),
+			ID:        uuid.NewString(),
+		},
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t.Header["kid"] = m.keyID
+	return t.SignedString(m.privateKey)
 }
 
 func (m *Manager) IssueAPIKeyToken(userID, email, name, jti string, ttl time.Duration) (string, time.Time, error) {

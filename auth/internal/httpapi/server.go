@@ -366,6 +366,11 @@ func (s *Server) issuePair(ctx context.Context, user *domain.User, clientID stri
 		return nil, err
 	}
 
+	idToken, err := s.tokens.IssueIDToken(user.ID, user.Email, user.Name, clientID)
+	if err != nil {
+		return nil, err
+	}
+
 	rawRefresh, err := token.RandomURLToken(48)
 	if err != nil {
 		return nil, err
@@ -385,6 +390,7 @@ func (s *Server) issuePair(ctx context.Context, user *domain.User, clientID stri
 
 	return map[string]any{
 		"access_token":  access,
+		"id_token":      idToken,
 		"refresh_token": rawRefresh,
 		"token_type":    "Bearer",
 		"expires_in":    s.tokens.AccessTTLSeconds(),
@@ -412,13 +418,14 @@ func (s *Server) handleUserInfo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"sub":        user.ID,
-		"email":      user.Email,
-		"name":       user.Name,
-		"picture":    user.AvatarURL,
-		"client_id":  claims.ClientID,
-		"token_use":  claims.TokenUse,
-		"created_at": user.CreatedAt.UTC().Format(time.RFC3339),
+		"sub":            user.ID,
+		"email":          user.Email,
+		"email_verified": true,
+		"name":           user.Name,
+		"picture":        user.AvatarURL,
+		"client_id":      claims.ClientID,
+		"token_use":      claims.TokenUse,
+		"created_at":     user.CreatedAt.UTC().Format(time.RFC3339),
 	})
 }
 
