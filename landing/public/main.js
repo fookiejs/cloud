@@ -144,13 +144,8 @@ async function requestApp(appKey) {
   if (!APPS[appKey]) return;
   const token = localStorage.getItem(ACCESS_KEY);
   if (token) {
-    try {
-      await fetchUser(token);
-      goToApp(appKey);
-      return;
-    } catch {
-      clearSession();
-    }
+    goToApp(appKey);
+    return;
   }
   sessionStorage.setItem(PENDING_APP_KEY, appKey);
   await startSignIn();

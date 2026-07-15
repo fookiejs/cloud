@@ -51,7 +51,7 @@
         </header>
 
         <section class="apps" id="apps" aria-label="Applications">
-          <article class="app-card">
+          <button class="app-card" type="button" data-app="script-manager">
             <div class="app-card-body">
               <div class="app-card-title">
                 <h2>Script Manager</h2>
@@ -59,25 +59,19 @@
               </div>
               <p>Runs remote calls, scheduled jobs, and on-save shell scripts on your machine — organised per project.</p>
             </div>
-            <div class="app-card-foot">
-              <button class="btn-open" type="button" data-app="script-manager">Open <span aria-hidden="true">→</span></button>
-            </div>
-          </article>
+          </button>
 
-          <article class="app-card">
+          <button class="app-card" type="button" data-app="task-bridge">
             <div class="app-card-body">
               <div class="app-card-title">
                 <h2>Task Bridge</h2>
-                <span class="pill">MCP</span>
+                <span class="pill">Board</span>
               </div>
               <p>Epics and task board — a lightweight Jira alternative for planning and tracking work.</p>
             </div>
-            <div class="app-card-foot">
-              <button class="btn-open" type="button" data-app="task-bridge">Open <span aria-hidden="true">→</span></button>
-            </div>
-          </article>
+          </button>
 
-          <article class="app-card">
+          <button class="app-card" type="button" data-app="notes">
             <div class="app-card-body">
               <div class="app-card-title">
                 <h2>Notes</h2>
@@ -85,12 +79,9 @@
               </div>
               <p>Short plain-text briefings — what happened, mark seen when you read them.</p>
             </div>
-            <div class="app-card-foot">
-              <button class="btn-open" type="button" data-app="notes">Open <span aria-hidden="true">→</span></button>
-            </div>
-          </article>
+          </button>
 
-          <article class="app-card" data-admin-app hidden>
+          <a class="app-card" href="https://grafana.fookiecloud.com" data-admin-app hidden>
             <div class="app-card-body">
               <div class="app-card-title">
                 <h2>Grafana</h2>
@@ -98,10 +89,7 @@
               </div>
               <p>Metrics, logs, and dashboards for Fookie Cloud infrastructure.</p>
             </div>
-            <div class="app-card-foot">
-              <a class="btn-open" href="https://grafana.fookiecloud.com">Open <span aria-hidden="true">→</span></a>
-            </div>
-          </article>
+          </a>
         </section>
       </main>
     </div>

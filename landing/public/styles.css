@@ -272,10 +272,20 @@ input {
 .app-card {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  text-align: left;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: color-mix(in srgb, var(--card) 50%, transparent);
   transition: border-color 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  padding: 0;
+}
+
+a.app-card {
+  text-decoration: none;
 }
 
 .app-card:hover {
@@ -283,8 +293,13 @@ input {
   background: var(--card);
 }
 
+.app-card:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  outline-offset: 2px;
+}
+
 .app-card-body {
-  padding: 1.15rem 1.15rem 0.85rem;
+  padding: 1.15rem;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -322,25 +337,6 @@ input {
   font-weight: 500;
   color: var(--muted);
 }
-
-.app-card-foot {
-  padding: 0 1.15rem 1.15rem;
-}
-
-.btn-open {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  height: 2rem;
-  padding: 0 0.85rem;
-  border-radius: 0.5rem;
-  background: var(--ink);
-  color: #18181b;
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-
-.btn-open:hover { opacity: 0.92; }
 
 .btn-ghost {
   padding: 0.35rem 0.65rem;
