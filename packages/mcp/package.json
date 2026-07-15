@@ -1,13 +1,19 @@
 {
   "name": "@umudik/fookie-cloud-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "Unified Fookie Cloud MCP — Notes, Task Bridge, Lotaru",
   "type": "module",
   "license": "MIT",
   "bin": {
-    "fookie-cloud-mcp": "./dist/index.js"
+    "fookie-cloud-mcp": "dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fookiejs/cloud.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://fookiecloud.com",
   "files": [
     "dist/**/*.js",
     "README.md"
