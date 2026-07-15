@@ -8,7 +8,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number(process.env.PORT || 3000);
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "..", "data");
 const STORE_PATH = path.join(DATA_DIR, "notes.json");
-const AUTH_ISSUER = (process.env.FOOKIE_AUTH_ISSUER || "https://auth.fookiecloud.com").replace(/\/$/, "");
+const AUTH_ISSUER = (process.env.FOOKIE_AUTH_ISSUER || "https://auth.fookiecloud.com").replace(
+  /\/$/,
+  "",
+);
 const INTROSPECT_SECRET = process.env.FOOKIE_INTROSPECT_SECRET || "";
 const WRITE_KEY = process.env.NOTES_WRITE_KEY || "";
 const ADMIN_EMAILS = String(process.env.FOOKIE_ADMIN_EMAILS || "")
@@ -21,7 +24,7 @@ if (!fs.existsSync(STORE_PATH)) {
   fs.writeFileSync(STORE_PATH, "[]\n", "utf8");
 }
 
-const introspectCache = new Map();
+const authCache = new Map();
 
 function readStore() {
   try {
@@ -72,10 +75,29 @@ function bearer(req) {
   return h.slice(7).trim();
 }
 
-async function introspect(token) {
-  if (!INTROSPECT_SECRET) return null;
-  const cached = introspectCache.get(token);
+async function resolveUser(token) {
+  const cached = authCache.get(token);
   if (cached && cached.expiresAt > Date.now()) return cached.value;
+
+  try {
+    const res = await fetch(`${AUTH_ISSUER}/v1/userinfo`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const email = String(data?.email || "").toLowerCase();
+      const value = email ? { email, sub: data?.sub || null } : null;
+      authCache.set(token, { value, expiresAt: Date.now() + 60_000 });
+      return value;
+    }
+  } catch {
+  }
+
+  if (!INTROSPECT_SECRET) {
+    authCache.set(token, { value: null, expiresAt: Date.now() + 15_000 });
+    return null;
+  }
+
   try {
     const res = await fetch(`${AUTH_ISSUER}/v1/introspect`, {
       method: "POST",
@@ -87,33 +109,33 @@ async function introspect(token) {
       body: JSON.stringify({ token }),
     });
     if (!res.ok) {
-      introspectCache.set(token, { value: null, expiresAt: Date.now() + 15_000 });
+      authCache.set(token, { value: null, expiresAt: Date.now() + 15_000 });
       return null;
     }
     const data = await res.json();
     const active = Boolean(data?.active);
     const email = String(data?.email || data?.username || "").toLowerCase();
-    const value = active ? { email, sub: data?.sub || null } : null;
-    introspectCache.set(token, { value, expiresAt: Date.now() + 60_000 });
+    const value = active && email ? { email, sub: data?.sub || null } : null;
+    authCache.set(token, { value, expiresAt: Date.now() + 60_000 });
     return value;
   } catch {
-    introspectCache.set(token, { value: null, expiresAt: Date.now() + 15_000 });
+    authCache.set(token, { value: null, expiresAt: Date.now() + 15_000 });
     return null;
   }
 }
 
-async function authorize(req, { write = false } = {}) {
+async function authorize(req) {
   const token = bearer(req);
   if (!token) return null;
   if (WRITE_KEY && token === WRITE_KEY) {
     return { email: "ops-metrics", role: "write" };
   }
-  const user = await introspect(token);
+  const user = await resolveUser(token);
   if (!user) return null;
   if (ADMIN_EMAILS.length > 0 && !ADMIN_EMAILS.includes(user.email)) {
     return null;
   }
-  return { ...user, role: write ? "write" : "read" };
+  return { ...user, role: "read" };
 }
 
 function publicDir() {
@@ -125,6 +147,7 @@ function contentType(filePath) {
   if (filePath.endsWith(".js")) return "text/javascript; charset=utf-8";
   if (filePath.endsWith(".css")) return "text/css; charset=utf-8";
   if (filePath.endsWith(".svg")) return "image/svg+xml";
+  if (filePath.endsWith(".ico")) return "image/x-icon";
   return "application/octet-stream";
 }
 
@@ -135,12 +158,16 @@ function serveStatic(req, res, urlPath) {
     res.writeHead(400).end();
     return;
   }
-  const filePath = path.join(publicDir(), rel);
-  if (!filePath.startsWith(publicDir())) {
+  const root = publicDir();
+  let filePath = path.join(root, rel);
+  if (!filePath.startsWith(root)) {
     res.writeHead(400).end();
     return;
   }
   if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+    filePath = path.join(root, "index.html");
+  }
+  if (!fs.existsSync(filePath)) {
     res.writeHead(404).end("not found");
     return;
   }
@@ -192,7 +219,7 @@ async function handleApi(req, res, url) {
   }
 
   if (url.pathname === "/api/notes" && req.method === "POST") {
-    const auth = await authorize(req, { write: true });
+    const auth = await authorize(req);
     if (!auth) {
       json(res, 401, { error: "unauthorized" });
       return;

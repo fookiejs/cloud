@@ -12,6 +12,7 @@ const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
 const APPS = {
   lotaru: "https://lotaru.fookiecloud.com",
   "task-bridge": "https://task-bridge.fookiecloud.com",
+  notes: "https://notes.fookiecloud.com",
 };
 
 const isProfile = document.body?.dataset?.page === "profile";
@@ -23,27 +24,16 @@ const keysList = document.getElementById("keys-list");
 const profileCard = document.getElementById("profile-card");
 const mcpSnippets = document.getElementById("mcp-snippets");
 
-const LOTARU_MCP = `{
+const FOOKIE_CLOUD_MCP = `{
   "mcpServers": {
-    "lotaru": {
+    "fookie-cloud": {
       "command": "npx",
-      "args": ["-y", "@umudik/lotaru-mcp"],
+      "args": ["-y", "@umudik/fookie-cloud-mcp"],
       "env": {
-        "LOTARU_API_URL": "https://lotaru.fookiecloud.com",
-        "FOOKIE_API_KEY": "<paste-key>"
-      }
-    }
-  }
-}`;
-
-const TASK_BRIDGE_MCP = `{
-  "mcpServers": {
-    "task-bridge": {
-      "command": "npx",
-      "args": ["-y", "@umudik/task-bridge-mcp"],
-      "env": {
+        "FOOKIE_API_KEY": "<paste-key>",
+        "NOTES_URL": "https://notes.fookiecloud.com",
         "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
-        "FOOKIE_API_KEY": "<paste-key>"
+        "LOTARU_API_URL": "https://lotaru.fookiecloud.com"
       }
     }
   }
@@ -264,25 +254,16 @@ function renderMcpSnippets() {
   mcpSnippets.innerHTML = `
     <div class="mcp-snippet-block">
       <div class="mcp-snippet-head">
-        <strong>Lotaru</strong>
-        <button class="btn-outline btn-sm" type="button" data-copy-mcp="lotaru">Copy</button>
+        <strong>Fookie Cloud</strong>
+        <button class="btn-outline btn-sm" type="button" data-copy-mcp="fookie-cloud">Copy</button>
       </div>
-      <pre class="mcp-snippet-pre">${escapeHtml(LOTARU_MCP)}</pre>
-    </div>
-    <div class="mcp-snippet-block">
-      <div class="mcp-snippet-head">
-        <strong>Task Bridge</strong>
-        <button class="btn-outline btn-sm" type="button" data-copy-mcp="task-bridge">Copy</button>
-      </div>
-      <pre class="mcp-snippet-pre">${escapeHtml(TASK_BRIDGE_MCP)}</pre>
+      <pre class="mcp-snippet-pre">${escapeHtml(FOOKIE_CLOUD_MCP)}</pre>
     </div>
   `;
   mcpSnippets.querySelectorAll("[data-copy-mcp]").forEach((btn) => {
     btn.addEventListener("click", async () => {
-      const which = btn.getAttribute("data-copy-mcp");
-      const text = which === "task-bridge" ? TASK_BRIDGE_MCP : LOTARU_MCP;
       try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(FOOKIE_CLOUD_MCP);
         btn.textContent = "Copied";
         setTimeout(() => {
           btn.textContent = "Copy";

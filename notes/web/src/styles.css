@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 8% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 232 60% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 5% 14%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 16%;
+    --input: 240 5% 16%;
+    --ring: 232 60% 60%;
+    --success: 142 60% 50%;
+    --warn: 38 90% 60%;
+    --radius: 0.75rem;
+  }
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: Geist, ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+  }
+}
+
+.fookie-cloud-mark {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.fookie-cloud-mark:hover {
+  opacity: 0.9;
+}
+
+.fookie-cloud-mark--sm {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.fookie-cloud-mark--sm:hover {
+  color: hsl(var(--foreground));
+}
+
+.fookie-cloud-word {
+  background-image: linear-gradient(90deg, #ec4899, #a855f7, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
