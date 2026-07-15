@@ -6,6 +6,7 @@ COPY packages/landing/package.json packages/landing/
 COPY packages/server/package.json packages/server/
 COPY packages/web/package.json packages/web/
 COPY packages/cli/package.json packages/cli/
+COPY packages/mcp/package.json packages/mcp/
 RUN npm ci
 COPY . .
 RUN npm --workspace @lotaru/web run build
