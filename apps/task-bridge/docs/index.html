@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Task Bridge API</title>
+  <meta name="description" content="Task Bridge REST API reference — epics, workflow, inbox, worker queue." />
+  <link rel="stylesheet" href="api.css" />
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <svg class="logo-badge" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+        </div>
+        <div>
+          <h1>Task Bridge</h1>
+          <p>API Reference v1</p>
+        </div>
+      </div>
+      <input type="search" id="search" class="search" placeholder="Search endpoints…" autocomplete="off" />
+      <nav class="flex-1 overflow-y-auto">
+        <div class="nav-group">
+          <div class="nav-label">Getting started</div>
+          <a class="nav-link" href="#overview">Overview</a>
+          <a class="nav-link" href="#auth">Authentication</a>
+          <a class="nav-link" href="#errors">Errors</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">System</div>
+          <a class="nav-link" href="#health">Health</a>
+          <a class="nav-link" href="#connect">Connect</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Resources</div>
+          <a class="nav-link" href="#projects">Projects</a>
+          <a class="nav-link" href="#epics-tasks">Epics &amp; Tasks</a>
+          <a class="nav-link" href="#inbox">Inbox</a>
+          <a class="nav-link" href="#workflow">Workflow</a>
+          <a class="nav-link" href="#templates">Workflow templates</a>
+          <a class="nav-link" href="#worker">Worker</a>
+          <a class="nav-link" href="#libraries">Libraries</a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-label">Types</div>
+          <a class="nav-link" href="#schemas">Response types</a>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="max-w-docs">
+      <header class="hero" id="overview">
+        <h2>Task Bridge API</h2>
+        <p>
+          Single backend for the mobile app, web UI, and automation agents.
+          Create epics, manage workflow stages, post comments, run the worker queue, and link library documents through this API.
+        </p>
+        <div class="badges">
+          <span class="badge">Base URL: <code>http://localhost:3000</code></span>
+          <span class="badge">Format: JSON</span>
+          <span class="badge">Auth: <code>X-Api-Key</code></span>
+        </div>
+      </header>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <h3>Default port</h3>
+          <p><code>3000</code> — override with <code>TASK_BRIDGE_PORT</code></p>
+        </div>
+        <div class="info-box">
+          <h3>API key</h3>
+          <p><code>BACKEND_API_KEY</code> — sent on every protected request</p>
+        </div>
+        <div class="info-box">
+          <h3>Public endpoints</h3>
+          <p><code>GET /health</code> and <code>GET /connect.json</code> require no auth</p>
+        </div>
+      </div>
+
+      <section id="auth">
+        <h2>Authentication</h2>
+        <p class="section-desc">
+          All protected routes expect an <code>X-Api-Key</code> header. The value must match the server <code>BACKEND_API_KEY</code>.
+          Missing or invalid keys return <code>401 Unauthorized</code>.
+        </p>
+        <div class="card" data-search="auth x-api-key header curl">
+          <div class="card-header">
+            <span class="method get">EXAMPLE</span>
+            <span class="path">Any protected endpoint</span>
+          </div>
+          <div class="card-body">
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>curl -s http://localhost:3000/projects \
+  -H "X-Api-Key: dev-key"</pre>
+            </div>
+            <p>The mobile app discovers the server endpoint and API key via <code>GET /connect.json</code>.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="errors">
+        <h2>Error format</h2>
+        <p class="section-desc">Most errors return a plain JSON object.</p>
+        <div class="card" data-search="errors 400 401 404 409 500">
+          <div class="card-body">
+            <div class="resp-type">→ <a href="#type-error" class="type-link">Error</a></div>
+            <table class="schema-table">
+              <thead><tr><th>Field</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td class="field">error</td><td class="type"><span class="t-string">string</span></td></tr>
+              </tbody>
+            </table>
+            <table>
+              <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><code>400</code></td><td>Invalid body or business rule violation</td></tr>
+                <tr><td><code>401</code></td><td>Missing or invalid API key</td></tr>
+                <tr><td><code>404</code></td><td>Resource not found</td></tr>
+                <tr><td><code>409</code></td><td>Conflict (e.g. task already claimed)</td></tr>
+                <tr><td><code>503</code></td><td><code>/connect.json</code> — no connect target available</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="health">
+        <h2>Health</h2>
+        <p class="section-desc">Server status — no authentication required.</p>
+
+        <div class="card" data-search="get health status ok">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/health</span>
+            <span class="card-title">Liveness check</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-health" class="type-link">HealthResponse</a></div>
+            <table class="schema-table">
+              <thead><tr><th>Field</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td class="field">status</td><td class="type"><span class="t-string">string</span></td></tr>
+                <tr><td class="field">timestamp</td><td class="type"><span class="t-string">string</span> <span class="t-null">(ISO-8601)</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="connect">
+        <h2>Connect</h2>
+        <p class="section-desc">
+          Discovery endpoint for mobile pairing. Returns the host where the API is reachable and the API key the app should use.
+          Whatever URL you deploy or expose the server on is what clients should connect to — there is no fixed tunnel provider.
+        </p>
+
+        <div class="card" data-search="get connect.json apiKey host port secure source pairing">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/connect.json</span>
+            <span class="card-title">Server connection manifest (no auth)</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-connect" class="type-link">ConnectManifest</a></div>
+            <table class="schema-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+              <tbody>
+                <tr><td class="field">host</td><td class="type"><span class="t-string">string</span></td><td>Reachable hostname</td></tr>
+                <tr><td class="field">port</td><td class="type"><span class="t-number">number</span></td><td>e.g. <span class="t-number">443</span> or <span class="t-number">3000</span></td></tr>
+                <tr><td class="field">secure</td><td class="type"><span class="t-boolean">boolean</span></td><td><span class="t-boolean">true</span> → HTTPS/WSS</td></tr>
+                <tr><td class="field">apiKey</td><td class="type"><span class="t-string">string</span></td><td>Server <code>BACKEND_API_KEY</code></td></tr>
+                <tr><td class="field">source</td><td class="type"><span class="t-string">string</span></td><td>Implementation-specific</td></tr>
+              </tbody>
+            </table>
+            <p>When no connect target is available: <code>503</code> → <a href="#type-error" class="type-link">Error</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="projects">
+        <h2>Projects</h2>
+        <p class="section-desc">Project registry and workflow template assignment.</p>
+
+        <div class="card" data-search="get projects list">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/projects</span>
+            <span class="card-title">List all projects</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-projects-list" class="type-link">ProjectsListResponse</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="post projects create workflowTemplateId">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/projects</span>
+            <span class="card-title">Create a project</span>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Field</th><th>Type</th><th>Required</th></tr></thead>
+              <tbody>
+                <tr><td><code>name</code></td><td>string</td><td>yes</td></tr>
+                <tr><td><code>id</code></td><td>string (kebab-case)</td><td>no</td></tr>
+                <tr><td><code>description</code></td><td>string</td><td>no</td></tr>
+                <tr><td><code>workflowTemplateId</code></td><td>string</td><td>no</td></tr>
+              </tbody>
+            </table>
+            <div class="label">Body</div>
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{
+  "name": "Task Bridge",
+  "id": "task-bridge",
+  "workflowTemplateId": "default"
+}</pre>
+            </div>
+            <div class="label">Response 201</div>
+            <div class="resp-type">→ <a href="#type-project" class="type-link">Project</a></div>
+            <p><code>409</code> → <a href="#type-error" class="type-link">Error</a> (duplicate id)</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="epics-tasks">
+        <h2>Epics &amp; Tasks</h2>
+        <p class="section-desc">
+          Epics (<code>parentId: null</code>) are workflow roots. Subtasks attach to an epic or another task.
+          Detail responses include <code>isEpic</code>, <code>subtasks</code>, <code>comments</code>, and <code>stage</code>.
+        </p>
+
+        <div class="card" data-search="post epics create mobile text title">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/epics</span>
+            <span class="card-title">Create epic (workflow auto-spawned)</span>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Field</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>projectId</code></td><td>Target project</td></tr>
+                <tr><td><code>title</code> / <code>text</code></td><td>At least one required; first line of <code>text</code> becomes the title</td></tr>
+                <tr><td><code>description</code></td><td>Optional long-form text</td></tr>
+              </tbody>
+            </table>
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>curl -X POST http://localhost:3000/epics \
+  -H "X-Api-Key: dev-key" \
+  -H "Content-Type: application/json" \
+  -d '{"projectId":"task-bridge","title":"New feature","description":"Details..."}'</pre>
+            </div>
+            <div class="label">Response 201</div>
+            <div class="resp-type">→ <a href="#type-created-task" class="type-link">CreatedTask</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="post tasks subtask parentId stageId">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/tasks</span>
+            <span class="card-title">Add task under an epic</span>
+          </div>
+          <div class="card-body">
+            <table class="schema-table">
+              <thead><tr><th>Field</th><th>Type</th><th>Required</th></tr></thead>
+              <tbody>
+                <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span></td><td>yes</td></tr>
+                <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td><td>yes</td></tr>
+                <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td><td>no</td></tr>
+                <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span></td><td>no</td></tr>
+              </tbody>
+            </table>
+            <div class="label">Response 201</div>
+            <div class="resp-type">→ <a href="#type-created-task" class="type-link">CreatedTask</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="get tasks list all">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/tasks</span>
+            <span class="card-title">List all bridge tasks (raw)</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-task-list" class="type-link">TaskListResponse</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="get tasks id detail isEpic comments subtasks">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/tasks/:id</span>
+            <span class="card-title">Task or epic detail</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-task-detail" class="type-link">TaskDetail</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="patch tasks comment description epic">
+          <div class="card-header">
+            <span class="method patch">PATCH</span>
+            <span class="path">/tasks/:id</span>
+            <span class="card-title">Update comment or description</span>
+          </div>
+          <div class="card-body">
+            <p><strong>Epic:</strong> <code>description</code> and/or <code>comment</code></p>
+            <p><strong>Subtask:</strong> <code>comment</code> only</p>
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{
+  "comment": { "text": "Review complete", "by": "mobile" },
+  "description": "Updated epic description"
+}</pre>
+            </div>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-task-detail" class="type-link">TaskDetail</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="patch work-status todo in_progress done">
+          <div class="card-header">
+            <span class="method patch">PATCH</span>
+            <span class="path">/tasks/:id/work-status</span>
+            <span class="card-title">Subtask work status</span>
+          </div>
+          <div class="card-body">
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{ "workStatus": "in_progress", "by": "web" }</pre>
+            </div>
+            <p>Values: <code>todo</code> · <code>in_progress</code> · <code>done</code>. Epics return <code>400</code>.</p>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-task-detail" class="type-link">TaskDetail</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="get epics subtasks workflow projectId epicId">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/projects/:projectId/epics/:epicId/tasks</span>
+            <span class="card-title">Epic workflow summary (mobile timeline)</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-epic-workflow" class="type-link">EpicWorkflowSummary</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="post claim unclaim patch comment description work-status">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/tasks/:id/claim · /unclaim</span>
+            <span class="card-title">Worker claim lifecycle</span>
+          </div>
+          <div class="card-body">
+            <p>Task updates use the standard endpoints — no separate agent or answer routes.</p>
+            <table class="schema-table">
+              <thead><tr><th>Action</th><th>Endpoint</th></tr></thead>
+              <tbody>
+                <tr><td>Add comment</td><td><code>PATCH /tasks/:id</code> → <code>{ "comment": { "text", "by" } }</code></td></tr>
+                <tr><td>Update description (epic)</td><td><code>PATCH /tasks/:id</code> → <code>{ "description": "…" }</code></td></tr>
+                <tr><td>Mark subtask done</td><td><code>PATCH /tasks/:id/work-status</code> → <code>{ "workStatus": "done", "by" }</code></td></tr>
+                <tr><td>Create subtask</td><td><code>POST /tasks</code></td></tr>
+                <tr><td>Claim for worker</td><td><code>POST /tasks/:id/claim</code> → <code>{ "claimedBy", "role" }</code></td></tr>
+                <tr><td>Release claim</td><td><code>POST /tasks/:id/unclaim</code></td></tr>
+              </tbody>
+            </table>
+            <table class="schema-table">
+              <thead><tr><th>Endpoint</th><th>Response</th></tr></thead>
+              <tbody>
+                <tr><td><code>POST …/claim</code></td><td class="type"><a href="#type-bridge-task" class="type-link">BridgeTask</a></td></tr>
+                <tr><td><code>POST …/unclaim</code></td><td class="type"><a href="#type-unclaim" class="type-link">UnclaimResponse</a></td></tr>
+              </tbody>
+            </table>
+            <p>Claim conflicts return <code>409</code> → <a href="#type-error" class="type-link">Error</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="inbox">
+        <h2>Inbox</h2>
+        <p class="section-desc">Cursor-paginated task feed, filterable by project and sorted by activity.</p>
+
+        <div class="card" data-search="get inbox cursor limit commentsOnly epicsOnly">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/inbox</span>
+            <span class="card-title">Paginated inbox</span>
+          </div>
+          <div class="card-body">
+            <table>
+              <thead><tr><th>Query</th><th>Type</th><th>Default</th></tr></thead>
+              <tbody>
+                <tr><td><code>projectId</code></td><td>string</td><td>—</td></tr>
+                <tr><td><code>commentsOnly</code></td><td>true/false</td><td>false — only <code>status: ready</code></td></tr>
+                <tr><td><code>epicsOnly</code></td><td>true/false</td><td>false</td></tr>
+                <tr><td><code>cursor</code></td><td>string</td><td>omit for first page; pass <code>nextCursor</code> from the previous response</td></tr>
+                <tr><td><code>limit</code></td><td>number (max 100)</td><td>20</td></tr>
+              </tbody>
+            </table>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-inbox-page" class="type-link">InboxPage</a></div>
+            <p><code>InboxItem.status</code>: <span class="t-enum">"sent"</span> | <span class="t-enum">"ready"</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow">
+        <h2>Workflow</h2>
+        <p class="section-desc">Per-project stages, roles, and member management.</p>
+
+        <div class="card" data-search="get workflow export stages members">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/projects/:projectId/workflow</span>
+            <span class="card-title">Read workflow definition</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-project-workflow" class="type-link">ProjectWorkflow</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="get workflow export readable">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/projects/:projectId/workflow/export</span>
+            <span class="card-title">Human-readable workflow summary</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-workflow-export" class="type-link">WorkflowExport</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="put workflow replace stages roles">
+          <div class="card-header">
+            <span class="method put">PUT</span>
+            <span class="path">/projects/:projectId/workflow</span>
+            <span class="card-title">Replace workflow entirely</span>
+          </div>
+          <div class="card-body">
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{ "stages": WorkflowStage[], "roles": string[] }</pre>
+            </div>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-project-workflow" class="type-link">ProjectWorkflow</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="post apply-template workflowTemplateId">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/projects/:projectId/workflow/apply-template</span>
+            <span class="card-title">Apply template to project</span>
+          </div>
+          <div class="card-body">
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{ "templateId": "default" }</pre>
+            </div>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-project-workflow" class="type-link">ProjectWorkflow</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="members get post patch delete project">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/projects/:projectId/members</span>
+            <span class="card-title">Members — CRUD</span>
+          </div>
+          <div class="card-body">
+            <table class="schema-table">
+              <thead><tr><th>Method</th><th>Path</th><th>Response</th></tr></thead>
+              <tbody>
+                <tr><td><code>GET</code></td><td><code>/projects/:projectId/members</code></td><td class="type">{ items: <a href="#type-project-member" class="type-link">ProjectMember</a><span class="t-array">[]</span> }</td></tr>
+                <tr><td><code>POST</code></td><td>body: { name: <span class="t-string">string</span>, role?: <span class="t-string">string</span> }</td><td class="type"><a href="#type-project-member" class="type-link">ProjectMember</a> <span class="t-null">201</span></td></tr>
+                <tr><td><code>PATCH</code></td><td><code>/projects/:projectId/members/:memberId</code></td><td class="type"><a href="#type-project-member" class="type-link">ProjectMember</a></td></tr>
+                <tr><td><code>DELETE</code></td><td><code>/projects/:projectId/members/:memberId</code></td><td><code>204</code> empty</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="templates">
+        <h2>Workflow templates</h2>
+        <p class="section-desc">Reusable stage and task template definitions.</p>
+
+        <div class="card" data-search="workflow-templates list create get put">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/workflow-templates</span>
+            <span class="card-title">List templates</span>
+          </div>
+          <div class="card-body">
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ { items: <a href="#type-workflow-template-summary" class="type-link">WorkflowTemplateSummary</a><span class="t-array">[]</span> }</div>
+          </div>
+        </div>
+
+        <div class="card" data-search="post workflow-templates create title">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/workflow-templates</span>
+            <span class="card-title">Create template</span>
+          </div>
+          <div class="card-body">
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{ "title": "Feature delivery", "description": "Standard flow" }</pre>
+            </div>
+            <div class="label">Response 201</div>
+            <div class="resp-type">→ <a href="#type-workflow-template" class="type-link">WorkflowTemplate</a></div>
+          </div>
+        </div>
+
+        <div class="card" data-search="get put workflow-templates templateId stages">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/workflow-templates/:templateId</span>
+            <span class="card-title">Template detail / update</span>
+          </div>
+          <div class="card-body">
+            <p><code>GET</code> → <a href="#type-workflow-template" class="type-link">WorkflowTemplate</a></p>
+            <p><code>PUT</code> body: { stages: <a href="#type-workflow-stage" class="type-link">WorkflowStage</a><span class="t-array">[]</span> } → <a href="#type-workflow-template" class="type-link">WorkflowTemplate</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="worker">
+        <h2>Worker</h2>
+        <p class="section-desc">Queue and batch claim for automation agents.</p>
+
+        <div class="card" data-search="get worker pending role claimedBy">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/worker/pending</span>
+            <span class="card-title">Pending tasks</span>
+          </div>
+          <div class="card-body">
+            <p>Query: <code>projectId</code>, <code>role</code>, <code>claimedBy</code> (optional)</p>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ { items: <a href="#type-task-claim" class="type-link">TaskClaimPayload</a><span class="t-array">[]</span> }</div>
+          </div>
+        </div>
+
+        <div class="card" data-search="post worker claim-next queue">
+          <div class="card-header">
+            <span class="method post">POST</span>
+            <span class="path">/worker/claim-next</span>
+            <span class="card-title">Claim next eligible task</span>
+          </div>
+          <div class="card-body">
+            <div class="code-wrap">
+              <button type="button" class="copy-btn">Copy</button>
+              <pre>{
+  "claimedBy": "cursor-agent",
+  "role": "dev",
+  "projectId": "task-bridge"
+}</pre>
+            </div>
+            <div class="label">Response 200</div>
+            <div class="resp-type">→ <a href="#type-claim-next" class="type-link">ClaimNextResponse</a></div>
+            <p><code>404</code> → <a href="#type-error" class="type-link">Error</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="libraries">
+        <h2>Libraries</h2>
+        <p class="section-desc">Documentation libraries and task links.</p>
+
+        <div class="card" data-search="libraries documents links crud">
+          <div class="card-header">
+            <span class="method get">GET</span>
+            <span class="path">/libraries</span>
+            <span class="card-title">Library API overview</span>
+          </div>
+          <div class="card-body">
+            <table class="schema-table">
+              <thead><tr><th>Method</th><th>Path</th><th>Response</th></tr></thead>
+              <tbody>
+                <tr><td><code>GET</code></td><td><code>/libraries</code></td><td class="type">{ items: <a href="#type-library-summary" class="type-link">LibrarySummary</a><span class="t-array">[]</span> }</td></tr>
+                <tr><td><code>POST</code></td><td><code>/libraries</code></td><td class="type"><a href="#type-library-detail" class="type-link">LibraryDetail</a></td></tr>
+                <tr><td><code>GET</code></td><td><code>/libraries/:libraryId</code></td><td class="type"><a href="#type-library-detail" class="type-link">LibraryDetail</a></td></tr>
+                <tr><td><code>PUT</code></td><td><code>/libraries/:libraryId</code></td><td class="type"><a href="#type-library-detail" class="type-link">LibraryDetail</a></td></tr>
+                <tr><td><code>DELETE</code></td><td><code>/libraries/:libraryId</code></td><td><code>204</code> empty</td></tr>
+                <tr><td><code>POST</code></td><td><code>/libraries/:id/documents</code></td><td class="type"><a href="#type-library-document" class="type-link">LibraryDocument</a></td></tr>
+                <tr><td><code>GET</code></td><td><code>/library-documents/:documentId</code></td><td class="type"><a href="#type-library-document" class="type-link">LibraryDocument</a></td></tr>
+                <tr><td><code>PUT</code></td><td><code>/libraries/:id/documents/:documentId</code></td><td class="type"><a href="#type-library-document" class="type-link">LibraryDocument</a></td></tr>
+                <tr><td><code>DELETE</code></td><td><code>/libraries/:id/documents/:documentId</code></td><td><code>204</code> empty</td></tr>
+                <tr><td><code>POST</code></td><td><code>/library-documents/:id/links</code></td><td class="type"><a href="#type-library-link" class="type-link">LibraryDocumentLink</a></td></tr>
+                <tr><td><code>DELETE</code></td><td><code>/library-documents/:id/links/:taskId</code></td><td><code>204</code> empty</td></tr>
+                <tr><td><code>GET</code></td><td><code>/tasks/:taskId/library-links</code></td><td class="type">{ items: <a href="#type-library-link" class="type-link">LibraryDocumentLink</a><span class="t-array">[]</span> }</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="schemas">
+        <h2>Response types</h2>
+        <p class="section-desc">Field-level schemas referenced by endpoints above. <span class="t-null">| null</span> means the field may be absent or explicitly null.</p>
+
+        <div class="schema-block" id="type-work-status">
+          <h3>WorkStatus</h3>
+          <table class="schema-table"><thead><tr><th>Type</th></tr></thead><tbody>
+            <tr><td class="type"><span class="t-enum">"todo"</span> | <span class="t-enum">"in_progress"</span> | <span class="t-enum">"done"</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-error">
+          <h3>Error</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">error</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-health">
+          <h3>HealthResponse</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">status</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">timestamp</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-connect">
+          <h3>ConnectManifest</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">host</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">port</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">secure</td><td class="type"><span class="t-boolean">boolean</span></td></tr>
+            <tr><td class="field">apiKey</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">source</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-project">
+          <h3>Project</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">name</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">workflowTemplateId</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-projects-list">
+          <h3>ProjectsListResponse</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">projects</td><td class="type"><a href="#type-project" class="type-link">Project</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-created-task">
+          <h3>CreatedTask</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">createdAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectName</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-task-event">
+          <h3>TaskEvent</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">type</td><td class="type"><span class="t-enum">"created"</span> | <span class="t-enum">"claimed"</span> | <span class="t-enum">"answered"</span> | <span class="t-enum">"done"</span> | <span class="t-enum">"commented"</span> | <span class="t-enum">"stage_changed"</span> | <span class="t-enum">"spec_updated"</span></td></tr>
+            <tr><td class="field">at</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">by</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">note</td><td class="type"><span class="t-string">string</span> <span class="t-null">optional</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-task-list-item">
+          <h3>TaskListItem</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectName</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">createdBy</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">createdAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">claimedBy</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">claimedAt</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">events</td><td class="type"><a href="#type-task-event" class="type-link">TaskEvent</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-task-list">
+          <h3>TaskListResponse</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">items</td><td class="type"><a href="#type-task-list-item" class="type-link">TaskListItem</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-comment">
+          <h3>TaskComment</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">authorType</td><td class="type"><span class="t-enum">"human"</span> | <span class="t-enum">"system"</span></td></tr>
+            <tr><td class="field">authorId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">tags</td><td class="type"><span class="t-string">string</span><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">body</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">at</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">metadata</td><td class="type"><span class="t-object">object</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">by</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">text</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">role</td><td class="type"><span class="t-enum">"user"</span> | <span class="t-enum">"system"</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-subtask-summary">
+          <h3>SubtaskSummary</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">taskId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageTitle</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">templateId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">workStatus</td><td class="type"><span class="t-enum">"todo"</span> | <span class="t-enum">"in_progress"</span> | <span class="t-enum">"done"</span></td></tr>
+            <tr><td class="field">workStatusLabel</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">done</td><td class="type"><span class="t-boolean">boolean</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-stage-snapshot">
+          <h3>StageSnapshot</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">spawnTaskCount</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">taskTemplates</td><td class="type"><a href="#type-stage-task-template" class="type-link">StageTaskTemplate</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-stage-task-template">
+          <h3>StageTaskTemplate</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">assigneeRole</td><td class="type"><span class="t-string">string</span> <span class="t-null">optional</span></td></tr>
+            <tr><td class="field">kind</td><td class="type"><span class="t-enum">"task"</span> | <span class="t-enum">"group"</span> <span class="t-null">optional</span></td></tr>
+            <tr><td class="field">execution</td><td class="type"><span class="t-enum">"parallel"</span> | <span class="t-enum">"sequential"</span> <span class="t-null">optional</span></td></tr>
+            <tr><td class="field">dependsOn</td><td class="type"><span class="t-string">string</span><span class="t-array">[]</span> <span class="t-null">optional</span></td></tr>
+            <tr><td class="field">children</td><td class="type"><a href="#type-stage-task-template" class="type-link">StageTaskTemplate</a><span class="t-array">[]</span> <span class="t-null">optional</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-task-detail">
+          <h3>TaskDetail</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">taskId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">request</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">acceptanceCriteria</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">priority</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">labels</td><td class="type"><span class="t-string">string</span><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">parent</td><td class="type">{ taskId: <span class="t-number">number</span>, title: <span class="t-string">string</span>, stageId: <span class="t-string">string</span> <span class="t-null">| null</span> } <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">subtasks</td><td class="type"><a href="#type-subtask-summary" class="type-link">SubtaskSummary</a><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stage</td><td class="type"><a href="#type-stage-snapshot" class="type-link">StageSnapshot</a> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">workStatus</td><td class="type"><a href="#type-work-status" class="type-link">WorkStatus</a> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">workStatusLabel</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">isEpic</td><td class="type"><span class="t-boolean">boolean</span></td></tr>
+            <tr><td class="field">status</td><td class="type"><span class="t-enum">"sent"</span> | <span class="t-enum">"ready"</span></td></tr>
+            <tr><td class="field">createdAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">updatedAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">createdBy</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectName</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">claimedBy</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">events</td><td class="type"><a href="#type-task-event" class="type-link">TaskEvent</a><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">comments</td><td class="type"><a href="#type-comment" class="type-link">TaskComment</a><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">libraryLinks</td><td class="type"><a href="#type-library-link" class="type-link">LibraryDocumentLink</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-epic-workflow-task">
+          <h3>EpicWorkflowTask</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageTitle</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">templateId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">workStatus</td><td class="type"><span class="t-enum">WorkStatus</span></td></tr>
+            <tr><td class="field">workStatusLabel</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-epic-workflow">
+          <h3>EpicWorkflowSummary</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">epicId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">epicTitle</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageTitle</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">tasks</td><td class="type"><a href="#type-epic-workflow-task" class="type-link">EpicWorkflowTask</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-inbox-item">
+          <h3>InboxItem</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">taskId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">preview</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">status</td><td class="type"><span class="t-enum">"sent"</span> | <span class="t-enum">"ready"</span></td></tr>
+            <tr><td class="field">activityAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">updatedAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">createdAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">done</td><td class="type"><span class="t-boolean">boolean</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectName</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">createdBy</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">claimedBy</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageTitle</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-inbox-page">
+          <h3>InboxPage</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">items</td><td class="type"><a href="#type-inbox-item" class="type-link">InboxItem</a><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">limit</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">nextCursor</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">hasMore</td><td class="type"><span class="t-boolean">boolean</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-workflow-stage">
+          <h3>WorkflowStage</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">position</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">autoAssignRole</td><td class="type"><span class="t-string">string</span> <span class="t-null">optional</span></td></tr>
+            <tr><td class="field">layoutX</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">layoutY</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">spawnTaskCount</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">taskTemplates</td><td class="type"><a href="#type-stage-task-template" class="type-link">StageTaskTemplate</a><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">activeTaskCount</td><td class="type"><span class="t-number">number</span> <span class="t-null">optional</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-project-member">
+          <h3>ProjectMember</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">name</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">role</td><td class="type"><span class="t-string">string</span> <span class="t-null">optional</span></td></tr>
+            <tr><td class="field">openTasks</td><td class="type"><span class="t-number">number</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-project-workflow">
+          <h3>ProjectWorkflow</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">roles</td><td class="type"><span class="t-string">string</span><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">stages</td><td class="type"><a href="#type-workflow-stage" class="type-link">WorkflowStage</a><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">members</td><td class="type"><a href="#type-project-member" class="type-link">ProjectMember</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-workflow-export">
+          <h3>WorkflowExport</h3>
+          <p>Flattened workflow for export; stages omit layout and active counts.</p>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">roles</td><td class="type"><span class="t-string">string</span><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">stages</td><td class="type">{ id, title, description, autoAssignRole, spawnTaskCount, taskTemplates }<span class="t-array">[]</span></td></tr>
+            <tr><td class="field">members</td><td class="type">{ id, name, role, openTasks }<span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-workflow-template-summary">
+          <h3>WorkflowTemplateSummary</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-workflow-template">
+          <h3>WorkflowTemplate</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">stages</td><td class="type"><a href="#type-workflow-stage" class="type-link">WorkflowStage</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-bridge-task">
+          <h3>BridgeTask</h3>
+          <p>Internal task record returned by claim endpoints. Not exposed on public detail responses.</p>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectName</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">epicId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">templateId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">acceptanceCriteria</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">priority</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">labels</td><td class="type"><span class="t-string">string</span><span class="t-array">[]</span></td></tr>
+            <tr><td class="field">assignee</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">assigneeRole</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">createdBy</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">createdAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">updatedAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">claimedBy</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">claimedAt</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">workStatus</td><td class="type"><span class="t-enum">WorkStatus</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">comments</td><td class="type"><a href="#type-comment" class="type-link">TaskComment</a><span class="t-array">[]</span> (raw, not mapped)</td></tr>
+            <tr><td class="field">events</td><td class="type"><a href="#type-task-event" class="type-link">TaskEvent</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-unclaim">
+          <h3>UnclaimResponse</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">taskId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-task-claim">
+          <h3>TaskClaimPayload</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">taskId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">turnId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">projectName</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">parentId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">epicId</td><td class="type"><span class="t-number">number</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">stageId</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">workStatus</td><td class="type"><span class="t-enum">WorkStatus</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">createdAt</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">comments</td><td class="type"><a href="#type-comment" class="type-link">TaskComment</a><span class="t-array">[]</span> (raw)</td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-claim-next">
+          <h3>ClaimNextResponse</h3>
+          <p>Extends <a href="#type-task-claim" class="type-link">TaskClaimPayload</a> with claim metadata and mapped comments.</p>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td colspan="2" class="type">All <a href="#type-task-claim" class="type-link">TaskClaimPayload</a> fields</td></tr>
+            <tr><td class="field">claimedBy</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">claimedAt</td><td class="type"><span class="t-string">string</span> <span class="t-null">| null</span></td></tr>
+            <tr><td class="field">comments</td><td class="type"><a href="#type-comment" class="type-link">TaskComment</a><span class="t-array">[]</span> (mapped)</td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-library-summary">
+          <h3>LibrarySummary</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">documentCount</td><td class="type"><span class="t-number">number</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-library-document-summary">
+          <h3>LibraryDocumentSummary</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">libraryId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-library-detail">
+          <h3>LibraryDetail</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">documents</td><td class="type"><a href="#type-library-document-summary" class="type-link">LibraryDocumentSummary</a><span class="t-array">[]</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-library-document">
+          <h3>LibraryDocument</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">id</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">libraryId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">title</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">description</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">libraryTitle</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">linkCount</td><td class="type"><span class="t-number">number</span></td></tr>
+          </tbody></table>
+        </div>
+
+        <div class="schema-block" id="type-library-link">
+          <h3>LibraryDocumentLink</h3>
+          <table class="schema-table"><thead><tr><th>Field</th><th>Type</th></tr></thead><tbody>
+            <tr><td class="field">documentId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">documentTitle</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">libraryId</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">libraryTitle</td><td class="type"><span class="t-string">string</span></td></tr>
+            <tr><td class="field">taskId</td><td class="type"><span class="t-number">number</span></td></tr>
+            <tr><td class="field">linkedAt</td><td class="type"><span class="t-string">string</span></td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <footer class="docs-footer">
+        Task Bridge · Source: <a href="https://github.com/umudik/task-bridge">github.com/umudik/task-bridge</a>
+      </footer>
+      </div>
+    </main>
+  </div>
+  <script src="api.js"></script>
+</body>
+</html>

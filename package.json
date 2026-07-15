@@ -1,0 +1,15 @@
+{
+  "name": "@fookie/cloud",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fookie Cloud monorepo",
+  "scripts": {
+    "build:shared": "npm --prefix packages/shared run build",
+    "build:mcp": "npm --prefix packages/mcp run build",
+    "build:script-manager": "npm --prefix apps/script-manager run build",
+    "build:task-bridge": "npm --prefix apps/task-bridge run build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

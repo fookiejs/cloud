@@ -1,0 +1,385 @@
+﻿
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\BrandMark.tsx
+  10:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  11:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  12:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  15:27  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  15:27  error  Unexpected use of undefined                                            no-undefined
+  46:89  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  46:89  error  Unexpected use of undefined                                            no-undefined
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\ConfirmDialogProvider.tsx
+  13:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  15:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  16:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  20:41  error  Optional parameter (?) is banned. Use 'T | null' in the parameter type  no-restricted-syntax
+  31:23  error  Optional parameter (?) is banned. Use 'T | null' in the parameter type  no-restricted-syntax
+  43:5   error  ?. optional call is banned. Guard with an explicit null check           no-restricted-syntax
+  58:27  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  63:16  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  66:16  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\CreateProjectPanel.tsx
+  33:18  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  33:18  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  33:18  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  33:31  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\CreateTaskModal.tsx
+  18:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  48:60  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\DescriptionEditor.tsx
+   8:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   9:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  10:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\DescriptionEditorModal.tsx
+  18:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  19:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\EditProjectModal.tsx
+   90:64  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+   94:28  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  143:19  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  163:33  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  163:33  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\ExpandableMarkdown.tsx
+   8:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   9:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  32:77  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  32:77  error  Unexpected use of undefined                                            no-undefined
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\LoadMore.tsx
+  12:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\MarkdownView.tsx
+  11:28  error  undefined in types is banned. Use null                                 no-restricted-syntax
+  12:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  13:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  18:10  error  ?. optional chaining is banned. Guard with an explicit null check      no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\SensitiveField.tsx
+  13:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  62:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  63:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\TaskLibraryLinks.tsx
+   76:18  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   76:18  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+   84:7   error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  166:24  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\layout\AppSidebar.tsx
+   34:27  error  ?. optional chaining is banned. Guard with an explicit null check      no-restricted-syntax
+   35:29  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+   35:48  error  ?. optional chaining is banned. Guard with an explicit null check      no-restricted-syntax
+   37:23  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+   37:23  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+   37:23  error  ?. optional chaining is banned. Guard with an explicit null check      no-restricted-syntax
+   47:19  error  ?. optional chaining is banned. Guard with an explicit null check      no-restricted-syntax
+   79:22  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+   83:13  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+   83:13  error  Unexpected use of undefined                                            no-undefined
+   92:13  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+   92:13  error  Unexpected use of undefined                                            no-undefined
+  107:18  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  111:16  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  114:13  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  114:13  error  Unexpected use of undefined                                            no-undefined
+  140:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  141:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\layout\PageHeader.tsx
+   6:38  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   9:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  11:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  12:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  13:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\ui\button.tsx
+  32:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\ui\input.tsx
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\ui\select.tsx
+  5:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\ui\textarea.tsx
+  4:18  error  An interface declaring no members is equivalent to its supertype  @typescript-eslint/no-empty-object-type
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\EpicProgressCanvas.tsx
+   34:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+   35:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+   36:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+   37:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+   38:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+   39:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+   80:22  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+   84:22  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  112:5   error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  112:5   error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  112:5   error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  113:5   error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  113:29  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  114:5   error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  118:19  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  118:19  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  137:18  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  144:16  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  144:16  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  207:11  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  207:27  error  Expected '!==' and instead saw '!='                                     eqeqeq
+  208:11  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  337:36  error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  354:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  355:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  356:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  358:19  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  358:35  error  Expected '!==' and instead saw '!='                                     eqeqeq
+  359:22  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  359:22  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  377:26  error  ?. optional call is banned. Guard with an explicit null check           no-restricted-syntax
+  389:44  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  389:44  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  389:95  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  389:95  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  419:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  420:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  437:31  error  ?. optional call is banned. Guard with an explicit null check           no-restricted-syntax
+  439:84  error  undefined is banned. Use null for missing values                        no-restricted-syntax
+  439:84  error  Unexpected use of undefined                                             no-undefined
+  479:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  480:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  484:9   error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  484:25  error  Expected '!==' and instead saw '!='                                     eqeqeq
+  493:21  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  495:17  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  495:34  error  ?. optional call is banned. Guard with an explicit null check           no-restricted-syntax
+  498:13  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  499:36  error  Forbidden non-null assertion                                            @typescript-eslint/no-non-null-assertion
+  500:17  error  undefined is banned. Use null for missing values                        no-restricted-syntax
+  500:17  error  Unexpected use of undefined                                             no-undefined
+  503:10  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  515:11  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  515:11  error  ?. optional chaining is banned. Guard with an explicit null check       no-restricted-syntax
+  517:49  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  541:3   error  Optional parameter (?) is banned. Use 'T | null' in the parameter type  no-restricted-syntax
+  542:3   error  Optional parameter (?) is banned. Use 'T | null' in the parameter type  no-restricted-syntax
+  543:3   error  Optional parameter (?) is banned. Use 'T | null' in the parameter type  no-restricted-syntax
+  555:25  error  ?. optional call is banned. Guard with an explicit null check           no-restricted-syntax
+  557:78  error  undefined is banned. Use null for missing values                        no-restricted-syntax
+  557:78  error  Unexpected use of undefined                                             no-undefined
+  595:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  596:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  597:3   error  Optional property (?:) is banned. Use 'T | null' in the property type   no-restricted-syntax
+  599:44  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  615:23  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  838:48  error  ?? is banned. Use explicit if/else                                      no-restricted-syntax
+  917:84  error  undefined is banned. Use null for missing values                        no-restricted-syntax
+  917:84  error  Unexpected use of undefined                                             no-undefined
+  922:21  error  undefined is banned. Use null for missing values                        no-restricted-syntax
+  922:21  error  Unexpected use of undefined                                             no-undefined
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\EpicTaskInspector.tsx
+  45:17  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+  65:22  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+  65:22  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\ProjectRoleSelect.tsx
+   6:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  11:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\StageInspectorPanel.tsx
+  85:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  87:21  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  91:26  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  91:26  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  92:21  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  92:21  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\TeamPanel.tsx
+  16:14  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  16:29  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\WorkflowCanvas.tsx
+   39:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   40:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   44:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   45:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   46:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   47:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   48:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+   49:3   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  109:48  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  173:36  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  223:43  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  330:23  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  478:21  error  Forbidden non-null assertion                                           @typescript-eslint/no-non-null-assertion
+  479:22  error  Forbidden non-null assertion                                           @typescript-eslint/no-non-null-assertion
+  603:26  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  608:36  error  ?. optional call is banned. Guard with an explicit null check          no-restricted-syntax
+  609:53  error  ?. optional call is banned. Guard with an explicit null check          no-restricted-syntax
+  610:37  error  ?. optional call is banned. Guard with an explicit null check          no-restricted-syntax
+  611:43  error  ?. optional call is banned. Guard with an explicit null check          no-restricted-syntax
+  613:17  error  ?. optional call is banned. Guard with an explicit null check          no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\components\workflow\WorkflowInspectorSidebar.tsx
+  8:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\lib\api.ts
+  255:5   error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  256:24  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  258:9   error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  284:20  error  unknown is banned. Use a concrete type                      no-restricted-syntax
+  288:20  error  unknown is banned. Use a concrete type                      no-restricted-syntax
+  307:21  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  334:21  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  365:7   error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  509:23  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  583:11  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  605:11  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+  644:23  error  Ternary (? :) is banned in .ts files. Use explicit if/else  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\AdminUsersPage.tsx
+  220:37  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+  221:24  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\InboxPage.tsx
+   27:29  error  undefined in types is banned. Use null                             no-restricted-syntax
+   52:15  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   52:15  error  Unexpected use of undefined                                        no-undefined
+   56:15  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   56:15  error  Unexpected use of undefined                                        no-undefined
+   72:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   72:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   72:20  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  129:35  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  129:35  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  141:41  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  141:55  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+  141:55  error  Unexpected use of undefined                                        no-undefined
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\LibraryPage.tsx
+   93:20  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  126:11  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  126:11  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  127:6   error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  130:27  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  187:28  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  187:28  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  187:28  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\MobilePage.tsx
+   15:60  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   15:60  error  Unexpected use of undefined                                        no-undefined
+   51:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   51:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   51:20  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+   91:24  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   91:24  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+   92:68  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   92:68  error  Unexpected use of undefined                                        no-undefined
+   96:24  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   97:66  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   97:66  error  Unexpected use of undefined                                        no-undefined
+  102:12  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\TaskPage.tsx
+   33:43  error    undefined in types is banned. Use null                                                                                                                                                            no-restricted-syntax
+   88:37  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+   96:24  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+   96:24  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  115:24  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  115:24  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  116:6   error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  118:23  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  118:23  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  119:9   warning  The 'subtasks' logical expression could make the dependencies of useMemo Hook (at line 122) change on every render. To fix this, wrap the initialization of 'subtasks' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  119:9   warning  The 'subtasks' logical expression could make the dependencies of useMemo Hook (at line 129) change on every render. To fix this, wrap the initialization of 'subtasks' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  119:20  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  119:20  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  121:11  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  162:66  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  162:66  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  165:27  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  185:44  error    undefined is banned. Use null for missing values                                                                                                                                                  no-restricted-syntax
+  185:44  error    Unexpected use of undefined                                                                                                                                                                       no-undefined
+  186:18  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  186:43  error    undefined is banned. Use null for missing values                                                                                                                                                  no-restricted-syntax
+  186:43  error    Unexpected use of undefined                                                                                                                                                                       no-undefined
+  192:18  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  192:18  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  241:14  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  241:14  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  241:14  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  244:7   error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  252:39  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  252:39  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  271:37  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  314:22  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  326:30  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  328:32  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  360:26  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  360:26  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  360:26  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  395:22  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  408:28  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  408:28  error    ?. optional chaining is banned. Guard with an explicit null check                                                                                                                                 no-restricted-syntax
+  473:16  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  473:16  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+  474:16  error    ?? is banned. Use explicit if/else                                                                                                                                                                no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\TasksPage.tsx
+   37:29  error  undefined in types is banned. Use null                             no-restricted-syntax
+   62:15  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   62:15  error  Unexpected use of undefined                                        no-undefined
+   66:15  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+   66:15  error  Unexpected use of undefined                                        no-undefined
+   97:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   97:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   97:20  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  183:37  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  183:37  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  195:39  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  195:53  error  undefined is banned. Use null for missing values                   no-restricted-syntax
+  195:53  error  Unexpected use of undefined                                        no-undefined
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\WorkflowPage.tsx
+  148:25  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  148:25  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  168:47  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  207:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  220:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  235:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  240:7   error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  240:7   error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  268:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  268:20  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  268:20  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  304:32  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  304:32  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\src\pages\WorkflowTemplatesPage.tsx
+   60:21  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   60:21  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  192:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  192:23  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  206:28  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  225:47  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  253:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  266:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  281:23  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  286:7   error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  286:7   error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  338:28  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  348:28  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  425:18  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  425:18  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+  468:32  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+  468:32  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+
+Γ£û 314 problems (312 errors, 2 warnings)
+

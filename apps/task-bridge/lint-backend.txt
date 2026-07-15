@@ -1,0 +1,184 @@
+﻿
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\config.ts
+   3:13  error  Expected '!==' and instead saw '!='  eqeqeq
+  11:13  error  Expected '!==' and instead saw '!='  eqeqeq
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\db\users-db.ts
+  73:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\db\workflow-template-db.ts
+  92:18  error  Ternary (? :) is banned. Use explicit if/else  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\domain\task.ts
+    2:15  error  'AppErrorDetails' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  218:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  219:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  220:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  221:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  222:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  223:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  224:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  225:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  226:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  227:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+  228:3   error  Optional property (?:) is banned. Use 'T | null' in the property type              no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\domain\workflow-stage.ts
+  15:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  16:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  17:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  18:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  19:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  20:3  error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\domain\workflow-state.ts
+  53:22  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\index.ts
+  26:3  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  27:3  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  30:3  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  35:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  36:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  37:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  38:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  39:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  40:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  41:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  42:7  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\mappers\task-response.ts
+  120:24  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  125:20  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  227:23  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  266:23  error  Expected '!==' and instead saw '!='                         eqeqeq
+  278:20  error  Expected '!==' and instead saw '!='                         eqeqeq
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\routes\library.ts
+   65:44  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+   81:44  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+   95:45  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+  111:44  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+  133:43  error  ?? is banned. Use explicit if/else  no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\routes\projects.ts
+  46:5   error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  53:18  error  Expected '===' and instead saw '=='                         eqeqeq
+  71:19  error  Expected '===' and instead saw '=='                         eqeqeq
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\routes\tasks.ts
+  187:5   error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  194:16  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  248:5   error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  250:20  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  255:22  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  261:18  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  293:11  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  318:25  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  342:22  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  353:29  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  359:18  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  369:18  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  409:22  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  442:18  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  447:26  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  494:18  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  506:22  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  520:25  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  530:25  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  541:18  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  574:18  error  ?? is banned. Use explicit if/else                          no-restricted-syntax
+  575:21  error  ?? is banned. Use explicit if/else                          no-restricted-syntax
+  576:18  error  ?? is banned. Use explicit if/else                          no-restricted-syntax
+  577:15  error  ?? is banned. Use explicit if/else                          no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\routes\web.ts
+  83:21  error  Expected '!==' and instead saw '!='  eqeqeq
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\routes\workflow.ts
+   70:1   error  Async function 'assertProject' has no 'await' expression    @typescript-eslint/require-await
+  177:21  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\epic-service.ts
+   63:12  error  Expected '!==' and instead saw '!='                         eqeqeq
+   70:16  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+   76:22  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+   85:22  error  Expected '!==' and instead saw '!='                         eqeqeq
+  140:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  150:14  error  Expected '!==' and instead saw '!='                         eqeqeq
+  152:15  error  Expected '!==' and instead saw '!='                         eqeqeq
+  162:16  error  Expected '!==' and instead saw '!='                         eqeqeq
+  168:21  error  Ternary (? :) is banned. Use explicit if/else               no-restricted-syntax
+  218:20  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  222:26  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  256:20  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  266:16  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  274:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  279:16  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  283:17  error  Expected '!==' and instead saw '!='                         eqeqeq
+  289:5   error  Ternary (? :) is banned. Use explicit if/else               no-restricted-syntax
+  295:18  error  Expected '===' and instead saw '=='                         eqeqeq
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\project-registry.ts
+   15:3  error  'DEFAULT_WORKFLOW_TEMPLATE_ID' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  107:8  error  Async function 'createProject' has no 'await' expression                                        @typescript-eslint/require-await
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\task-assignee-service.ts
+   6:10  error  Forbidden non-null assertion                                        @typescript-eslint/no-non-null-assertion
+   9:8   error  Async function 'pickMemberByProjectRole' has no 'await' expression  @typescript-eslint/require-await
+  26:20  error  Ternary (? :) is banned. Use explicit if/else                       no-restricted-syntax
+  31:14  error  Ternary (? :) is banned. Use explicit if/else                       no-restricted-syntax
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\task-claim-policy.ts
+  155:3   error  'actor' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+  220:11  error  Expected '!==' and instead saw '!='                                      eqeqeq
+  324:22  error  Expected '!==' and instead saw '!='                                      eqeqeq
+  347:23  error  Ternary (? :) is banned. Use explicit if/else                            no-restricted-syntax
+  347:30  error  Expected '!==' and instead saw '!='                                      eqeqeq
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\task-queue.ts
+   92:28  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  111:28  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  119:21  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+  135:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\workflow-rules.ts
+  7:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value  @typescript-eslint/await-thenable
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\workflow-service.ts
+  168:10  error  'pickMemberWithLowestLoad' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  210:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+  240:8   error  Async function 'getFirstStageId' has no 'await' expression                                  @typescript-eslint/require-await
+  301:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+  310:9   error  'stageRows' is assigned a value but never used. Allowed unused vars must match /^_/u        @typescript-eslint/no-unused-vars
+  403:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+  424:16  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+  447:8   error  Async function 'getStageSnapshot' has no 'await' expression                                 @typescript-eslint/require-await
+  480:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+  495:17  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+  536:16  error  Unexpected `await` of a non-Promise (non-"Thenable") value                                  @typescript-eslint/await-thenable
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\workflow-spawn-service.ts
+   34:25  error  ?? is banned. Use explicit if/else                                 no-restricted-syntax
+   34:25  error  ?. optional chaining is banned. Guard with an explicit null check  no-restricted-syntax
+   37:24  error  Expected '!==' and instead saw '!='                                eqeqeq
+   96:14  error  Unexpected `await` of a non-Promise (non-"Thenable") value         @typescript-eslint/await-thenable
+  131:22  error  Unexpected `await` of a non-Promise (non-"Thenable") value         @typescript-eslint/await-thenable
+  146:14  error  Expected '!==' and instead saw '!='                                eqeqeq
+  172:20  error  Unexpected `await` of a non-Promise (non-"Thenable") value         @typescript-eslint/await-thenable
+
+C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\backend\src\services\workflow-state-service.ts
+   47:5   error  Ternary (? :) is banned. Use explicit if/else                          no-restricted-syntax
+  147:10  error  ?? is banned. Use explicit if/else                                     no-restricted-syntax
+  154:5   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  155:5   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  156:5   error  Optional property (?:) is banned. Use 'T | null' in the property type  no-restricted-syntax
+  162:30  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  162:30  error  Unexpected use of undefined                                            no-undefined
+  163:28  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  163:28  error  Unexpected use of undefined                                            no-undefined
+  164:26  error  undefined is banned. Use null for missing values                       no-restricted-syntax
+  164:26  error  Unexpected use of undefined                                            no-undefined
+
+Γ£û 137 problems (137 errors, 0 warnings)
+

@@ -1,0 +1,29 @@
+{
+  "name": "@fookie/task-bridge",
+  "version": "0.0.23",
+  "private": true,
+  "description": "Task Bridge — Fookie Cloud epic / task board (monorepo app; not published to npm).",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "task-bridge": "bin/task-bridge.mjs"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm --prefix apps/web run build && node scripts/copy-web.mjs && npm --prefix apps/backend run build",
+    "start": "node bin/task-bridge.mjs",
+    "test": "npm --prefix apps/backend run test",
+    "lint": "npm --prefix apps/backend run lint"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.2",
+    "@fastify/static": "^8.1.1",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.11.1",
+    "fastify": "^5.2.1",
+    "zod": "^3.24.2"
+  }
+}

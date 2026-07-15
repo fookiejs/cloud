@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+**/dist
+.git
+.github
+*.md
+packages/cli/dist-server
+packages/cli/public
+packages/web/dist

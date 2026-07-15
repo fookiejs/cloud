@@ -1,0 +1,366 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 94%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 94%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 94%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 48%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 94%;
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 217 91% 60%;
+    --success: 142 60% 48%;
+    --warn: 38 90% 55%;
+    --radius: 0.875rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-black font-sans text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  a {
+    @apply text-primary no-underline hover:underline;
+  }
+
+  code {
+    @apply rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.9em] text-foreground;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.16) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgb(255 255 255 / 0.1);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(255 255 255 / 0.22);
+  }
+}
+
+@layer components {
+  .layout {
+    @apply flex min-h-screen bg-black;
+  }
+
+  .sidebar {
+    @apply sticky top-0 flex h-screen w-[280px] shrink-0 flex-col overflow-y-auto border-r border-white/[0.07] bg-black px-2 py-3;
+  }
+
+  .brand {
+    @apply mb-4 flex h-14 shrink-0 items-center gap-2.5 border-b border-white/[0.07] px-2;
+  }
+
+  .logo {
+    @apply relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15 ring-1 ring-primary/25 text-primary;
+  }
+
+  .logo-badge {
+    @apply absolute -bottom-0.5 -right-0.5 rounded-full bg-card p-0.5 text-primary;
+  }
+
+  .docs-footer {
+    @apply mt-12 border-t border-white/[0.08] pt-6 text-sm text-muted-foreground;
+  }
+
+  .brand h1 {
+    @apply text-sm font-semibold tracking-tight text-foreground;
+  }
+
+  .brand p {
+    @apply text-[10px] text-muted-foreground;
+  }
+
+  .search {
+    @apply mb-3 flex h-10 w-full rounded-xl border border-white/[0.1] bg-[#111111] px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-black;
+  }
+
+  .nav-group {
+    @apply mb-4 space-y-0.5 px-1;
+  }
+
+  .nav-label {
+    @apply px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground;
+  }
+
+  .nav-link {
+    @apply block rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-white/[0.04] hover:text-foreground hover:no-underline;
+  }
+
+  .nav-link.active {
+    @apply bg-white/[0.09] font-medium text-white hover:text-white;
+  }
+
+  .main {
+    @apply min-w-0 flex-1 overflow-y-auto bg-[#080808] px-8 py-8 pb-20;
+  }
+
+  .hero {
+    @apply panel-card mb-10 p-8;
+  }
+
+  .hero h2 {
+    @apply mb-3 text-3xl font-bold tracking-tight text-foreground;
+  }
+
+  .hero p {
+    @apply max-w-2xl text-base text-muted-foreground;
+  }
+
+  .badges {
+    @apply mt-5 flex flex-wrap gap-2;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full border border-white/[0.1] bg-[#111111] px-3 py-1 text-xs text-muted-foreground;
+  }
+
+  section {
+    @apply mb-14 scroll-mt-6;
+  }
+
+  section h2 {
+    @apply mb-2 text-2xl font-bold tracking-tight text-foreground;
+  }
+
+  .section-desc {
+    @apply mb-6 text-sm text-muted-foreground;
+  }
+
+  .card {
+    @apply panel-card mb-4 overflow-hidden;
+  }
+
+  .card.hidden {
+    display: none;
+  }
+
+  .card-header {
+    @apply flex flex-wrap items-start gap-3 border-b border-white/[0.08] px-5 py-4;
+  }
+
+  .method {
+    @apply shrink-0 rounded-md px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-wide;
+  }
+
+  .method.get {
+    @apply bg-sky-500/15 text-sky-400;
+  }
+
+  .method.post {
+    @apply bg-emerald-500/15 text-emerald-400;
+  }
+
+  .method.put {
+    @apply bg-amber-500/15 text-amber-400;
+  }
+
+  .method.patch {
+    @apply bg-violet-500/15 text-violet-400;
+  }
+
+  .method.delete {
+    @apply bg-rose-500/15 text-rose-400;
+  }
+
+  .path {
+    @apply break-all font-mono text-sm text-foreground;
+  }
+
+  .card-title {
+    @apply w-full text-sm font-semibold text-muted-foreground;
+  }
+
+  .card-body {
+    @apply p-5;
+  }
+
+  .card-body p {
+    @apply mb-3 text-sm text-muted-foreground;
+  }
+
+  .label {
+    @apply mb-1.5 mt-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground first:mt-0;
+  }
+
+  pre {
+    @apply overflow-x-auto rounded-xl border border-white/[0.08] bg-[#0a0a0a] p-4 font-mono text-xs leading-relaxed text-foreground/90;
+  }
+
+  .code-wrap {
+    @apply relative mb-2;
+  }
+
+  .copy-btn {
+    @apply absolute right-2 top-2 inline-flex h-7 items-center rounded-lg border border-white/[0.1] bg-[#161616] px-2.5 text-[11px] text-muted-foreground transition-colors hover:border-white/[0.16] hover:bg-white/[0.05] hover:text-foreground;
+  }
+
+  table {
+    @apply mb-3 w-full border-collapse text-sm;
+  }
+
+  th,
+  td {
+    @apply border-b border-white/[0.08] px-2.5 py-2 text-left;
+  }
+
+  th {
+    @apply text-[11px] font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+
+  td code {
+    @apply bg-transparent p-0 text-primary;
+  }
+
+  .info-grid {
+    @apply mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .info-box {
+    @apply panel-card p-4;
+  }
+
+  .info-box h3 {
+    @apply mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+
+  .info-box p {
+    @apply text-sm text-muted-foreground;
+  }
+
+  .schema-table {
+    @apply mb-3 w-full border-collapse text-sm;
+  }
+
+  .schema-table th,
+  .schema-table td {
+    @apply border-b border-white/[0.08] px-2.5 py-2 align-top;
+  }
+
+  .schema-table th {
+    @apply text-[11px] font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+
+  .schema-table .field {
+    @apply font-mono text-xs text-foreground;
+  }
+
+  .schema-table .type {
+    @apply whitespace-nowrap font-mono text-xs;
+  }
+
+  .t-string {
+    @apply text-emerald-400;
+  }
+
+  .t-number {
+    @apply text-sky-400;
+  }
+
+  .t-boolean {
+    @apply text-amber-400;
+  }
+
+  .t-enum {
+    @apply text-violet-400;
+  }
+
+  .t-object {
+    @apply text-rose-400;
+  }
+
+  .t-array {
+    @apply text-teal-400;
+  }
+
+  .t-null {
+    @apply text-muted-foreground;
+  }
+
+  .type-link {
+    @apply font-mono text-xs text-primary hover:text-primary/80;
+  }
+
+  .schema-block {
+    @apply mb-5 scroll-mt-6 border-b border-white/[0.08] pb-4;
+  }
+
+  .schema-block:last-child {
+    @apply mb-0 border-b-0 pb-0;
+  }
+
+  .schema-block h3 {
+    @apply mb-1 font-mono text-sm font-semibold text-primary;
+  }
+
+  .schema-block p {
+    @apply mb-2.5 text-sm text-muted-foreground;
+  }
+
+  .resp-type {
+    @apply mb-2.5 font-mono text-sm text-primary;
+  }
+
+  .panel-card {
+    @apply rounded-2xl border border-white/[0.08] bg-[#111111] text-card-foreground shadow-[0_8px_30px_rgba(0,0,0,0.35)];
+  }
+}
+
+@layer utilities {
+  .max-w-docs {
+    max-width: 56rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .layout {
+    @apply flex-col;
+  }
+
+  .sidebar {
+    @apply relative h-auto w-full border-b border-white/[0.07] border-r-0;
+  }
+
+  .main {
+    @apply px-5 py-6;
+  }
+}

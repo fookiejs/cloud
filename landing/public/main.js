@@ -11,6 +11,7 @@ const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
 
 const APPS = {
   lotaru: "https://lotaru.fookiecloud.com",
+  "script-manager": "https://lotaru.fookiecloud.com",
   "task-bridge": "https://task-bridge.fookiecloud.com",
   notes: "https://notes.fookiecloud.com",
 };

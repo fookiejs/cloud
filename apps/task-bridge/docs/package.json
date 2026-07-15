@@ -1,0 +1,14 @@
+{
+  "name": "@task-bridge/docs",
+  "private": true,
+  "scripts": {
+    "dev": "tailwindcss -i ./src/input.css -o ./api.css --watch",
+    "build": "tailwindcss -i ./src/input.css -o ./api.css --minify"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.15",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}

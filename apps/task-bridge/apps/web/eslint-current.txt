@@ -1,0 +1,8 @@
+﻿node.exe : The compact formatter is no longer part of core ESLint. Install it manually with `npm install -D 
+eslint-formatter-compact`
+At C:\Users\seyit\OneDrive\Documents\GitHub\task-bridge\apps\web\node_modules\.bin\eslint.ps1:24 char:5
++     & "node$exe"  "$basedir/../eslint/bin/eslint.js" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (The compact for...matter-compact`:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 

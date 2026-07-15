@@ -1,0 +1,124 @@
+name: Deploy landing to S3
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'packages/landing/**'
+      - 'package-lock.json'
+      - '.github/workflows/landing-s3.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: landing-s3-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: eu-central-1
+      LANDING_S3_BUCKET: lotaru-landing
+      DIST_DIR: packages/landing/dist
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build:landing
+
+      - name: Configure AWS credentials (OIDC)
+        if: ${{ vars.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Configure AWS credentials (access keys)
+        if: ${{ vars.AWS_ROLE_ARN == '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Ensure S3 bucket
+        id: bucket
+        run: |
+          set -euo pipefail
+          BUCKET="$LANDING_S3_BUCKET"
+          echo "name=${BUCKET}" >> "$GITHUB_OUTPUT"
+          if aws s3api head-bucket --bucket "$BUCKET" 2>/dev/null; then
+            echo "Using existing bucket: $BUCKET"
+            exit 0
+          fi
+          echo "Creating bucket: $BUCKET"
+          if [ "$AWS_REGION" = "us-east-1" ]; then
+            aws s3api create-bucket --bucket "$BUCKET" --region "$AWS_REGION"
+          else
+            aws s3api create-bucket \
+              --bucket "$BUCKET" \
+              --region "$AWS_REGION" \
+              --create-bucket-configuration "LocationConstraint=$AWS_REGION"
+          fi
+          aws s3api put-public-access-block \
+            --bucket "$BUCKET" \
+            --public-access-block-configuration \
+            "BlockPublicAcls=false,IgnorePublicAcls=false,BlockPublicPolicy=false,RestrictPublicBuckets=false"
+          POLICY=$(printf '%s' "{
+            \"Version\": \"2012-10-17\",
+            \"Statement\": [{
+              \"Sid\": \"PublicReadGetObject\",
+              \"Effect\": \"Allow\",
+              \"Principal\": \"*\",
+              \"Action\": \"s3:GetObject\",
+              \"Resource\": \"arn:aws:s3:::%s/*\"
+            }]
+          }" "$BUCKET")
+          aws s3api put-bucket-policy --bucket "$BUCKET" --policy "$POLICY"
+          aws s3api put-bucket-versioning \
+            --bucket "$BUCKET" \
+            --versioning-configuration Status=Enabled
+          aws s3 website "s3://${BUCKET}/" \
+            --index-document index.html \
+            --error-document index.html
+
+      - name: Sync site to S3
+        run: |
+          set -euo pipefail
+          BUCKET="${{ steps.bucket.outputs.name }}"
+          aws s3 sync "$DIST_DIR" "s3://${BUCKET}" --delete \
+            --cache-control "public,max-age=31536000,immutable" \
+            --exclude "index.html"
+          aws s3 cp "$DIST_DIR/index.html" "s3://${BUCKET}/index.html" \
+            --cache-control "public,max-age=0,must-revalidate" \
+            --content-type "text/html"
+
+      - name: Website URL
+        id: deploy
+        run: |
+          BUCKET="${{ steps.bucket.outputs.name }}"
+          if [ "$AWS_REGION" = "us-east-1" ]; then
+            URL="http://${BUCKET}.s3-website-us-east-1.amazonaws.com"
+          else
+            URL="http://${BUCKET}.s3-website-${AWS_REGION}.amazonaws.com"
+          fi
+          echo "bucket=${BUCKET}" >> "$GITHUB_OUTPUT"
+          echo "website_url=${URL}" >> "$GITHUB_OUTPUT"
+          echo "Deployed to ${URL}"
+
+      - name: Summary
+        run: |
+          echo "### Landing deployed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Bucket: \`${{ steps.deploy.outputs.bucket }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- URL: ${{ steps.deploy.outputs.website_url }}" >> "$GITHUB_STEP_SUMMARY"

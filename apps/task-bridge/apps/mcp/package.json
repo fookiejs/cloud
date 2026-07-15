@@ -1,0 +1,44 @@
+{
+  "name": "@umudik/task-bridge-mcp",
+  "version": "0.1.0",
+  "private": false,
+  "description": "MCP server for Task Bridge - claim tasks, read context, complete work from Cursor",
+  "type": "module",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/umudik/task-bridge.git",
+    "directory": "apps/mcp"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "task-bridge-mcp": "./dist/index.js",
+    "task-bridge-mcp-client": "./dist/client-cli.js"
+  },
+  "files": [
+    "dist/**/*.js",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
+    "client": "tsx src/client-cli.ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}

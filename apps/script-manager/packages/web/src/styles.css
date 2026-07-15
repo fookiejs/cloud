@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 8% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 232 60% 60%;
+    --primary-foreground: 0 0% 100%;
+    --running: 232 60% 60%;
+    --secondary: 240 5% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 5% 14%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 16%;
+    --input: 240 5% 16%;
+    --ring: 232 60% 60%;
+    --success: 142 60% 50%;
+    --warn: 38 90% 60%;
+    --radius: 0.75rem;
+  }
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.28) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.25);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.22);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: hsl(var(--primary) / 0.5);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+}
+
+.command-editor-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.command-editor-surface .cm-editor {
+  height: 100%;
+}
+
+.command-editor-surface .cm-scroller {
+  min-height: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.command-shell-editor .cm-gutters {
+  border-right: 1px solid hsl(var(--border) / 0.5);
+}
+
+.task-card-flash {
+  animation: task-card-border-flash 1.35s ease-out forwards;
+}
+
+.task-card-flash[data-flash='running'] {
+  --task-flash: hsl(var(--running) / 0.42);
+}
+
+.task-card-flash[data-flash='success'] {
+  --task-flash: hsl(var(--success) / 0.4);
+}
+
+.task-card-flash[data-flash='failed'] {
+  --task-flash: hsl(var(--destructive) / 0.45);
+}
+
+.task-card-flash[data-flash='cancelled'] {
+  --task-flash: hsl(var(--warn) / 0.42);
+}
+
+.task-card-flash[data-flash='pending'] {
+  --task-flash: hsl(var(--muted-foreground) / 0.35);
+}
+
+.task-card-flash[data-flash='idle'] {
+  --task-flash: hsl(var(--border));
+}
+
+@keyframes task-card-border-flash {
+  0% {
+    border-color: var(--task-flash);
+    box-shadow: 0 0 0 1px var(--task-flash);
+  }
+  14% {
+    border-color: var(--task-flash);
+    box-shadow: 0 0 0 1px var(--task-flash);
+  }
+  100% {
+    border-color: hsl(var(--border));
+    box-shadow: none;
+  }
+}
+
+.fookie-cloud-mark {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.fookie-cloud-mark:hover {
+  opacity: 0.9;
+}
+
+.fookie-cloud-mark--sm {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.fookie-cloud-mark--sm:hover {
+  color: hsl(var(--foreground));
+}
+
+.fookie-cloud-word {
+  background-image: linear-gradient(
+    90deg,
+    #ec4899,
+    #a855f7,
+    #22d3ee
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

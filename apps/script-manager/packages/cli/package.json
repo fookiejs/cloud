@@ -1,0 +1,48 @@
+﻿{
+  "name": "@fookie/script-manager",
+  "version": "0.2.34",
+  "private": true,
+  "description": "Script Manager agent (Fookie Cloud) — run from the monorepo; not published to npm",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fookiejs/cloud.git",
+    "directory": "apps/script-manager/packages/cli"
+  },
+  "engines": {
+    "node": ">=26"
+  },
+  "bin": {
+    "script-manager": "dist/index.js"
+  },
+  "files": [
+    "dist/index.js",
+    "dist-server/**/*.js",
+    "dist-server/**/*.sql",
+    "public/**"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/static": "^9.1.3",
+    "@fastify/websocket": "^11.2.0",
+    "chokidar": "^4.0.1",
+    "dockerode": "^5.0.1",
+    "fastify": "^5.8.5",
+    "jose": "^6.0.11",
+    "micromatch": "^4.0.8",
+    "nanoid": "^5.0.9",
+    "node-cron": "^4.5.0",
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "@lotaru/server": "0.1.0",
+    "@types/node": "^26.0.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}
