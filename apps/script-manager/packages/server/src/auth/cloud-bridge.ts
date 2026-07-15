@@ -4,7 +4,7 @@ import type { EventBus } from '../events/bus.js';
 import { isAllowedBridgeMethod, isAllowedBridgePath } from './bridge-allowlist.js';
 import { agentHostname, getValidAccessTokenSilent, loadCredentials } from './credentials.js';
 
-const DEFAULT_GATEWAY = 'https://lotaru.fookiecloud.com';
+const DEFAULT_GATEWAY = 'https://script.fookiecloud.com';
 const PACKAGE_VERSION = process.env['LOTARU_VERSION'] ?? '0.2.0';
 const HEARTBEAT_MS = 20_000;
 const PONG_TIMEOUT_MS = 12_000;

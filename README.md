@@ -29,4 +29,4 @@ npm ci
 npm start
 ```
 
-Domain remains `https://lotaru.fookiecloud.com` during the transition.
+Domain: `https://script.fookiecloud.com` (legacy `lotaru.fookiecloud.com` still accepted).

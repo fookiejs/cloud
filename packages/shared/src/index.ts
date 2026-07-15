@@ -21,24 +21,24 @@ export type FookieOAuthClientConfig = {
 
 export const SCRIPT_MANAGER_OAUTH: FookieOAuthClientConfig = {
   clientId: "lotaru",
-  redirectUri: "https://lotaru.fookiecloud.com/callback",
+  redirectUri: "https://script.fookiecloud.com/callback",
   accessKey: "lotaru_access_token",
   refreshKey: "lotaru_refresh_token",
   userKey: "lotaru_user",
   pkceVerifierKey: "lotaru_pkce_verifier",
   oauthStateKey: "lotaru_oauth_state",
-  cloudHostname: "lotaru.fookiecloud.com",
+  cloudHostname: "script.fookiecloud.com",
 };
 
 export const TASK_BRIDGE_OAUTH: FookieOAuthClientConfig = {
   clientId: "task-bridge",
-  redirectUri: "https://task-bridge.fookiecloud.com/app/callback",
+  redirectUri: "https://task.fookiecloud.com/app/callback",
   accessKey: "task_bridge_access_token",
   refreshKey: "task_bridge_refresh_token",
   userKey: "task_bridge_user",
   pkceVerifierKey: "task_bridge_pkce_verifier",
   oauthStateKey: "task_bridge_oauth_state",
-  cloudHostname: "task-bridge.fookiecloud.com",
+  cloudHostname: "task.fookiecloud.com",
 };
 
 export const NOTES_OAUTH: FookieOAuthClientConfig = {

@@ -1,5 +1,5 @@
 const PROMETHEUS_URL = (process.env.PROMETHEUS_URL || "http://prometheus:9090").replace(/\/$/, "");
-const TASK_BRIDGE_URL = (process.env.TASK_BRIDGE_URL || "https://task-bridge.fookiecloud.com").replace(/\/$/, "");
+const TASK_BRIDGE_URL = (process.env.TASK_BRIDGE_URL || "https://task.fookiecloud.com").replace(/\/$/, "");
 const FOOKIE_API_KEY = process.env.FOOKIE_API_KEY || "";
 const TB_PROJECT_ID = process.env.TB_PROJECT_ID || "ops";
 const CRON_MS = Number(process.env.OPS_INTERVAL_MS || 6 * 60 * 60 * 1000);

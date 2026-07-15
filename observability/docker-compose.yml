@@ -183,7 +183,7 @@ services:
       dockerfile: Dockerfile
     environment:
       PROMETHEUS_URL: http://prometheus:9090
-      TASK_BRIDGE_URL: https://task-bridge.fookiecloud.com
+      TASK_BRIDGE_URL: https://task.fookiecloud.com
       FOOKIE_API_KEY: ${OPS_FOOKIE_API_KEY}
       TB_PROJECT_ID: ${OPS_TB_PROJECT_ID:-ops}
       OPS_INTERVAL_MS: ${OPS_INTERVAL_MS:-21600000}

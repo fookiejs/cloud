@@ -16,7 +16,7 @@ import { registerLocalApiAuth } from './auth/local-auth.js';
 import { ensureLocalApiToken } from './auth/local-token.js';
 
 const DEFAULT_PORT = 4317;
-const CONSOLE_URL = process.env['LOTARU_CONSOLE_URL'] ?? 'https://lotaru.fookiecloud.com';
+const CONSOLE_URL = process.env['LOTARU_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
 
 interface StartOptions {
   port: number;

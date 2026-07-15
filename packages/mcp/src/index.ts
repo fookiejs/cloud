@@ -5,11 +5,11 @@ import { z } from "zod";
 
 const FOOKIE_API_KEY = process.env.FOOKIE_API_KEY || "";
 const NOTES_URL = (process.env.NOTES_URL || "https://notes.fookiecloud.com").replace(/\/$/, "");
-const TASK_BRIDGE_URL = (process.env.TASK_BRIDGE_URL || "https://task-bridge.fookiecloud.com").replace(
+const TASK_BRIDGE_URL = (process.env.TASK_BRIDGE_URL || "https://task.fookiecloud.com").replace(
   /\/$/,
   "",
 );
-const LOTARU_API_URL = (process.env.LOTARU_API_URL || "https://lotaru.fookiecloud.com").replace(
+const LOTARU_API_URL = (process.env.LOTARU_API_URL || "https://script.fookiecloud.com").replace(
   /\/$/,
   "",
 );

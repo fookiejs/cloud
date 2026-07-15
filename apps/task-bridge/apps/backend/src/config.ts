@@ -27,7 +27,7 @@ const taskBridgeClientId = getEnv("TASK_BRIDGE_CLIENT_ID") || "task-bridge";
 const fookieMode = getEnv("FOOKIE_MODE") !== "0";
 const fookieIntrospectSecret = getEnv("FOOKIE_INTROSPECT_SECRET") || "";
 const metricsToken = getEnv("METRICS_TOKEN") || "";
-const allowedOrigins = (getEnv("ALLOWED_ORIGINS") || "https://task-bridge.fookiecloud.com")
+const allowedOrigins = (getEnv("ALLOWED_ORIGINS") || "https://task.fookiecloud.com,https://task-bridge.fookiecloud.com")
   .split(",")
   .map((o) => o.trim())
   .filter((o) => o.length > 0);

@@ -21,7 +21,7 @@ const CLOUD_MCP = `{
       "command": "npx",
       "args": ["-y", "@umudik/task-bridge-mcp"],
       "env": {
-        "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
+        "TASK_BRIDGE_URL": "https://task.fookiecloud.com",
         "FOOKIE_API_KEY": "<paste-key>"
       }
     }
@@ -29,7 +29,10 @@ const CLOUD_MCP = `{
 }`;
 
 function isCloudHost(): boolean {
-  return window.location.hostname === "task-bridge.fookiecloud.com";
+  return (
+    window.location.hostname === "task.fookiecloud.com" ||
+    window.location.hostname === "task-bridge.fookiecloud.com"
+  );
 }
 
 export function McpSetup() {

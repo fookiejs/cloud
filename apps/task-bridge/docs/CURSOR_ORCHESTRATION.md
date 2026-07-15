@@ -17,7 +17,7 @@ Use both MCP servers in `.cursor/mcp.json` so Cursor plans work in Task Bridge a
       "command": "npx",
       "args": ["-y", "@umudik/task-bridge-mcp"],
       "env": {
-        "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
+        "TASK_BRIDGE_URL": "https://task.fookiecloud.com",
         "FOOKIE_API_KEY": "<paste-key>"
       }
     },
@@ -25,7 +25,7 @@ Use both MCP servers in `.cursor/mcp.json` so Cursor plans work in Task Bridge a
       "command": "npx",
       "args": ["-y", "@umudik/lotaru-mcp"],
       "env": {
-        "LOTARU_API_URL": "https://lotaru.fookiecloud.com",
+        "LOTARU_API_URL": "https://script.fookiecloud.com",
         "FOOKIE_API_KEY": "<paste-key>"
       }
     }

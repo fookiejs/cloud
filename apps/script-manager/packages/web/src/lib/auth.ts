@@ -1,6 +1,10 @@
 const AUTH = 'https://auth.fookiecloud.com';
 const CLIENT_ID = 'lotaru';
-const REDIRECT_URI = 'https://lotaru.fookiecloud.com/callback';
+const CLOUD_HOSTS = new Set(['script.fookiecloud.com', 'lotaru.fookiecloud.com']);
+const REDIRECT_URI =
+  typeof window !== 'undefined' && CLOUD_HOSTS.has(window.location.hostname)
+    ? `${window.location.origin}/callback`
+    : 'https://script.fookiecloud.com/callback';
 const ACCESS_KEY = 'lotaru_access_token';
 const REFRESH_KEY = 'lotaru_refresh_token';
 const USER_KEY = 'lotaru_user';
@@ -11,7 +15,7 @@ let exchangeInFlight: Promise<void> | null = null;
 let exchangeInFlightCode: string | null = null;
 
 function isCloudHost(): boolean {
-  return window.location.hostname === 'lotaru.fookiecloud.com';
+  return CLOUD_HOSTS.has(window.location.hostname);
 }
 
 function base64url(bytes: Uint8Array): string {

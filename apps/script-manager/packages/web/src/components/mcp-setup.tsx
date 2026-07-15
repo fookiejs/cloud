@@ -11,8 +11,8 @@ const FOOKIE_CLOUD_MCP = `{
       "env": {
         "FOOKIE_API_KEY": "<paste-key>",
         "NOTES_URL": "https://notes.fookiecloud.com",
-        "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
-        "LOTARU_API_URL": "https://lotaru.fookiecloud.com"
+        "TASK_BRIDGE_URL": "https://task.fookiecloud.com",
+        "LOTARU_API_URL": "https://script.fookiecloud.com"
       }
     }
   }

@@ -1,6 +1,6 @@
 # @umudik/task-bridge-mcp
 
-MCP server for [Task Bridge](https://task-bridge.fookiecloud.com) — claim tasks, read agent context, complete work from Cursor.
+MCP server for [Task Bridge](https://task.fookiecloud.com) — claim tasks, read agent context, complete work from Cursor.
 
 ## Cursor config
 
@@ -13,7 +13,7 @@ Cloud with a Fookie API key (from [fookiecloud.com/profile](https://fookiecloud.
       "command": "npx",
       "args": ["-y", "@umudik/task-bridge-mcp"],
       "env": {
-        "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
+        "TASK_BRIDGE_URL": "https://task.fookiecloud.com",
         "FOOKIE_API_KEY": "<paste-key>"
       }
     }

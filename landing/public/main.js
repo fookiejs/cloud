@@ -10,9 +10,9 @@ const OAUTH_STATE_KEY = "fookie_oauth_state";
 const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
 
 const APPS = {
-  lotaru: "https://lotaru.fookiecloud.com",
-  "script-manager": "https://lotaru.fookiecloud.com",
-  "task-bridge": "https://task-bridge.fookiecloud.com",
+  lotaru: "https://script.fookiecloud.com",
+  "script-manager": "https://script.fookiecloud.com",
+  "task-bridge": "https://task.fookiecloud.com",
   notes: "https://notes.fookiecloud.com",
 };
 
@@ -33,8 +33,8 @@ const FOOKIE_CLOUD_MCP = `{
       "env": {
         "FOOKIE_API_KEY": "<paste-key>",
         "NOTES_URL": "https://notes.fookiecloud.com",
-        "TASK_BRIDGE_URL": "https://task-bridge.fookiecloud.com",
-        "LOTARU_API_URL": "https://lotaru.fookiecloud.com"
+        "TASK_BRIDGE_URL": "https://task.fookiecloud.com",
+        "LOTARU_API_URL": "https://script.fookiecloud.com"
       }
     }
   }

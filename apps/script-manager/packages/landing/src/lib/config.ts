@@ -1,6 +1,10 @@
 const AUTH = 'https://auth.fookiecloud.com';
 const CLIENT_ID = 'lotaru';
-const REDIRECT_URI = 'https://lotaru.fookiecloud.com/callback';
+const CLOUD_HOSTS = new Set(['script.fookiecloud.com', 'lotaru.fookiecloud.com']);
+const REDIRECT_URI =
+  typeof window !== 'undefined' && CLOUD_HOSTS.has(window.location.hostname)
+    ? `${window.location.origin}/callback`
+    : 'https://script.fookiecloud.com/callback';
 const GITHUB_URL = 'https://github.com/umudik/lotaru';
 const INSTALL_CMD = 'git clone --depth 1 https://github.com/fookiejs/cloud.git && cd cloud/apps/script-manager && npm ci && npm start';
 const ACCESS_KEY = 'lotaru_access_token';

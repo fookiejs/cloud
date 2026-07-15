@@ -22,7 +22,7 @@ export function resolveBaseUrl() {
   if (typeof fromEnv === "string" && fromEnv.trim().length > 0) {
     return trimTrailingSlash(fromEnv.trim());
   }
-  return "https://task-bridge.fookiecloud.com";
+  return "https://task.fookiecloud.com";
 }
 
 export function resolveToken() {

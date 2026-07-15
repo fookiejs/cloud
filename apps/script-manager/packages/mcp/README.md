@@ -1,6 +1,6 @@
 # @umudik/lotaru-mcp
 
-MCP server for [Lotaru](https://lotaru.fookiecloud.com) — list/create/run tasks from Cursor.
+MCP server for [Lotaru](https://script.fookiecloud.com) — list/create/run tasks from Cursor.
 
 ## Cursor config
 
@@ -26,7 +26,7 @@ Cloud console with a Fookie API key (from [fookiecloud.com](https://fookiecloud.
       "command": "npx",
       "args": ["-y", "@umudik/lotaru-mcp"],
       "env": {
-        "LOTARU_API_URL": "https://lotaru.fookiecloud.com",
+        "LOTARU_API_URL": "https://script.fookiecloud.com",
         "FOOKIE_API_KEY": "<paste-key>"
       }
     }

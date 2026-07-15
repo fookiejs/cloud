@@ -17,7 +17,7 @@ import {
 import { registerObservability } from './observability.js';
 
 const PORT = Number.parseInt(process.env['PORT'] ?? '8080', 10);
-const PUBLIC_URL = process.env['PUBLIC_URL'] ?? 'https://lotaru.fookiecloud.com';
+const PUBLIC_URL = process.env['PUBLIC_URL'] ?? 'https://script.fookiecloud.com';
 const REDIRECT_URI = `${PUBLIC_URL}/callback`;
 
 const ALLOWED_ORIGINS = new Set(

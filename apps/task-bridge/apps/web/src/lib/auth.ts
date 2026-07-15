@@ -1,9 +1,11 @@
 const AUTH = "https://auth.fookiecloud.com";
 const CLIENT_ID = "task-bridge";
+const CLOUD_HOSTS = new Set(["task.fookiecloud.com", "task-bridge.fookiecloud.com"]);
 const REDIRECT_URI =
-  typeof window !== "undefined" && window.location.hostname === "localhost"
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" || CLOUD_HOSTS.has(window.location.hostname))
     ? `${window.location.origin}/app/callback`
-    : "https://task-bridge.fookiecloud.com/app/callback";
+    : "https://task.fookiecloud.com/app/callback";
 const ACCESS_KEY = "task_bridge_access_token";
 const REFRESH_KEY = "task_bridge_refresh_token";
 const PKCE_VERIFIER_KEY = "task_bridge_pkce_verifier";
