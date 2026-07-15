@@ -1,8 +1,7 @@
 ﻿{
-  "name": "@fookie/script-manager",
-  "version": "0.2.34",
-  "private": true,
-  "description": "Script Manager agent (Fookie Cloud) — run from the monorepo; not published to npm",
+  "name": "@umudik/lotaru",
+  "version": "0.2.36",
+  "description": "Script Manager agent (Fookie Cloud) — run shell tasks on your machine from the browser",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -10,10 +9,12 @@
     "url": "git+https://github.com/fookiejs/cloud.git",
     "directory": "apps/script-manager/packages/cli"
   },
+  "homepage": "https://script.fookiecloud.com",
   "engines": {
-    "node": ">=26"
+    "node": ">=20"
   },
   "bin": {
+    "lotaru": "dist/index.js",
     "script-manager": "dist/index.js"
   },
   "files": [
@@ -25,6 +26,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/index.ts",
+    "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -44,5 +46,8 @@
     "@types/node": "^26.0.1",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -5,10 +5,10 @@ Local-first task orchestration for your machine. Define shell tasks on a project
 ## Run
 
 ```bash
-git clone --depth 1 https://github.com/fookiejs/cloud.git && cd cloud/apps/script-manager && npm ci && npm start
+npx -y @umudik/lotaru@latest
 ```
 
-Opens http://127.0.0.1:4317 and stores data in `~/.lotaru/`.
+Opens the local agent and stores data in `~/.lotaru/`. Sign in when prompted to connect to https://script.fookiecloud.com.
 
 ### Requirements
 

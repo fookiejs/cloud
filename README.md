@@ -20,13 +20,10 @@ Monorepo for Fookie Cloud apps.
 | `packages/shared` | Shared TypeScript constants / OAuth client configs |
 | `packages/mcp` | Unified Cursor MCP (`@umudik/fookie-cloud-mcp`) |
 
-## Script Manager agent (no npm publish)
+## Script Manager agent
 
 ```bash
-git clone --depth 1 https://github.com/fookiejs/cloud.git
-cd cloud/apps/script-manager
-npm ci
-npm start
+npx -y @umudik/lotaru@latest
 ```
 
 Domain: `https://script.fookiecloud.com` (legacy `lotaru.fookiecloud.com` still accepted).

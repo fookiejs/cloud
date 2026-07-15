@@ -5,7 +5,7 @@ import { FookieCloudMark } from '@/components/fookie-cloud-mark';
 import { Button } from '@/components/ui/button';
 import type { AgentInfo } from '@/hooks/use-agent-connection';
 
-const INSTALL_CMD = 'git clone --depth 1 https://github.com/fookiejs/cloud.git && cd cloud/apps/script-manager && npm ci && npm start';
+const INSTALL_CMD = 'npx -y @umudik/lotaru@latest';
 
 interface Props {
   info: AgentInfo | null;

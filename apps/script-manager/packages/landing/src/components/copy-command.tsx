@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const INSTALL_CMD = 'git clone --depth 1 https://github.com/fookiejs/cloud.git && cd cloud/apps/script-manager && npm ci && npm start';
+const INSTALL_CMD = 'npx -y @umudik/lotaru@latest';
 
 interface Props {
   className?: string;
