@@ -1,10 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { LotaruApi } from './api-client.js';
+import { ScriptApi } from './api-client.js';
 import { registerTools } from './tools.js';
 
-export function createLotaruMcpServer(api: LotaruApi): McpServer {
+export function createScriptMcpServer(api: ScriptApi): McpServer {
   const server = new McpServer({
-    name: 'lotaru',
+    name: 'script',
     version: '0.1.0',
   });
   registerTools(server, api);

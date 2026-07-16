@@ -80,12 +80,12 @@ export function useAgentConnection(): AgentConnection {
       setInfo(detail.info ?? null);
       setChecking(false);
     }
-    window.addEventListener('lotaru:agent', onAgent);
+    window.addEventListener('script:agent', onAgent);
 
     return () => {
       cancelled = true;
       window.clearInterval(id);
-      window.removeEventListener('lotaru:agent', onAgent);
+      window.removeEventListener('script:agent', onAgent);
     };
   }, []);
 

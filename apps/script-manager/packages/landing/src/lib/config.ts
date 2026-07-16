@@ -1,17 +1,17 @@
 const AUTH = 'https://auth.fookiecloud.com';
-const CLIENT_ID = 'lotaru';
+const CLIENT_ID = 'script';
 const CLOUD_HOSTS = new Set(['script.fookiecloud.com', 'lotaru.fookiecloud.com']);
 const REDIRECT_URI =
   typeof window !== 'undefined' && CLOUD_HOSTS.has(window.location.hostname)
     ? `${window.location.origin}/callback`
     : 'https://script.fookiecloud.com/callback';
-const GITHUB_URL = 'https://github.com/umudik/lotaru';
-const INSTALL_CMD = 'npx -y @umudik/lotaru@latest';
-const ACCESS_KEY = 'lotaru_access_token';
-const REFRESH_KEY = 'lotaru_refresh_token';
-const USER_KEY = 'lotaru_user';
-const PKCE_VERIFIER_KEY = 'lotaru_pkce_verifier';
-const OAUTH_STATE_KEY = 'lotaru_oauth_state';
+const GITHUB_URL = 'https://github.com/fookiejs/cloud';
+const INSTALL_CMD = 'npx -y @umudik/script@latest';
+const ACCESS_KEY = 'script_access_token';
+const REFRESH_KEY = 'script_refresh_token';
+const USER_KEY = 'script_user';
+const PKCE_VERIFIER_KEY = 'script_pkce_verifier';
+const OAUTH_STATE_KEY = 'script_oauth_state';
 
 function base64url(bytes: Uint8Array): string {
   let s = '';

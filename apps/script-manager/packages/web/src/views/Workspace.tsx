@@ -53,7 +53,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewportMaxDetail, setViewportMaxDetail] = useState(960);
   const detailResize = useDragResize({
-    storageKey: 'lotaru-workspace-detail-width',
+    storageKey: 'script-workspace-detail-width',
     initial: 560,
     min: 400,
     max: viewportMaxDetail,

@@ -20,13 +20,13 @@ export type FookieOAuthClientConfig = {
 };
 
 export const SCRIPT_MANAGER_OAUTH: FookieOAuthClientConfig = {
-  clientId: "lotaru",
+  clientId: "script",
   redirectUri: "https://script.fookiecloud.com/callback",
-  accessKey: "lotaru_access_token",
-  refreshKey: "lotaru_refresh_token",
-  userKey: "lotaru_user",
-  pkceVerifierKey: "lotaru_pkce_verifier",
-  oauthStateKey: "lotaru_oauth_state",
+  accessKey: "script_access_token",
+  refreshKey: "script_refresh_token",
+  userKey: "script_user",
+  pkceVerifierKey: "script_pkce_verifier",
+  oauthStateKey: "script_oauth_state",
   cloudHostname: "script.fookiecloud.com",
 };
 

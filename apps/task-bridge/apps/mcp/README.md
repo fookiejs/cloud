@@ -40,14 +40,14 @@ Local dev (`npm run dev` in task-bridge repo):
 
 Also accepted: `FOOKIE_API_KEY` with cloud URL.
 
-## Orchestration loop (with Lotaru)
+## Orchestration loop (with Script)
 
 1. `claim_next_task` — take the next workflow task
 2. `get_task_context` — description, brief, full comments, epic stage
-3. Implement in Cursor; run shell on your machine via `@umudik/lotaru-mcp` (`task-create` + `task-run`, e.g. `gh pr create`)
+3. Implement in Cursor; run shell on your machine via `@umudik/script-mcp` (`task-create` + `task-run`, e.g. `gh pr create`)
 4. `complete_task` — mark done, append summary + PR URL, unclaim, get next claimable task
 
-Pair with Lotaru MCP in the same `.cursor/mcp.json` for local execution and PR creation.
+Pair with Script MCP in the same `.cursor/mcp.json` for local execution and PR creation.
 
 ## Key tools
 

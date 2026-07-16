@@ -15,7 +15,7 @@ export interface WatcherManager {
   closeAll(): Promise<void>;
 }
 
-const IGNORED_SEGMENTS = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.lotaru']);
+const IGNORED_SEGMENTS = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.script']);
 
 function shouldIgnorePath(path: string): boolean {
   const normalised = path.replace(/\\/g, '/');

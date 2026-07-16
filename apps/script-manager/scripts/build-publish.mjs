@@ -61,12 +61,12 @@ function verifyPublishBundle() {
   }
 }
 
-run('npm --workspace @lotaru/web run build');
+run('npm --workspace @script/web run build');
 
 if (existsSync(serverDist)) {
   rmSync(serverDist, { recursive: true, force: true });
 }
-run('npm --workspace @lotaru/server run build');
+run('npm --workspace @script/server run build');
 
 if (!existsSync(serverDist)) {
   console.error('[build-publish] server dist missing');
@@ -84,7 +84,7 @@ pruneDir(cliDistServer);
 console.log('[build-publish] copied server/dist -> cli/dist-server');
 
 run('node scripts/cp-public.mjs');
-run('npm --workspace @umudik/lotaru run build');
+run('npm --workspace @umudik/script run build');
 
 verifyPublishBundle();
 

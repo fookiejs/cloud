@@ -8,7 +8,7 @@ discovery.docker "fookie" {
   refresh_interval = "10s"
   filter {
     name   = "name"
-    values = [".*auth.*", ".*lotaru.*", ".*task-bridge.*", ".*taskbridge.*"]
+    values = [".*auth.*", ".*lotaru.*", ".*script.*", ".*task-bridge.*", ".*taskbridge.*"]
   }
 }
 
@@ -30,9 +30,9 @@ discovery.relabel "fookie" {
 
   rule {
     source_labels = ["container"]
-    regex         = "(?i).*(lotaru).*"
+    regex         = "(?i).*(lotaru|script).*"
     target_label  = "service"
-    replacement   = "lotaru"
+    replacement   = "script"
   }
 
   rule {

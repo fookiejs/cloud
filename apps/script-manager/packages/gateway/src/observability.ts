@@ -8,10 +8,10 @@ import {
   collectDefaultMetrics,
 } from 'prom-client';
 
-const SERVICE = 'lotaru';
+const SERVICE = 'script';
 
 const register = new Registry();
-collectDefaultMetrics({ register, prefix: 'lotaru_' });
+collectDefaultMetrics({ register, prefix: 'script_' });
 
 const httpRequests = new Counter({
   name: 'http_requests_total',

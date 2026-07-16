@@ -24,7 +24,7 @@ export type AssigneeKind = "ai" | "";
 export type CommentMetadata = Record<string, string | number | boolean | null>;
 
 export type AgentMetadata = {
-  lotaruRefs?: string[];
+  scriptRefs?: string[];
   prUrl?: string | null;
 };
 

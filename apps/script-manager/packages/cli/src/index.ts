@@ -5,7 +5,7 @@ import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DEFAULT_PORT = 4317;
-const CONSOLE_URL = process.env['LOTARU_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
+const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
 
 interface StartOptions {
   port: number;
@@ -16,7 +16,7 @@ interface StartOptions {
 type StartFn = (opts: StartOptions) => Promise<void>;
 
 function resolvePort(): number {
-  const envPort = process.env['LOTARU_PORT'];
+  const envPort = process.env['SCRIPT_PORT'];
   if (typeof envPort !== 'string' || envPort.length === 0) {
     return DEFAULT_PORT;
   }
@@ -38,13 +38,13 @@ async function loadStart(): Promise<StartFn> {
     const mod = (await import(pathToFileURL(bundled).href)) as { start: StartFn };
     return mod.start;
   }
-  const mod = await import('@lotaru/server');
+  const mod = await import('@script/server');
   return mod.start;
 }
 
 async function main(): Promise<void> {
   const port = resolvePort();
-  const dataDir = join(homedir(), '.lotaru');
+  const dataDir = join(homedir(), '.script');
   const staticDir = resolveStaticDir();
   const start = await loadStart();
   await start({ port, dataDir, staticDir });

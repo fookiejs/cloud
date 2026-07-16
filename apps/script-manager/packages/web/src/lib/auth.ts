@@ -1,15 +1,15 @@
 const AUTH = 'https://auth.fookiecloud.com';
-const CLIENT_ID = 'lotaru';
+const CLIENT_ID = 'script';
 const CLOUD_HOSTS = new Set(['script.fookiecloud.com', 'lotaru.fookiecloud.com']);
 const REDIRECT_URI =
   typeof window !== 'undefined' && CLOUD_HOSTS.has(window.location.hostname)
     ? `${window.location.origin}/callback`
     : 'https://script.fookiecloud.com/callback';
-const ACCESS_KEY = 'lotaru_access_token';
-const REFRESH_KEY = 'lotaru_refresh_token';
-const USER_KEY = 'lotaru_user';
-const PKCE_VERIFIER_KEY = 'lotaru_pkce_verifier';
-const OAUTH_STATE_KEY = 'lotaru_oauth_state';
+const ACCESS_KEY = 'script_access_token';
+const REFRESH_KEY = 'script_refresh_token';
+const USER_KEY = 'script_user';
+const PKCE_VERIFIER_KEY = 'script_pkce_verifier';
+const OAUTH_STATE_KEY = 'script_oauth_state';
 
 let exchangeInFlight: Promise<void> | null = null;
 let exchangeInFlightCode: string | null = null;

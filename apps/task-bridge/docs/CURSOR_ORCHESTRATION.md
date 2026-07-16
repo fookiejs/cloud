@@ -1,12 +1,12 @@
-# Cursor orchestration: Task Bridge + Lotaru
+# Cursor orchestration: Task Bridge + Script
 
-Use both MCP servers in `.cursor/mcp.json` so Cursor plans work in Task Bridge and runs commands on your machine via Lotaru.
+Use both MCP servers in `.cursor/mcp.json` so Cursor plans work in Task Bridge and runs commands on your machine via Script.
 
 ## Prerequisites
 
 1. API key from [fookiecloud.com/profile](https://fookiecloud.com/profile)
-2. Local Lotaru agent: `npx -y @umudik/lotaru@latest` (sign in when prompted)
-3. `gh` CLI authenticated on the machine where Lotaru runs (for PR creation)
+2. Local Script agent: `npx -y @umudik/script@latest` (sign in when prompted)
+3. `gh` CLI authenticated on the machine where Script runs (for PR creation)
 
 ## MCP config (cloud)
 
@@ -21,12 +21,13 @@ Use both MCP servers in `.cursor/mcp.json` so Cursor plans work in Task Bridge a
         "FOOKIE_API_KEY": "<paste-key>"
       }
     },
-    "lotaru": {
+    "fookie-cloud": {
       "command": "npx",
-      "args": ["-y", "@umudik/lotaru-mcp"],
+      "args": ["-y", "@umudik/fookie-cloud-mcp"],
       "env": {
-        "LOTARU_API_URL": "https://script.fookiecloud.com",
-        "FOOKIE_API_KEY": "<paste-key>"
+        "FOOKIE_API_KEY": "<paste-key>",
+        "SCRIPT_API_URL": "https://script.fookiecloud.com",
+        "TASK_BRIDGE_URL": "https://task.fookiecloud.com"
       }
     }
   }
@@ -38,16 +39,16 @@ Reload MCP in Cursor after saving.
 ## Loop per task
 
 1. **Claim** — `claim_next_task` with your `projectId`
-2. **Context** — `get_task_context` on the claimed `taskId` (description, brief, all comments, epic stage)
-3. **Work** — implement in the repo; use `update_task_brief` and `add_comment` with `role: system` for decisions (keeps claim)
-4. **Run** — Lotaru `task-create` (shell) + `task-run` for tests, builds, or `gh pr create ...`
+2. **Context** — `get_task_context` on the claimed `taskId` (description, brief, all comments, epic stage, `replyLanguage`, `agentInstructions`)
+3. **Work** — implement in the repo; use `update_task_brief` and `add_comment` with `role: system` for decisions (keeps claim). Comments, completion, and Notes must match the epic Objective language (`replyLanguage` / `agentInstructions`).
+4. **Run** — Script `task-create` (shell) + `task-run` for tests, builds, or `gh pr create ...`
 5. **Complete** — `complete_task` with `summary` and `prUrl`; response includes epic stage and next claimable task
 
 ## Example Cursor instruction
 
 ```
 Claim the next Task Bridge task for project <id>. Read full context. Implement the change.
-Run tests via Lotaru shell task. Open a PR with gh. Complete the Task Bridge task with the PR URL.
+Run tests via Script shell task. Open a PR with gh. Complete the Task Bridge task with the PR URL.
 ```
 
 ## Agent context

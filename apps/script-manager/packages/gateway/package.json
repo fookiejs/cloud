@@ -1,5 +1,5 @@
 {
-  "name": "@lotaru/gateway",
+  "name": "@script/gateway",
   "version": "0.1.0",
   "private": true,
   "type": "module",

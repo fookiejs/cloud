@@ -1,7 +1,7 @@
 import type { Store } from './db/index.js';
 import type { ConcurrencyKind, RuntimeKind, TriggerKind } from './types.js';
 
-export const PROJECT_EXPORT_FORMAT = 'lotaru-project';
+export const PROJECT_EXPORT_FORMAT = 'script-project';
 export const PROJECT_EXPORT_VERSION = 1;
 
 export interface ProjectExportTask {

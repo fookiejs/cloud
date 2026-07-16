@@ -120,7 +120,7 @@ export function createOrchestrator(
     bus.emit({
       kind: 'execution.log',
       executionId,
-      line: '[lotaru] marked cancelled (no live process)',
+      line: '[script] marked cancelled (no live process)',
       stream: 'out',
       ts: Date.now(),
     });
@@ -138,7 +138,7 @@ export function createOrchestrator(
         bus.emit({
           kind: 'execution.log',
           executionId: `drop-${nanoid(6)}`,
-          line: `[lotaru] trigger dropped (${task.concurrency}): ${reason.detail}`,
+          line: `[script] trigger dropped (${task.concurrency}): ${reason.detail}`,
           stream: 'out',
           ts: Date.now(),
         });
@@ -194,7 +194,7 @@ export function createOrchestrator(
     const customEnv = store.resolveActiveEnvVars(task.workspace_id);
     const envSummary = envKeySummary(customEnv);
     if (envSummary.length > 0) {
-      onLine(`[lotaru] env keys=${envSummary}`, 'out');
+      onLine(`[script] env keys=${envSummary}`, 'out');
     }
 
     const isolated = task.runtime === 'docker';
@@ -204,7 +204,7 @@ export function createOrchestrator(
     if (task.runtime === 'docker') {
       const image = task.docker_image;
       if (image === null || image === '') {
-        onLine('[lotaru] docker_image missing', 'err');
+        onLine('[script] docker_image missing', 'err');
         onExit(null, false);
         return;
       }
@@ -212,7 +212,7 @@ export function createOrchestrator(
       if (platform !== null) {
         platformNote = ` platform=${platform}`;
       }
-      onLine(`[lotaru] docker image=${image}${platformNote}`, 'out');
+      onLine(`[script] docker image=${image}${platformNote}`, 'out');
       handle = runDocker({
         command: task.command,
         cwd: workspace.path,
@@ -224,7 +224,7 @@ export function createOrchestrator(
         onExit,
       });
     } else {
-      onLine(`[lotaru] shell cwd=${workspace.path}`, 'out');
+      onLine(`[script] shell cwd=${workspace.path}`, 'out');
       handle = runShell({
         command: task.command,
         cwd: workspace.path,

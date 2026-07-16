@@ -35,6 +35,8 @@ export type TaskContextPayload = {
   projectName: string;
   parentId: number | null;
   epicId: number | null;
+  replyLanguage: string;
+  agentInstructions: string;
   epic: {
     taskId: number;
     title: string;
@@ -49,6 +51,22 @@ export type TaskContextPayload = {
   } | null;
   workflowState: ReturnType<typeof listWorkflowStateSummaries>;
 };
+
+const LANGUAGE_INSTRUCTION =
+  "Write comments, brief updates, completion summaries, and Notes bodies in the same language as the epic Objective / primary user-facing description. Workflow UI labels may stay English.";
+
+function inferReplyLanguage(text: string): string {
+  if (
+    /[ğüşıöçĞÜŞİÖÇ]/.test(text) ||
+    /\b(ve|bir|için|değerlendir|yükle|olası|metrik|özet|yorum|türkçe)\b/i.test(text)
+  ) {
+    return "tr";
+  }
+  if (/\b(the|and|evaluate|upload|metrics|summary|comment)\b/i.test(text)) {
+    return "en";
+  }
+  return "match-epic";
+}
 
 function resolveStageTitle(
   stageId: string | null,
@@ -103,6 +121,12 @@ export function buildTaskContext(task: BridgeTask): TaskContextPayload {
     workflowState = listWorkflowStateSummaries(epicId);
   }
 
+  const languageSource =
+    epicPayload?.description ||
+    parentPayload?.description ||
+    canonicalDescription(task);
+  const replyLanguage = inferReplyLanguage(languageSource);
+
   return {
     taskId: task.id,
     title: task.title,
@@ -119,6 +143,8 @@ export function buildTaskContext(task: BridgeTask): TaskContextPayload {
     projectName: task.projectName,
     parentId: task.parentId,
     epicId,
+    replyLanguage,
+    agentInstructions: LANGUAGE_INSTRUCTION,
     epic: epicPayload,
     parent: parentPayload,
     workflowState,

@@ -39,7 +39,7 @@ export function connectStream(): Stream {
       const rec = parsed as Record<string, unknown>;
       if (rec['type'] === 'agent.status') {
         window.dispatchEvent(
-          new CustomEvent('lotaru:agent', {
+          new CustomEvent('script:agent', {
             detail: {
               online: rec['online'] === true,
               info: (rec['info'] as { hostname: string; version: string; connectedAt: number } | null) ?? null,

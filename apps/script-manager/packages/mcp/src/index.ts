@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { LotaruApi } from './api-client.js';
-import { createLotaruMcpServer } from './server.js';
+import { ScriptApi } from './api-client.js';
+import { createScriptMcpServer } from './server.js';
 
 async function main(): Promise<void> {
-  const api = LotaruApi.fromEnv();
-  const server = createLotaruMcpServer(api);
+  const api = ScriptApi.fromEnv();
+  const server = createScriptMcpServer(api);
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

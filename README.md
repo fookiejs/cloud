@@ -6,7 +6,7 @@ Monorepo for Fookie Cloud apps.
 
 | Path | Product |
 |------|---------|
-| `apps/script-manager` | Script Manager (formerly Lotaru) — local agent + cloud gateway |
+| `apps/script-manager` | Script Manager — local agent + cloud gateway |
 | `apps/task-bridge` | Task Bridge |
 | `auth` | Shared OIDC / Google auth |
 | `landing` | fookiecloud.com |
@@ -23,7 +23,7 @@ Monorepo for Fookie Cloud apps.
 ## Script Manager agent
 
 ```bash
-npx -y @umudik/lotaru@latest
+npx -y @umudik/script@latest
 ```
 
 Domain: `https://script.fookiecloud.com` (legacy `lotaru.fookiecloud.com` still accepted).

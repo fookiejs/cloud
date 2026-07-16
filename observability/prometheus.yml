@@ -21,7 +21,7 @@ scrape_configs:
         refresh_interval: 15s
     relabel_configs:
       - source_labels: [__meta_docker_container_name]
-        regex: "(?i).*(auth|lotaru|task-bridge|taskbridge).*"
+        regex: "(?i).*(auth|lotaru|script|task-bridge|taskbridge).*"
         action: keep
       - source_labels: [__meta_docker_port_private]
         regex: "^(8080|3000)$"
@@ -31,9 +31,9 @@ scrape_configs:
         target_label: service
         replacement: auth
       - source_labels: [__meta_docker_container_name]
-        regex: "(?i).*(lotaru).*"
+        regex: "(?i).*(lotaru|script).*"
         target_label: service
-        replacement: lotaru
+        replacement: script
       - source_labels: [__meta_docker_container_name]
         regex: "(?i).*(task-bridge|taskbridge).*"
         target_label: service

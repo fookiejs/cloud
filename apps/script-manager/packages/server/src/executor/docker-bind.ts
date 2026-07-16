@@ -11,7 +11,7 @@ export function dockerWorkspaceBind(hostPath: string): string {
 
 export function dockerMountLogLine(hostPath: string): string {
   const bindHost = dockerBindSource(hostPath);
-  return `[lotaru] docker mount ${bindHost} -> /workspace`;
+  return `[script] docker mount ${bindHost} -> /workspace`;
 }
 
 export function needsOneDriveBindHint(hostPath: string): boolean {

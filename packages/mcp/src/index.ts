@@ -9,11 +9,11 @@ const TASK_BRIDGE_URL = (process.env.TASK_BRIDGE_URL || "https://task.fookieclou
   /\/$/,
   "",
 );
-const LOTARU_API_URL = (process.env.LOTARU_API_URL || "https://script.fookiecloud.com").replace(
+const SCRIPT_API_URL = (process.env.SCRIPT_API_URL || "https://script.fookiecloud.com").replace(
   /\/$/,
   "",
 );
-const ENABLE_LOTARU = String(process.env.FOOKIE_MCP_ENABLE_LOTARU || "1") !== "0";
+const ENABLE_SCRIPT = String(process.env.FOOKIE_MCP_ENABLE_SCRIPT || "1") !== "0";
 
 if (!FOOKIE_API_KEY) {
   process.stderr.write("FOOKIE_API_KEY is required\n");
@@ -195,51 +195,51 @@ server.tool(
     ),
 );
 
-if (ENABLE_LOTARU) {
-  server.tool("lotaru_workspace_list", "List Lotaru workspaces", {}, async () =>
-    textResult(await api(LOTARU_API_URL, "GET", "/api/v1/workspaces")),
+if (ENABLE_SCRIPT) {
+  server.tool("script_workspace_list", "List Script workspaces", {}, async () =>
+    textResult(await api(SCRIPT_API_URL, "GET", "/api/v1/workspaces")),
   );
 
   server.tool(
-    "lotaru_task_list",
-    "List Lotaru tasks in a workspace",
+    "script_task_list",
+    "List Script tasks in a workspace",
     { workspaceId: z.string().min(1) },
     async ({ workspaceId }) =>
-      textResult(await api(LOTARU_API_URL, "GET", `/api/v1/workspaces/${workspaceId}/tasks`)),
+      textResult(await api(SCRIPT_API_URL, "GET", `/api/v1/workspaces/${workspaceId}/tasks`)),
   );
 
   server.tool(
-    "lotaru_task_one",
-    "Get Lotaru task",
+    "script_task_one",
+    "Get Script task",
     { id: z.string().min(1) },
-    async ({ id }) => textResult(await api(LOTARU_API_URL, "GET", `/api/v1/tasks/${id}`)),
+    async ({ id }) => textResult(await api(SCRIPT_API_URL, "GET", `/api/v1/tasks/${id}`)),
   );
 
   server.tool(
-    "lotaru_task_run",
-    "Manually run a Lotaru task",
+    "script_task_run",
+    "Manually run a Script task",
     { id: z.string().min(1) },
-    async ({ id }) => textResult(await api(LOTARU_API_URL, "POST", `/api/v1/tasks/${id}/run`)),
+    async ({ id }) => textResult(await api(SCRIPT_API_URL, "POST", `/api/v1/tasks/${id}/run`)),
   );
 
   server.tool(
-    "lotaru_execution_list",
-    "List recent Lotaru executions",
+    "script_execution_list",
+    "List recent Script executions",
     { taskId: z.string().optional(), limit: z.number().optional() },
     async ({ taskId, limit }) => {
       const q = new URLSearchParams();
       if (taskId) q.set("taskId", taskId);
       if (limit) q.set("limit", String(limit));
       const suffix = q.toString() ? `?${q.toString()}` : "";
-      return textResult(await api(LOTARU_API_URL, "GET", `/api/v1/executions${suffix}`));
+      return textResult(await api(SCRIPT_API_URL, "GET", `/api/v1/executions${suffix}`));
     },
   );
 
   server.tool(
-    "lotaru_execution_log",
-    "Read Lotaru execution log",
+    "script_execution_log",
+    "Read Script execution log",
     { id: z.string().min(1) },
-    async ({ id }) => textResult(await api(LOTARU_API_URL, "GET", `/api/v1/executions/${id}/log`)),
+    async ({ id }) => textResult(await api(SCRIPT_API_URL, "GET", `/api/v1/executions/${id}/log`)),
   );
 }
 

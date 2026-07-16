@@ -22,16 +22,16 @@ describe('dockerBindSource', () => {
 
 describe('dockerWorkspaceBind', () => {
   it('maps host dir to /workspace rw', () => {
-    const cwd = dockerBindSource('/tmp/lotaru-proj');
-    expect(dockerWorkspaceBind('/tmp/lotaru-proj')).toBe(`${cwd}:/workspace:rw`);
+    const cwd = dockerBindSource('/tmp/script-proj');
+    expect(dockerWorkspaceBind('/tmp/script-proj')).toBe(`${cwd}:/workspace:rw`);
   });
 });
 
 describe('dockerMountLogLine', () => {
   it('includes resolved host path', () => {
-    const cwd = dockerBindSource('/tmp/lotaru-proj');
-    expect(dockerMountLogLine('/tmp/lotaru-proj')).toBe(
-      `[lotaru] docker mount ${cwd} -> /workspace`,
+    const cwd = dockerBindSource('/tmp/script-proj');
+    expect(dockerMountLogLine('/tmp/script-proj')).toBe(
+      `[script] docker mount ${cwd} -> /workspace`,
     );
   });
 });
@@ -39,6 +39,6 @@ describe('dockerMountLogLine', () => {
 describe('needsOneDriveBindHint', () => {
   it('detects OneDrive paths case-insensitively', () => {
     expect(needsOneDriveBindHint('C:\\Users\\me\\OneDrive\\proj')).toBe(true);
-    expect(needsOneDriveBindHint('/home/me/projects/lotaru')).toBe(false);
+    expect(needsOneDriveBindHint('/home/me/projects/script')).toBe(false);
   });
 });

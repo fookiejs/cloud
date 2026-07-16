@@ -36,7 +36,7 @@ export function resolveTaskPlatform(taskPlatform: string | null): string | null 
   if (taskPlatform !== null && taskPlatform.length > 0) {
     return taskPlatform;
   }
-  const env = process.env['LOTARU_DOCKER_PLATFORM'];
+  const env = process.env['SCRIPT_DOCKER_PLATFORM'];
   if (typeof env === 'string' && env.length > 0 && isDockerPlatform(env)) {
     return env;
   }

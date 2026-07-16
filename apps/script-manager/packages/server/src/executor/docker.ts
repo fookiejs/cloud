@@ -70,7 +70,7 @@ export function runDocker(opts: DockerOptions): ExecutionHandle {
       write(dockerMountLogLine(opts.cwd), 'out');
       if (needsOneDriveBindHint(opts.cwd)) {
         write(
-          '[lotaru] OneDrive folder: enable path in Docker Desktop → Settings → Resources → File sharing',
+          '[script] OneDrive folder: enable path in Docker Desktop → Settings → Resources → File sharing',
           'out',
         );
       }

@@ -77,6 +77,9 @@ async function collectSnapshot() {
     "## Objective",
     "Bu dilimin Prometheus snapshot'ı. Olası bug/hataları değerlendir, metriklerden anlamlı sonuç çıkar, gerekli özeti Notes'a yükle (title + düz metin). Kod değiştirme zorunlu değil; önce değerlendirme ve note.",
     "",
+    "## Language",
+    "Yorumlar, completion özeti, brief ve Notes içeriği Türkçe olsun. Workflow/UI etiketleri İngilizce kalabilir.",
+    "",
     "## Window",
     WINDOW,
     "",
@@ -90,6 +93,7 @@ async function collectSnapshot() {
     "POST https://notes.fookiecloud.com/api/notes",
     'Body: { "title": "...", "body": "...", "source": "ops-eval" }',
     "Auth: Bearer FOOKIE_API_KEY or NOTES_WRITE_KEY",
+    "Note title ve body Türkçe yaz.",
   ].join("\n");
 
   return { title, description };

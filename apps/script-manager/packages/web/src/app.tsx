@@ -39,7 +39,7 @@ export function navigate(path: string): void {
     return;
   }
   window.history.pushState({}, '', p);
-  window.dispatchEvent(new Event('lotaru:navigate'));
+  window.dispatchEvent(new Event('script:navigate'));
 }
 
 function TaskRedirect(props: { taskId: string }): React.JSX.Element {
@@ -69,10 +69,10 @@ function useRouteWithRedirect(): { route: Route; taskRedirect: string | null } {
       setParsed(parsePathWithTaskRedirect(window.location.pathname));
     };
     window.addEventListener('popstate', handler);
-    window.addEventListener('lotaru:navigate', handler);
+    window.addEventListener('script:navigate', handler);
     return () => {
       window.removeEventListener('popstate', handler);
-      window.removeEventListener('lotaru:navigate', handler);
+      window.removeEventListener('script:navigate', handler);
     };
   }, []);
   return parsed;

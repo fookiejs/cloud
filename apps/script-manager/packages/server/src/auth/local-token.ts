@@ -26,7 +26,7 @@ export function loadLocalApiToken(dataDir: string): string | null {
 }
 
 export function ensureLocalApiToken(dataDir: string): string {
-  const fromEnv = process.env['LOTARU_AGENT_API_TOKEN'];
+  const fromEnv = process.env['SCRIPT_AGENT_API_TOKEN'];
   if (typeof fromEnv === 'string' && fromEnv.trim().length >= 32) {
     return fromEnv.trim();
   }

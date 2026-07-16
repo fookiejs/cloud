@@ -97,10 +97,19 @@ const DEFAULT_TEMPLATE_SEEDS: TemplateSeed[] = [
         title: "Do",
         description: "Execute the epic.",
         purpose: "Work",
-        rules: ["Epic done"],
+        rules: [
+          "Epic done",
+          "Comments, brief, completion summaries, and Notes must match the epic Objective language. Workflow UI labels may stay English.",
+        ],
         position: 0,
         autoAssign: false,
-        taskTemplates: [task("do-work", "Do the work", "")],
+        taskTemplates: [
+          task(
+            "do-work",
+            "Do the work",
+            "Match the language of the epic Objective for comments, brief, completion, and Notes. UI/workflow labels may stay English.",
+          ),
+        ],
       },
     ],
   },

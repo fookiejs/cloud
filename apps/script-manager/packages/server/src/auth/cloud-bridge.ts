@@ -5,7 +5,7 @@ import { isAllowedBridgeMethod, isAllowedBridgePath } from './bridge-allowlist.j
 import { agentHostname, getValidAccessTokenSilent, loadCredentials } from './credentials.js';
 
 const DEFAULT_GATEWAY = 'https://script.fookiecloud.com';
-const PACKAGE_VERSION = process.env['LOTARU_VERSION'] ?? '0.2.0';
+const PACKAGE_VERSION = process.env['SCRIPT_VERSION'] ?? '0.2.0';
 const HEARTBEAT_MS = 20_000;
 const PONG_TIMEOUT_MS = 12_000;
 const MAX_RETRY_MS = 30_000;
@@ -25,7 +25,7 @@ function toWsBase(httpUrl: string): string {
 }
 
 export function connectCloudBridge(opts: BridgeOptions): { stop: () => void } {
-  const gateway = (opts.gatewayUrl ?? process.env['LOTARU_GATEWAY_URL'] ?? DEFAULT_GATEWAY).replace(
+  const gateway = (opts.gatewayUrl ?? process.env['SCRIPT_GATEWAY_URL'] ?? DEFAULT_GATEWAY).replace(
     /\/$/,
     '',
   );

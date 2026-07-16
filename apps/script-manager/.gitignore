@@ -142,8 +142,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-# Lotaru runtime
-.lotaru/
+.script/
 packages/server/public/
 packages/cli/dist-server/
 packages/cli/public/

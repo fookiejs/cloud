@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "script-manager",
     "version":  "0.2.34",
     "private":  true,
@@ -9,19 +9,19 @@
                    ],
     "scripts":  {
                     "dev":  "npm-run-all --parallel dev:server dev:web",
-                    "dev:server":  "npm --workspace @lotaru/server run dev",
-                    "dev:web":  "npm --workspace @lotaru/web run dev",
-                    "dev:landing":  "npm --workspace @lotaru/landing run dev",
-                    "build:landing":  "npm --workspace @lotaru/landing run build",
-                    "build":  "npm --workspace @lotaru/web run build \u0026\u0026 npm --workspace @lotaru/server run build \u0026\u0026 node scripts/cp-public.mjs \u0026\u0026 npm --workspace @umudik/lotaru run build",
+                    "dev:server":  "npm --workspace @script/server run dev",
+                    "dev:web":  "npm --workspace @script/web run dev",
+                    "dev:landing":  "npm --workspace @script/landing run dev",
+                    "build:landing":  "npm --workspace @script/landing run build",
+                    "build":  "npm --workspace @script/web run build \u0026\u0026 npm --workspace @script/server run build \u0026\u0026 node scripts/cp-public.mjs \u0026\u0026 npm --workspace @umudik/script run build",
                     "build:publish":  "node scripts/build-publish.mjs",
                     "lint":  "eslint \"packages/*/src/**/*.{ts,tsx}\"",
                     "format":  "prettier --write .",
                     "format:check":  "prettier --check .",
-                    "typecheck":  "npm --workspace @lotaru/server run typecheck \u0026\u0026 npm --workspace @lotaru/web run typecheck \u0026\u0026 npm --workspace @lotaru/landing run typecheck \u0026\u0026 npm --workspace @lotaru/gateway run typecheck",
-                    "dev:gateway":  "npm --workspace @lotaru/gateway run dev",
-                    "build:gateway":  "npm --workspace @lotaru/landing run build \u0026\u0026 npm --workspace @lotaru/gateway run build",
-                    "test":  "npm --workspace @lotaru/server run test"
+                    "typecheck":  "npm --workspace @script/server run typecheck \u0026\u0026 npm --workspace @script/web run typecheck \u0026\u0026 npm --workspace @script/landing run typecheck \u0026\u0026 npm --workspace @script/gateway run typecheck",
+                    "dev:gateway":  "npm --workspace @script/gateway run dev",
+                    "build:gateway":  "npm --workspace @script/landing run build \u0026\u0026 npm --workspace @script/gateway run build",
+                    "test":  "npm --workspace @script/server run test"
                 },
     "devDependencies":  {
                             "@typescript-eslint/eslint-plugin":  "^8.15.0",

@@ -1,5 +1,5 @@
-﻿{
-  "name": "@umudik/lotaru",
+{
+  "name": "@umudik/script",
   "version": "0.2.36",
   "description": "Script Manager agent (Fookie Cloud) — run shell tasks on your machine from the browser",
   "type": "module",
@@ -14,7 +14,7 @@
     "node": ">=20"
   },
   "bin": {
-    "lotaru": "dist/index.js",
+    "script": "dist/index.js",
     "script-manager": "dist/index.js"
   },
   "files": [
@@ -42,7 +42,7 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
-    "@lotaru/server": "0.1.0",
+    "@script/server": "0.1.0",
     "@types/node": "^26.0.1",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"

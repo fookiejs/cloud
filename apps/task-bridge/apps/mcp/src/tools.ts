@@ -167,7 +167,7 @@ export function registerTools(server: McpServer, api: TaskBridgeApi) {
 
   server.tool(
     "get_task_context",
-    "Get packed agent context: description, brief, comments, epic/parent summary, workflow state.",
+    "Get packed agent context: description, brief, comments, epic/parent summary, workflow state, replyLanguage, agentInstructions. Follow agentInstructions for comment/Notes language.",
     {
       taskId: z.number().int().positive(),
     },

@@ -4,7 +4,7 @@ import { SiteHeader } from '@/components/site-header';
 import { ProductPreview } from '@/components/product-preview';
 import { cn } from '@/lib/utils';
 
-const GITHUB_URL = 'https://github.com/umudik/lotaru';
+const GITHUB_URL = 'https://github.com/fookiejs/cloud';
 
 const features = [
   {
@@ -25,7 +25,7 @@ const features = [
   {
     icon: FolderOpen,
     title: 'Local-first',
-    body: 'Your projects stay on disk. State lives in ~/.lotaru/ no cloud account required.',
+    body: 'Your projects stay on disk. State lives in ~/.script/ no cloud account required.',
   },
   {
     icon: Braces,
@@ -43,7 +43,7 @@ const steps = [
   {
     n: '01',
     title: 'Pick a project folder',
-    body: 'Point Lotaru at any directory on your machine.',
+    body: 'Point Script at any directory on your machine.',
   },
   {
     n: '02',
@@ -95,7 +95,7 @@ function Landing(): React.JSX.Element {
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
                 Opens <code className="font-mono text-foreground/70">http://127.0.0.1:4317</code> ·
-                data in <code className="font-mono text-foreground/70">~/.lotaru/</code>
+                data in <code className="font-mono text-foreground/70">~/.script/</code>
               </p>
             </div>
             <ProductPreview className="lg:translate-y-2" />
@@ -188,7 +188,7 @@ function Landing(): React.JSX.Element {
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary text-xs font-bold">
               L
             </span>
-            Lotaru
+            Script
           </span>
           <span>MIT · Node.js 20+</span>
         </div>

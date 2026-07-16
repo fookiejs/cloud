@@ -33,7 +33,7 @@ const FOOKIE_CLOUD_MCP = `{
         "FOOKIE_API_KEY": "<paste-key>",
         "NOTES_URL": "https://notes.fookiecloud.com",
         "TASK_BRIDGE_URL": "https://task.fookiecloud.com",
-        "LOTARU_API_URL": "https://script.fookiecloud.com"
+        "SCRIPT_API_URL": "https://script.fookiecloud.com"
       }
     }
   }

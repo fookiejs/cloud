@@ -6,11 +6,11 @@ import { hostname as osHostname } from 'node:os';
 import { tightenFileMode, writeSecretFile } from './secure-file.js';
 
 const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'] ?? 'https://auth.fookiecloud.com';
-const CLIENT_ID = process.env['LOTARU_CLIENT_ID'] ?? 'lotaru';
+const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'] ?? 'script';
 const AGENT_REDIRECT_URI =
-  process.env['LOTARU_AGENT_REDIRECT_URI'] ?? 'http://127.0.0.1:8743/callback';
+  process.env['SCRIPT_AGENT_REDIRECT_URI'] ?? 'http://127.0.0.1:8743/callback';
 const AGENT_CALLBACK_PORT = Number.parseInt(
-  process.env['LOTARU_AGENT_CALLBACK_PORT'] ?? '8743',
+  process.env['SCRIPT_AGENT_CALLBACK_PORT'] ?? '8743',
   10,
 );
 

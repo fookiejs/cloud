@@ -22,7 +22,7 @@ jobs:
       id-token: write
     env:
       AWS_REGION: eu-central-1
-      LANDING_S3_BUCKET: lotaru-landing
+      LANDING_S3_BUCKET: script-landing
       DIST_DIR: packages/landing/dist
     steps:
       - uses: actions/checkout@v4

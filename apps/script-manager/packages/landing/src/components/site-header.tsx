@@ -1,7 +1,7 @@
 import { Github } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const GITHUB_URL = 'https://github.com/umudik/lotaru';
+const GITHUB_URL = 'https://github.com/fookiejs/cloud';
 
 interface Props {
   className?: string;

@@ -49,8 +49,8 @@ function runDockerAndWait(opts: {
 
 describe.skipIf(!hasDocker)('runDocker workspace mount', () => {
   it('exposes host project files at /workspace', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'lotaru-docker-'));
-    const marker = 'lotaru-mount-ok';
+    const root = await mkdtemp(join(tmpdir(), 'script-docker-'));
+    const marker = 'script-mount-ok';
     try {
       await writeFile(join(root, 'mount-marker.txt'), marker, 'utf8');
       const logPath = join(root, 'run.log');
@@ -65,7 +65,7 @@ describe.skipIf(!hasDocker)('runDocker workspace mount', () => {
       expect(result.exitCode).toBe(0);
       expect(result.lines.some((line) => line.includes(marker))).toBe(true);
       expect(result.lines.some((line) => line.includes('/workspace'))).toBe(true);
-      expect(result.lines.some((line) => line.includes('[lotaru] docker mount'))).toBe(true);
+      expect(result.lines.some((line) => line.includes('[script] docker mount'))).toBe(true);
     } finally {
       await rm(root, { recursive: true, force: true });
     }

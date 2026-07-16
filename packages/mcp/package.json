@@ -2,7 +2,7 @@
   "name": "@umudik/fookie-cloud-mcp",
   "version": "0.1.1",
   "private": false,
-  "description": "Unified Fookie Cloud MCP — Notes, Task Bridge, Lotaru",
+  "description": "Unified Fookie Cloud MCP — Notes, Task Bridge, Script",
   "type": "module",
   "license": "MIT",
   "bin": {

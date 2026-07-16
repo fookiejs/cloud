@@ -1,4 +1,4 @@
-export const PROJECT_EXPORT_FORMAT = 'lotaru-project';
+export const PROJECT_EXPORT_FORMAT = 'script-project';
 export const PROJECT_EXPORT_VERSION = 1;
 
 export interface ProjectExportTask {
@@ -65,7 +65,7 @@ export function exportFileName(projectName: string): string {
   if (base.length === 0) {
     base = 'project';
   }
-  return `${base}.lotaru-project.json`;
+  return `${base}.script-project.json`;
 }
 
 export function downloadProjectBundle(bundle: ProjectExportBundle, fileName: string): void {

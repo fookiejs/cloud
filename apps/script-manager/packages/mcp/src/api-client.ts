@@ -2,13 +2,13 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 
-export class LotaruApiError extends Error {
+export class ScriptApiError extends Error {
   status: number;
   body: string;
 
   constructor(message: string, status: number, body: string) {
     super(message);
-    this.name = 'LotaruApiError';
+    this.name = 'ScriptApiError';
     this.status = status;
     this.body = body;
   }
@@ -22,7 +22,7 @@ function trimTrailingSlash(value: string): string {
 }
 
 export function resolveBaseUrl(): string {
-  const fromEnv = process.env['LOTARU_API_URL'];
+  const fromEnv = process.env['SCRIPT_API_URL'];
   if (typeof fromEnv === 'string' && fromEnv.trim().length > 0) {
     return trimTrailingSlash(fromEnv.trim());
   }
@@ -30,7 +30,7 @@ export function resolveBaseUrl(): string {
 }
 
 function loadCredentialsToken(): string {
-  const path = join(homedir(), '.lotaru', 'credentials.json');
+  const path = join(homedir(), '.script', 'credentials.json');
   if (!existsSync(path)) {
     return '';
   }
@@ -46,11 +46,11 @@ function loadCredentialsToken(): string {
 }
 
 function loadLocalAgentApiToken(): string {
-  const fromEnv = process.env['LOTARU_AGENT_API_TOKEN'];
+  const fromEnv = process.env['SCRIPT_AGENT_API_TOKEN'];
   if (typeof fromEnv === 'string' && fromEnv.trim().length > 0) {
     return fromEnv.trim();
   }
-  const path = join(homedir(), '.lotaru', 'agent-api-token');
+  const path = join(homedir(), '.script', 'agent-api-token');
   if (!existsSync(path)) {
     return '';
   }
@@ -70,7 +70,7 @@ export function resolveToken(baseUrl: string): string {
   if (typeof apiKey === 'string' && apiKey.trim().length > 0) {
     return apiKey.trim();
   }
-  const token = process.env['LOTARU_TOKEN'];
+  const token = process.env['SCRIPT_TOKEN'];
   if (typeof token === 'string' && token.trim().length > 0) {
     return token.trim();
   }
@@ -96,7 +96,7 @@ function buildQuery(params: Record<string, string | number | boolean | null>): s
   return `?${text}`;
 }
 
-export class LotaruApi {
+export class ScriptApi {
   private baseUrl: string;
   private token: string;
 
@@ -105,9 +105,9 @@ export class LotaruApi {
     this.token = token.trim();
   }
 
-  static fromEnv(): LotaruApi {
+  static fromEnv(): ScriptApi {
     const baseUrl = resolveBaseUrl();
-    return new LotaruApi(baseUrl, resolveToken(baseUrl));
+    return new ScriptApi(baseUrl, resolveToken(baseUrl));
   }
 
   async request<T>(
@@ -140,7 +140,7 @@ export class LotaruApi {
     const res = await fetch(url, init);
     const text = await res.text();
     if (!res.ok) {
-      throw new LotaruApiError(text || res.statusText, res.status, text);
+      throw new ScriptApiError(text || res.statusText, res.status, text);
     }
     if (text.length === 0) {
       return {} as T;

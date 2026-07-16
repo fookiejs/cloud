@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { LotaruApi, LotaruApiError } from './api-client.js';
+import { ScriptApi, ScriptApiError } from './api-client.js';
 import { jsonToolResult, toolError } from './result.js';
 
 async function runTool<T>(handler: () => Promise<T>) {
@@ -8,7 +8,7 @@ async function runTool<T>(handler: () => Promise<T>) {
     const value = await handler();
     return jsonToolResult(value as object);
   } catch (error) {
-    if (error instanceof LotaruApiError) {
+    if (error instanceof ScriptApiError) {
       return toolError(`API ${String(error.status)}: ${error.message}`);
     }
     if (error instanceof Error) {
@@ -48,8 +48,8 @@ function taskBody(input: {
   };
 }
 
-export function registerTools(server: McpServer, api: LotaruApi): void {
-  server.tool('workspace-list', 'List Lotaru workspaces (projects).', {}, async () =>
+export function registerTools(server: McpServer, api: ScriptApi): void {
+  server.tool('workspace-list', 'List Script workspaces (projects).', {}, async () =>
     runTool(() => api.get('/api/v1/workspaces')),
   );
 

@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "@fookie/script-manager-mcp-deprecated",
     "version":  "0.1.23",
     "private":  false,
@@ -7,14 +7,14 @@
     "license":  "MIT",
     "repository":  {
                        "type":  "git",
-                       "url":  "git+https://github.com/umudik/lotaru.git",
+                       "url":  "git+https://github.com/fookiejs/cloud.git",
                        "directory":  "packages/mcp"
                    },
     "engines":  {
                     "node":  "\u003e=20"
                 },
     "bin":  {
-                "lotaru-mcp":  "dist/index.js"
+                "script-mcp":  "dist/index.js"
             },
     "files":  [
                   "dist/**/*.js",

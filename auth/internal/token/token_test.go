@@ -27,7 +27,7 @@ func TestPKCEAndAccessToken(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	access, _, err := mgr.IssueAccessToken("user-1", "a@b.c", "Ada", "lotaru")
+	access, _, err := mgr.IssueAccessToken("user-1", "a@b.c", "Ada", "script")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func TestPKCEAndAccessToken(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if claims.Subject != "user-1" || claims.ClientID != "lotaru" {
+	if claims.Subject != "user-1" || claims.ClientID != "script" {
 		t.Fatalf("unexpected claims: %+v", claims)
 	}
 

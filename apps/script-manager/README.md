@@ -1,14 +1,14 @@
-# lotaru
+# script
 
 Local-first task orchestration for your machine. Define shell tasks on a project folder, trigger them on save, schedule, or manually, and watch logs in the browser.
 
 ## Run
 
 ```bash
-npx -y @umudik/lotaru@latest
+npx -y @umudik/script@latest
 ```
 
-Opens the local agent and stores data in `~/.lotaru/`. Sign in when prompted to connect to https://script.fookiecloud.com.
+Opens the local agent and stores data in `~/.script/`. Sign in when prompted to connect to https://script.fookiecloud.com.
 
 ### Requirements
 
@@ -21,4 +21,4 @@ Shell tasks run on your machine (`gh`, `ollama`, `npm`, etc.). Use **Docker** ru
 
 | Variable      | Default | Purpose   |
 | ------------- | ------- | --------- |
-| `LOTARU_PORT` | `4317`  | HTTP port |
+| `SCRIPT_PORT` | `4317`  | HTTP port |

@@ -16,7 +16,7 @@ import { registerLocalApiAuth } from './auth/local-auth.js';
 import { ensureLocalApiToken } from './auth/local-token.js';
 
 const DEFAULT_PORT = 4317;
-const CONSOLE_URL = process.env['LOTARU_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
+const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
 
 interface StartOptions {
   port: number;
@@ -26,11 +26,11 @@ interface StartOptions {
 
 export async function start(opts: StartOptions): Promise<void> {
   mkdirSync(opts.dataDir, { recursive: true });
-  const dbPath = join(opts.dataDir, 'lotaru.db');
+  const dbPath = join(opts.dataDir, 'script.db');
   const logsDir = join(opts.dataDir, 'logs');
   mkdirSync(logsDir, { recursive: true });
 
-  console.log('\n  Sign in with Fookie to connect this machine as your Lotaru backend…\n');
+  console.log('\n  Sign in with Fookie to connect this machine as your Script backend…\n');
   const creds = await ensureAuth(opts.dataDir);
   console.log(`  signed in as ${creds.user.email ?? creds.user.id}`);
 
@@ -130,14 +130,14 @@ function isMainEntry(): boolean {
 
 if (isMainEntry()) {
   let port = DEFAULT_PORT;
-  const envPort = process.env['LOTARU_PORT'];
+  const envPort = process.env['SCRIPT_PORT'];
   if (typeof envPort === 'string' && envPort.length > 0) {
     const n = Number.parseInt(envPort, 10);
     if (Number.isFinite(n) && n > 0) {
       port = n;
     }
   }
-  const dataDir = join(homedir(), '.lotaru');
+  const dataDir = join(homedir(), '.script');
   void start({
     port,
     dataDir,
