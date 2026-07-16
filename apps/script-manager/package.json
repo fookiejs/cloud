@@ -13,7 +13,7 @@
                     "dev:web":  "npm --workspace @script/web run dev",
                     "dev:landing":  "npm --workspace @script/landing run dev",
                     "build:landing":  "npm --workspace @script/landing run build",
-                    "build":  "npm --workspace @script/web run build \u0026\u0026 npm --workspace @script/server run build \u0026\u0026 node scripts/cp-public.mjs \u0026\u0026 npm --workspace @umudik/script run build",
+                    "build":  "npm --workspace @script/web run build \u0026\u0026 npm --workspace @script/server run build \u0026\u0026 node scripts/cp-public.mjs \u0026\u0026 npm --workspace @fookiejs/script run build",
                     "build:publish":  "node scripts/build-publish.mjs",
                     "lint":  "eslint \"packages/*/src/**/*.{ts,tsx}\"",
                     "format":  "prettier --write .",

@@ -92,13 +92,16 @@ async function attachAuthedSocket(
   const url = new URL(req.url, 'http://localhost');
   const token = tokenFromRequest(req);
   if (token === null) {
+    console.log(JSON.stringify({ msg: 'ws_auth_fail', kind, reason: 'missing_token' }));
     socket.close(4401, 'unauthorized');
     return;
   }
   let user;
   try {
     user = await verifyAccessToken(token);
-  } catch {
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : 'verify_failed';
+    console.log(JSON.stringify({ msg: 'ws_auth_fail', kind, reason }));
     socket.close(4401, 'unauthorized');
     return;
   }
@@ -109,11 +112,29 @@ async function attachAuthedSocket(
       connectedAt: Date.now(),
     };
     registerAgent(user.id, socket, info);
+    console.log(
+      JSON.stringify({
+        msg: 'agent_registered',
+        userId: user.id,
+        clientId: user.clientId,
+        hostname: info.hostname,
+        version: info.version,
+      }),
+    );
     socket.send(JSON.stringify({ type: 'agent.welcome', userId: user.id }));
     socket.on('message', (data) => {
       handleAgentMessage(user.id, data.toString());
     });
-    socket.on('close', () => {
+    socket.on('close', (code, reasonBuf) => {
+      const reason = Buffer.isBuffer(reasonBuf) ? reasonBuf.toString() : String(reasonBuf);
+      console.log(
+        JSON.stringify({
+          msg: 'agent_ws_close',
+          userId: user.id,
+          code,
+          reason,
+        }),
+      );
       unregisterAgent(user.id, socket);
     });
     return;

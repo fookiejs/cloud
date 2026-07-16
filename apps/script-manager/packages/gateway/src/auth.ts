@@ -1,17 +1,16 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'];
-if (AUTH_ISSUER === undefined || AUTH_ISSUER.length === 0) {
-  throw new Error('FOOKIE_AUTH_ISSUER required');
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (value === undefined || value.length === 0) {
+    throw new Error(`${name} required`);
+  }
+  return value;
 }
-const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'];
-if (CLIENT_ID === undefined || CLIENT_ID.length === 0) {
-  throw new Error('SCRIPT_CLIENT_ID required');
-}
-const INTROSPECT_SECRET = process.env['FOOKIE_INTROSPECT_SECRET'];
-if (INTROSPECT_SECRET === undefined || INTROSPECT_SECRET.length === 0) {
-  throw new Error('FOOKIE_INTROSPECT_SECRET required');
-}
+
+const AUTH_ISSUER = requireEnv('FOOKIE_AUTH_ISSUER');
+const CLIENT_ID = requireEnv('SCRIPT_CLIENT_ID');
+const INTROSPECT_SECRET = requireEnv('FOOKIE_INTROSPECT_SECRET');
 const ALLOWED_CLIENT_IDS = new Set([CLIENT_ID]);
 const PLATFORM_CLIENT_ID = 'fookie';
 const TOKEN_USE_API_KEY = 'api_key';
@@ -75,7 +74,7 @@ export async function verifyAccessToken(raw: string): Promise<AuthUser> {
         : Array.isArray(aud) && typeof aud[0] === 'string'
           ? aud[0]
           : undefined;
-  if (clientId === undefined) {
+  if (clientId === undefined || clientId.length === 0) {
     throw new Error('invalid client');
   }
   const tokenUse =

@@ -5,14 +5,12 @@ import { join } from 'node:path';
 import { hostname as osHostname } from 'node:os';
 import { tightenFileMode, writeSecretFile } from './secure-file.js';
 
-const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'];
-if (AUTH_ISSUER === undefined || AUTH_ISSUER.length === 0) {
-  throw new Error('FOOKIE_AUTH_ISSUER required');
-}
-const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'];
-if (CLIENT_ID === undefined || CLIENT_ID.length === 0) {
-  throw new Error('SCRIPT_CLIENT_ID required');
-}
+const authIssuerEnv = process.env['FOOKIE_AUTH_ISSUER'];
+const AUTH_ISSUER =
+  authIssuerEnv !== undefined && authIssuerEnv.length > 0
+    ? authIssuerEnv
+    : 'https://auth.fookiecloud.com';
+const CLIENT_ID = 'script';
 const AGENT_REDIRECT_URI =
   process.env['SCRIPT_AGENT_REDIRECT_URI'] || 'http://127.0.0.1:8743/callback';
 const AGENT_CALLBACK_PORT = Number.parseInt(

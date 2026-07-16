@@ -1,6 +1,6 @@
 {
-  "name": "@umudik/script",
-  "version": "0.2.36",
+  "name": "@fookiejs/script",
+  "version": "0.2.38",
   "description": "Script Manager agent (Fookie Cloud) — run shell tasks on your machine from the browser",
   "type": "module",
   "license": "MIT",

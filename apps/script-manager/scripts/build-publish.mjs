@@ -84,7 +84,7 @@ pruneDir(cliDistServer);
 console.log('[build-publish] copied server/dist -> cli/dist-server');
 
 run('node scripts/cp-public.mjs');
-run('npm --workspace @umudik/script run build');
+run('npm --workspace @fookiejs/script run build');
 
 verifyPublishBundle();
 
