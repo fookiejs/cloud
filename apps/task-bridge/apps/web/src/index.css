@@ -30,6 +30,7 @@
     --success: 142 60% 50%;
     --warn: 38 90% 60%;
     --radius: 0.75rem;
+    --cloud-grad: linear-gradient(90deg, #ec4899, #a855f7, #22d3ee);
   }
 
   * {
@@ -50,7 +51,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+    font-family: Geist, ui-sans-serif, system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01";
   }
 
@@ -175,12 +176,7 @@
 }
 
 .fookie-cloud-word {
-  background-image: linear-gradient(
-    90deg,
-    #ec4899,
-    #a855f7,
-    #22d3ee
-  );
+  background-image: var(--cloud-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

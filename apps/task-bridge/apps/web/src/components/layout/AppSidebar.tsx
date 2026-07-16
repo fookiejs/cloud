@@ -49,7 +49,7 @@ export function AppSidebar() {
 
   return (
     <aside className="app-sidebar">
-      <div className="flex h-14 shrink-0 items-center border-b border-border/60 px-4">
+      <div className="flex h-14 shrink-0 items-center border-b px-4">
         <BrandMark compact />
       </div>
 
@@ -96,13 +96,13 @@ export function AppSidebar() {
       </nav>
 
       <div className="shrink-0">
-        <div className="border-t border-border/60 px-2 py-2">
+        <div className="border-t px-2 py-2">
           <div className="px-2.5 py-2">
             <FookieCloudMark size="sm" />
           </div>
         </div>
         {session ? (
-          <div className="border-t border-border/60 px-2 py-2">
+          <div className="border-t px-2 py-2">
             <a
               href="https://fookiecloud.com/profile"
               className="flex w-full items-center rounded-md px-2.5 py-2 text-left transition-colors hover:bg-secondary/60"
