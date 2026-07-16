@@ -107,11 +107,7 @@ async function attachAuthedSocket(
       version: url.searchParams.get('version') ?? '0.0.0',
       connectedAt: Date.now(),
     };
-    const session = registerAgent(user.id, socket, info);
-    if (session === null) {
-      socket.close(4409, 'agent_already_connected');
-      return;
-    }
+    registerAgent(user.id, socket, info);
     socket.send(JSON.stringify({ type: 'agent.welcome', userId: user.id }));
     socket.on('message', (data) => {
       handleAgentMessage(user.id, data.toString());

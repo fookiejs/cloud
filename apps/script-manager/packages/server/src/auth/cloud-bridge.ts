@@ -219,7 +219,7 @@ export function connectCloudBridge(opts: BridgeOptions): { stop: () => void } {
         socket = null;
       }
 
-      const active = new WebSocket(wsUrl.toString(), {
+      const active = new WebSocket(wsUrl.toString(), ['bearer', token], {
         headers: { Authorization: `Bearer ${token}` },
       });
       socket = active;
@@ -260,15 +260,19 @@ export function connectCloudBridge(opts: BridgeOptions): { stop: () => void } {
         }
       });
 
-      active.on('close', () => {
-        if (socket === active) {
-          socket = null;
+      active.on('close', (code, reasonBuf) => {
+        if (socket !== active) {
+          return;
         }
+        socket = null;
         clearHeartbeat();
         if (stopped) {
           return;
         }
-        console.log(`  cloud bridge disconnected`);
+        const reason = reasonBuf.toString();
+        console.log(
+          `  cloud bridge disconnected (${String(code)}${reason.length > 0 ? ` ${reason}` : ''})`,
+        );
         scheduleReconnect();
       });
 
