@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const INSTALL_CMD = 'npx -y @umudik/script@latest';
+const INSTALL_CMD = 'npx -y @fookiejs/script@latest';
 
 interface Props {
   className?: string;

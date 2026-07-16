@@ -6,7 +6,7 @@ const REDIRECT_URI =
     ? `${window.location.origin}/callback`
     : 'https://script.fookiecloud.com/callback';
 const GITHUB_URL = 'https://github.com/fookiejs/cloud';
-const INSTALL_CMD = 'npx -y @umudik/script@latest';
+const INSTALL_CMD = 'npx -y @fookiejs/script@latest';
 const ACCESS_KEY = 'script_access_token';
 const REFRESH_KEY = 'script_refresh_token';
 const USER_KEY = 'script_user';

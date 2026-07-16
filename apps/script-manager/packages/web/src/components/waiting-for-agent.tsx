@@ -5,7 +5,7 @@ import { FookieCloudMark } from '@/components/fookie-cloud-mark';
 import { Button } from '@/components/ui/button';
 import type { AgentInfo } from '@/hooks/use-agent-connection';
 
-const INSTALL_CMD = 'npx -y @umudik/script@latest';
+const INSTALL_CMD = 'npx -y @fookiejs/script@latest';
 
 interface Props {
   info: AgentInfo | null;

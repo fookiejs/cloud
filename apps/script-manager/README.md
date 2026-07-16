@@ -5,7 +5,7 @@ Local-first task orchestration for your machine. Define shell tasks on a project
 ## Run
 
 ```bash
-npx -y @umudik/script@latest
+npx -y @fookiejs/script@latest
 ```
 
 Opens the local agent and stores data in `~/.script/`. Sign in when prompted to connect to https://script.fookiecloud.com.
