@@ -1,7 +1,11 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'] ?? 'https://auth.fookiecloud.com';
-const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'] ?? 'script';
+const CLIENT_ID =
+  process.env['SCRIPT_CLIENT_ID'] ?? process.env['LOTARU_CLIENT_ID'] ?? 'script';
+const ALLOWED_CLIENT_IDS = new Set(
+  [CLIENT_ID, 'script', 'lotaru'].filter((id) => id.length > 0),
+);
 const PLATFORM_CLIENT_ID = 'fookie';
 const TOKEN_USE_API_KEY = 'api_key';
 const JWKS_URL = new URL(`${AUTH_ISSUER}/.well-known/jwks.json`);
@@ -69,7 +73,7 @@ export async function verifyAccessToken(raw: string): Promise<AuthUser> {
     if (!active) {
       throw new Error('api key revoked');
     }
-  } else if (clientId !== CLIENT_ID) {
+  } else if (!ALLOWED_CLIENT_IDS.has(clientId)) {
     throw new Error('invalid client');
   }
 
