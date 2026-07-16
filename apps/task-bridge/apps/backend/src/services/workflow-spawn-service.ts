@@ -99,12 +99,6 @@ function spawnTemplateTask(input: {
   }
 
   const id = allocateTaskId();
-  let description: string;
-  if (input.template.description !== null) {
-    description = input.template.description;
-  } else {
-    description = "";
-  }
   const nodeDefaults = applyWorkflowStateNodeToTaskInput(input.epic.id, input.template.id, {
     workStatus: "todo",
     comments: [],
@@ -113,8 +107,8 @@ function spawnTemplateTask(input: {
     id,
     projectId: input.epic.projectId,
     projectName: input.epic.projectName,
-    title: input.template.title,
-    description,
+    title: input.epic.title,
+    description: input.epic.description,
     createdBy: "workflow",
     createdAt: null,
     parentId: input.parentTaskId,

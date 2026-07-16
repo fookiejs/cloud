@@ -552,7 +552,7 @@ export async function deleteWorkflowTemplate(session: Session, templateId: strin
   });
 }
 
-export const PROTECTED_WORKFLOW_TEMPLATE_IDS = new Set(["plan-build-deliver", "lean-sdlc"]);
+export const PROTECTED_WORKFLOW_TEMPLATE_IDS = new Set(["plan-build-deliver"]);
 
 export async function exportWorkflowTemplate(session: Session, templateId: string): Promise<void> {
   const res = await fetch(`/api/workflow-templates/${templateId}/export`, {

@@ -264,7 +264,7 @@ export function importWorkflowTemplate(input: {
   return replaceWorkflowTemplate(id, input.stages);
 }
 
-const PROTECTED_WORKFLOW_TEMPLATE_IDS = new Set([DEFAULT_WORKFLOW_TEMPLATE_ID, "lean-sdlc"]);
+const PROTECTED_WORKFLOW_TEMPLATE_IDS = new Set([DEFAULT_WORKFLOW_TEMPLATE_ID]);
 
 export function deleteWorkflowTemplate(templateId: string): void {
   ensureDefaultWorkflowTemplates();

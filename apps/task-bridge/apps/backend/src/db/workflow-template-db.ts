@@ -2,7 +2,11 @@ import { countSpawnableTemplates } from "../domain/task-template-graph.js";
 import { DEFAULT_WORKFLOW_TEMPLATE_ID } from "../domain/workflow-template-id.js";
 import type { StageTaskTemplate } from "../domain/workflow-stage.js";
 import { serializeTaskTemplates } from "../domain/workflow-stage.js";
-import { getProjectsDb } from "./projects-db.js";
+import { listProjectRows, getProjectsDb } from "./projects-db.js";
+import {
+  deleteWorkflowStagesForProject,
+  insertWorkflowStageRow,
+} from "./workflow-db.js";
 
 export type WorkflowTemplateRow = {
   id: string;
@@ -60,6 +64,8 @@ const DEPRECATED_TEMPLATE_IDS = [
   "plan-decompose",
   "ready-for-pr",
   "review-security",
+  "general-work",
+  "lean-sdlc",
 ];
 
 function task(
@@ -83,447 +89,18 @@ function task(
 const DEFAULT_TEMPLATE_SEEDS: TemplateSeed[] = [
   {
     id: DEFAULT_WORKFLOW_TEMPLATE_ID,
-    title: "Plan · Build · Deliver",
-    description: "Simple three-stage pipeline. Plan the work, build it, then deliver.",
+    title: "Do the work",
+    description: "One stage. One task. The epic text is the job.",
     stages: [
       {
-        id: "plan",
-        title: "Plan",
-        description: "Define what to build and how to approach it.",
-        purpose: "Scope",
-        rules: ["Scope clear", "Approach agreed"],
+        id: "do",
+        title: "Do",
+        description: "Execute the epic.",
+        purpose: "Work",
+        rules: ["Epic done"],
         position: 0,
         autoAssign: false,
-        taskTemplates: [
-          task(
-            "pl-scope",
-            "Define scope and approach",
-            "**Output:** what to build and how.",
-          ),
-        ],
-      },
-      {
-        id: "build",
-        title: "Build",
-        description: "Implement the change.",
-        purpose: "Implementation",
-        rules: ["Change implemented"],
-        position: 1,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "bd-implement",
-            "Implement the change",
-            "**Output:** working change ready for review.",
-          ),
-        ],
-      },
-      {
-        id: "deliver",
-        title: "Deliver",
-        description: "Ship and verify the outcome.",
-        purpose: "Release",
-        rules: ["Change verified", "Outcome delivered"],
-        position: 2,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "dl-ship",
-            "Ship and verify",
-            "**Output:** change deployed and verified.",
-          ),
-        ],
-      },
-    ],
-  },
-  {
-    id: "general-work",
-    title: "General Work",
-    description: `Coarse loop for any kind of work (not code-only).
-
-Research -> Debate -> Check -> Critique -> Deliver.
-
-One task per stage. Deliverables follow the epic text (PR, Library, docs, etc.). No calendar estimates.`,
-    stages: [
-      {
-        id: "research",
-        title: "Research",
-        description: `## Objective
-Internet and prior-art research for the epic.
-
-## Exit
-You understand how others solved this and what matters for this epic.`,
-        purpose: "Internet research",
-        rules: ["Sources gathered", "Approaches compared", "No calendar estimates"],
-        position: 0,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "gw-research",
-            "Internet research",
-            "**Output:** research notes in the task brief.\n\n- Search the web, docs, repos, and forums\n- Capture useful approaches and trade-offs\n- Match the language of the epic\n- Do not invent day/week timelines",
-          ),
-        ],
-      },
-      {
-        id: "debate",
-        title: "Debate",
-        description: `## Objective
-Argue the options against each other before committing.
-
-## Exit
-A clear recommendation with risks.`,
-        purpose: "Internal debate",
-        rules: ["Options weighed", "Risks named", "Recommendation made"],
-        position: 1,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "gw-debate",
-            "Internal debate",
-            "**Output:** debate notes in the task brief.\n\n- Compare options using prior research\n- Call out risks and unknowns\n- Recommend a path (code change not required unless the epic needs it)",
-          ),
-        ],
-      },
-      {
-        id: "check",
-        title: "Check",
-        description: `## Objective
-Verify the work-in-progress against the epic goal.
-
-## Exit
-Gaps and pass/fail notes are written.`,
-        purpose: "Work check",
-        rules: ["Evidence checked", "Gaps listed"],
-        position: 2,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "gw-check",
-            "Work check",
-            "**Output:** verification notes in the task brief.\n\n- Check claims against the repo and sources\n- List what holds and what is missing",
-          ),
-        ],
-      },
-      {
-        id: "critique",
-        title: "Critique",
-        description: `## Objective
-Critically review quality, simplicity, and failure points.
-
-## Exit
-Actionable critique is written.`,
-        purpose: "Critique",
-        rules: ["Weak points named", "Improvements proposed"],
-        position: 3,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "gw-critique",
-            "Critique",
-            "**Output:** critique in the task brief.\n\n- What is wrong, fragile, or overbuilt\n- What to simplify or fix next",
-          ),
-        ],
-      },
-      {
-        id: "deliver",
-        title: "Deliver",
-        description: `## Objective
-Ship the epic outcome only as requested (PR and/or Library and/or notes).
-
-## Exit
-Requested delivery is done; brief holds the summary.`,
-        purpose: "Delivery",
-        rules: ["Follow epic delivery asks", "Brief updated"],
-        position: 4,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "gw-deliver",
-            "Deliver outcome",
-            "**Output:** final delivery summary in the task brief.\n\n- If the epic asks for a PR, open a PR\n- If the epic asks for Library, add Library docs\n- Otherwise write the final notes only\n- Match the epic language; no calendar estimates",
-          ),
-        ],
-      },
-    ],
-  },
-  {
-    id: "lean-sdlc",
-    title: "Lean SDLC",
-    description: `Lean, classic software delivery pipeline.
-
-Research -> Define -> Design -> Implement -> Review -> Verify -> Done.
-
-No branches, no PRs, no AI gates: build the change, then review the diff directly. Customize stages on the Pipeline tab.`,
-    stages: [
-      {
-        id: "research",
-        title: "Research",
-        description: `## Objective
-Learn from prior art before committing to a solution.
-
-## Exit
-You know how others solved this, with concrete references, examples, and known pitfalls.`,
-        purpose: "Prior art",
-        rules: ["Similar solutions reviewed", "References collected", "Pitfalls noted"],
-        position: 0,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "rs-similar",
-            "Find how others solved this",
-            "**Output:** short notes on existing approaches.\n\n- Search the web, forums, and repos for similar work\n- Capture 2-3 approaches and their trade-offs",
-          ),
-          task(
-            "rs-examples",
-            "Collect code examples",
-            "**Output:** a list of reference snippets and libraries.\n\n- Gather relevant examples and reusable libraries\n- Note license and fit",
-          ),
-          task(
-            "rs-docs",
-            "Gather official docs and references",
-            "**Output:** links to authoritative docs.\n\n- Official docs, specs, and API references for the tools involved",
-          ),
-          task(
-            "rs-opinions",
-            "Collect community opinions and pitfalls",
-            "**Output:** list of gotchas.\n\n- Issues, threads, and comments from people who built this\n- What broke for them and what they would do differently",
-          ),
-        ],
-      },
-      {
-        id: "define",
-        title: "Define",
-        description: `## Objective
-Turn the request into a clear, testable spec.
-
-## Exit
-Problem, acceptance criteria, and scope are written down.`,
-        purpose: "Spec",
-        rules: ["Problem statement written", "Acceptance criteria defined", "Scope explicit"],
-        position: 1,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "df-problem",
-            "Write problem statement",
-            "**Output:** one paragraph on who has the problem and why it matters.",
-            "",
-            [
-              task(
-                "df-criteria",
-                "Define acceptance criteria",
-                "**Output:** checklist of conditions that mean done.",
-              ),
-              task(
-                "df-scope",
-                "Set scope and out-of-scope",
-                "**Output:** what is in and what is explicitly out.",
-              ),
-              task(
-                "df-priority",
-                "Prioritize and size",
-                "**Output:** rough size and priority versus other work.",
-              ),
-            ],
-          ),
-        ],
-      },
-      {
-        id: "design",
-        title: "Design",
-        description: `## Objective
-Decide how to build it before writing code.
-
-## Exit
-A technical approach and a task breakdown exist.`,
-        purpose: "Plan",
-        rules: ["Approach chosen", "Data/API impact known", "Work broken down"],
-        position: 2,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "ds-approach",
-            "Choose technical approach",
-            "**Output:** short design note describing the chosen approach.",
-            "",
-            [
-              task(
-                "ds-data",
-                "Define data model and API changes",
-                "**Output:** schema, types, or endpoint changes.",
-                "",
-                [
-                  task(
-                    "ds-risks",
-                    "List risks and dependencies",
-                    "**Output:** risks, unknowns, and what this depends on.",
-                    "",
-                    [
-                      task(
-                        "ds-breakdown",
-                        "Break work into tasks",
-                        "**Output:** ordered list of implementation steps.",
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      },
-      {
-        id: "implement",
-        title: "Implement",
-        description: `## Objective
-Build the change.
-
-## Exit
-Change is complete and passes local checks.`,
-        purpose: "Build",
-        rules: ["Change implemented", "Tests added/updated", "Local checks pass"],
-        position: 3,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "im-core",
-            "Implement the change",
-            "**Output:** working code for the feature or fix.",
-            "",
-            [
-              task(
-                "im-tests",
-                "Add or update tests",
-                "**Output:** tests covering the new behavior.",
-                "",
-                [
-                  task(
-                    "im-docs",
-                    "Update docs and config",
-                    "**Output:** updated docs, config, or examples.",
-                    "",
-                    [
-                      task(
-                        "im-selfcheck",
-                        "Run local checks",
-                        "**Output:** lint, typecheck, and build all pass locally.",
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      },
-      {
-        id: "review",
-        title: "Review",
-        description: `## Objective
-Review the change directly. No PR, no branch ceremony.
-
-## Exit
-The diff has been read and acceptance criteria are met.`,
-        purpose: "Review diff",
-        rules: ["Diff reviewed", "Criteria met", "Feedback applied"],
-        position: 4,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "rv-diff",
-            "Review the change set",
-            "**Output:** notes from reading the full diff.",
-            "",
-            [
-              task(
-                "rv-criteria",
-                "Verify acceptance criteria",
-                "**Output:** each criterion checked against the change.",
-                "",
-                [
-                  task(
-                    "rv-feedback",
-                    "Apply review feedback",
-                    "**Output:** fixes for issues found in review.",
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      },
-      {
-        id: "verify",
-        title: "Verify",
-        description: `## Objective
-Confirm it works and nothing else broke.
-
-## Exit
-Tests pass and behavior is verified.`,
-        purpose: "QA",
-        rules: ["Test suite green", "Behavior verified", "No regressions"],
-        position: 5,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "vf-suite",
-            "Run the test suite",
-            "**Output:** full test run is green.",
-            "",
-            [
-              task(
-                "vf-manual",
-                "Manual and exploratory test",
-                "**Output:** notes from trying the change by hand.",
-                "",
-                [
-                  task(
-                    "vf-regression",
-                    "Regression check",
-                    "**Output:** confirm related features still work.",
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      },
-      {
-        id: "done",
-        title: "Done",
-        description: `## Objective
-Wrap up and record what shipped.
-
-## Exit
-Change is integrated and noted.`,
-        purpose: "Closed",
-        rules: ["Change integrated", "Notes updated"],
-        position: 6,
-        autoAssign: false,
-        taskTemplates: [
-          task(
-            "dn-apply",
-            "Integrate the change",
-            "**Output:** change merged or applied to the main line of work.",
-            "",
-            [
-              task(
-                "dn-notes",
-                "Update changelog and notes",
-                "**Output:** short note of what changed and why.",
-                "",
-                [
-                  task(
-                    "dn-close",
-                    "Close out and record learnings",
-                    "**Output:** capture anything worth remembering next time.",
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+        taskTemplates: [task("do-work", "Do the work", "")],
       },
     ],
   },
@@ -536,8 +113,41 @@ function removeDeprecatedTemplates() {
     "UPDATE projects SET workflow_template_id = ? WHERE workflow_template_id = 'empty'",
   ).run(DEFAULT_WORKFLOW_TEMPLATE_ID);
   for (const id of DEPRECATED_TEMPLATE_IDS) {
+    db.prepare(
+      "UPDATE projects SET workflow_template_id = ? WHERE workflow_template_id = ?",
+    ).run(DEFAULT_WORKFLOW_TEMPLATE_ID, id);
     deleteWorkflowTemplateStages(id);
     db.prepare("DELETE FROM workflow_templates WHERE id = ?").run(id);
+  }
+}
+
+let didSyncProjectStages = false;
+
+function syncProjectStagesFromDefaultTemplate() {
+  migrateWorkflowTemplateTables();
+  const db = getProjectsDb();
+  db.prepare("UPDATE projects SET workflow_template_id = ?").run(
+    DEFAULT_WORKFLOW_TEMPLATE_ID,
+  );
+  const templateStages = listWorkflowTemplateStageRows(DEFAULT_WORKFLOW_TEMPLATE_ID);
+  for (const project of listProjectRows()) {
+    deleteWorkflowStagesForProject(project.id);
+    for (const stage of templateStages) {
+      insertWorkflowStageRow({
+        id: stage.id,
+        projectId: project.id,
+        title: stage.title,
+        description: stage.description,
+        purpose: stage.purpose,
+        rulesJson: stage.rules_json,
+        position: stage.position,
+        autoAssignRole: "",
+        layoutX: stage.layout_x,
+        layoutY: stage.layout_y,
+        spawnTaskCount: stage.spawn_task_count,
+        taskTemplatesJson: stage.task_templates_json,
+      });
+    }
   }
 }
 
@@ -775,5 +385,9 @@ export function seedDefaultWorkflowTemplates() {
   removeDeprecatedTemplates();
   for (const template of DEFAULT_TEMPLATE_SEEDS) {
     upsertBuiltinTemplate(template);
+  }
+  if (!didSyncProjectStages) {
+    didSyncProjectStages = true;
+    syncProjectStagesFromDefaultTemplate();
   }
 }
