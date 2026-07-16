@@ -10,7 +10,6 @@ const OAUTH_STATE_KEY = "fookie_oauth_state";
 const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
 
 const APPS = {
-  lotaru: "https://script.fookiecloud.com",
   "script-manager": "https://script.fookiecloud.com",
   "task-bridge": "https://task.fookiecloud.com",
   notes: "https://notes.fookiecloud.com",
@@ -348,11 +347,6 @@ document.addEventListener("click", (event) => {
   const signInEl = target.closest("[data-signin], [data-open-signin], #google-login");
   if (signInEl) {
     void startSignIn(event);
-    return;
-  }
-  const appEl = target.closest("[data-app]");
-  if (appEl) {
-    void requestApp(appEl.getAttribute("data-app"));
   }
 });
 
