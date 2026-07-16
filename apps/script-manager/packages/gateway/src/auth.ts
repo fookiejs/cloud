@@ -1,11 +1,15 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
 const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'] ?? 'https://auth.fookiecloud.com';
-const CLIENT_ID =
-  process.env['SCRIPT_CLIENT_ID'] ?? process.env['LOTARU_CLIENT_ID'] ?? 'script';
-const ALLOWED_CLIENT_IDS = new Set(
-  [CLIENT_ID, 'script', 'lotaru'].filter((id) => id.length > 0),
-);
+const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'];
+if (CLIENT_ID === undefined || CLIENT_ID.length === 0) {
+  throw new Error('SCRIPT_CLIENT_ID required');
+}
+const INTROSPECT_SECRET = process.env['FOOKIE_INTROSPECT_SECRET'];
+if (INTROSPECT_SECRET === undefined || INTROSPECT_SECRET.length === 0) {
+  throw new Error('FOOKIE_INTROSPECT_SECRET required');
+}
+const ALLOWED_CLIENT_IDS = new Set([CLIENT_ID]);
 const PLATFORM_CLIENT_ID = 'fookie';
 const TOKEN_USE_API_KEY = 'api_key';
 const JWKS_URL = new URL(`${AUTH_ISSUER}/.well-known/jwks.json`);
@@ -31,7 +35,7 @@ async function introspectApiKey(token: string): Promise<boolean> {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        authorization: `Bearer ${process.env['FOOKIE_INTROSPECT_SECRET'] ?? ''}`,
+        authorization: `Bearer ${INTROSPECT_SECRET}`,
       },
       body: JSON.stringify({ token }),
     });
@@ -58,15 +62,21 @@ export async function verifyAccessToken(raw: string): Promise<AuthUser> {
   if (typeof sub !== 'string' || sub.length === 0) {
     throw new Error('missing sub');
   }
+  const clientIdRaw = payload['client_id'];
+  const aud = payload.aud;
   const clientId =
-    typeof payload['client_id'] === 'string'
-      ? payload['client_id']
-      : Array.isArray(payload.aud)
-        ? String(payload.aud[0] ?? '')
-        : typeof payload.aud === 'string'
-          ? payload.aud
-          : '';
-  const tokenUse = typeof payload['token_use'] === 'string' ? payload['token_use'] : '';
+    typeof clientIdRaw === 'string'
+      ? clientIdRaw
+      : typeof aud === 'string'
+        ? aud
+        : Array.isArray(aud) && typeof aud[0] === 'string'
+          ? aud[0]
+          : undefined;
+  if (clientId === undefined) {
+    throw new Error('invalid client');
+  }
+  const tokenUse =
+    typeof payload['token_use'] === 'string' ? payload['token_use'] : undefined;
 
   if (tokenUse === TOKEN_USE_API_KEY && clientId === PLATFORM_CLIENT_ID) {
     const active = await introspectApiKey(raw);
