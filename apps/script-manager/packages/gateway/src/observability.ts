@@ -44,7 +44,7 @@ function statusClass(code: number): string {
 }
 
 function normalizeRoute(url: string): string {
-  const path = url.split('?')[0] ?? '/';
+  const path = url.split('?')[0] || '/';
   return path
     .split('/')
     .map((p) => {
@@ -55,13 +55,19 @@ function normalizeRoute(url: string): string {
     .join('/');
 }
 
+function firstForwarded(raw: string): string {
+  const part = raw.split(',')[0];
+  if (part === undefined) return '';
+  return part.trim();
+}
+
 function clientIp(req: FastifyRequest): string {
   const xf = req.headers['x-forwarded-for'];
   if (typeof xf === 'string' && xf.length > 0) {
-    return xf.split(',')[0]?.trim() ?? req.ip;
+    return firstForwarded(xf) || req.ip;
   }
-  if (Array.isArray(xf) && xf[0]) {
-    return xf[0].split(',')[0]?.trim() ?? req.ip;
+  if (Array.isArray(xf) && typeof xf[0] === 'string') {
+    return firstForwarded(xf[0]) || req.ip;
   }
   return req.ip;
 }
@@ -108,7 +114,7 @@ export async function registerObservability(app: FastifyInstance): Promise<void>
       service: SERVICE,
       client_ip: clientIp(req),
       method: req.method,
-      path: req.url.split('?')[0] ?? '/',
+      path: req.url.split('?')[0] || '/',
       status: reply.statusCode,
       duration_ms: Math.round(durMs * 100) / 100,
       request_id: req.id,

@@ -14,7 +14,9 @@ function authHeaders(extra?: HeadersInit): HeadersInit {
 }
 
 async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const headers = authHeaders(init?.headers);
+  let extra: HeadersInit | undefined;
+  if (init !== undefined) extra = init.headers;
+  const headers = authHeaders(extra);
   const res = await fetch(url, { ...init, headers });
   if (!res.ok) {
     const text = await res.text();

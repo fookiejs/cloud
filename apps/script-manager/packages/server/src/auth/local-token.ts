@@ -65,7 +65,8 @@ export function bearerFromAuthorization(header: string | string[] | undefined): 
 }
 
 export function bearerFromWsProtocols(raw: string | string[] | undefined): string | null {
-  const protocols = (Array.isArray(raw) ? raw.join(',') : (raw ?? ''))
+  if (raw === undefined) return null;
+  const protocols = (Array.isArray(raw) ? raw.join(',') : raw)
     .split(',')
     .map((p) => p.trim())
     .filter(Boolean);

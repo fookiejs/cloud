@@ -117,7 +117,7 @@ export function AuthGate(props: Props): React.JSX.Element {
   if (boot === 'error') {
     return (
       <div className="min-h-screen grid place-items-center bg-background text-sm gap-3">
-        <p className="text-destructive">{authError ?? 'Auth failed'}</p>
+        <p className="text-destructive">{authError || 'Auth failed'}</p>
         <button
           type="button"
           className="text-primary underline"

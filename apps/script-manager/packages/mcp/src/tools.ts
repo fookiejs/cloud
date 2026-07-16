@@ -37,14 +37,14 @@ function taskBody(input: {
   return {
     name: input.name,
     command: input.command,
-    runtime: input.runtime ?? 'shell',
-    docker_image: input.docker_image ?? null,
-    docker_platform: input.docker_platform ?? null,
-    trigger_type: input.trigger_type ?? 'manual',
-    trigger_glob: input.trigger_glob ?? null,
-    trigger_cron: input.trigger_cron ?? null,
-    concurrency: input.concurrency ?? 'restart',
-    enabled: input.enabled ?? true,
+    runtime: input.runtime || 'shell',
+    docker_image: input.docker_image || null,
+    docker_platform: input.docker_platform || null,
+    trigger_type: input.trigger_type || 'manual',
+    trigger_glob: input.trigger_glob || null,
+    trigger_cron: input.trigger_cron || null,
+    concurrency: input.concurrency || 'restart',
+    enabled: input.enabled !== false,
   };
 }
 
@@ -112,8 +112,8 @@ export function registerTools(server: McpServer, api: ScriptApi): void {
     async (input) =>
       runTool(() =>
         api.get(`/api/v1/workspaces/${input.workspaceId}/tasks`, {
-          cursor: input.cursor ?? null,
-          limit: input.limit ?? null,
+          cursor: input.cursor || null,
+          limit: input.limit || null,
         }),
       ),
   );
@@ -191,8 +191,8 @@ export function registerTools(server: McpServer, api: ScriptApi): void {
     async (input) =>
       runTool(() =>
         api.get('/api/v1/executions', {
-          taskId: input.taskId ?? null,
-          limit: input.limit ?? 50,
+          taskId: input.taskId || null,
+          limit: input.limit || 50,
         }),
       ),
   );
@@ -235,7 +235,7 @@ export function registerTools(server: McpServer, api: ScriptApi): void {
       runTool(() =>
         api.post(`/api/v1/workspaces/${input.workspaceId}/environments`, {
           name: input.name,
-          vars: input.vars ?? {},
+          vars: input.vars || {},
         }),
       ),
   );

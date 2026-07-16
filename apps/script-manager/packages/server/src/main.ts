@@ -16,7 +16,7 @@ import { registerLocalApiAuth } from './auth/local-auth.js';
 import { ensureLocalApiToken } from './auth/local-token.js';
 
 const DEFAULT_PORT = 4317;
-const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
+const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] || 'https://script.fookiecloud.com';
 
 interface StartOptions {
   port: number;
@@ -32,7 +32,7 @@ export async function start(opts: StartOptions): Promise<void> {
 
   console.log('\n  Sign in with Fookie to connect this machine as your Script backend…\n');
   const creds = await ensureAuth(opts.dataDir);
-  console.log(`  signed in as ${creds.user.email ?? creds.user.id}`);
+  console.log(`  signed in as ${creds.user.email || creds.user.id}`);
 
   const store = openStore(dbPath);
   const bus = createBus();

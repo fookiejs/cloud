@@ -595,9 +595,7 @@ export function useBootstrap(): { ready: boolean } {
         }
         await actions.refreshRecentExecutions();
         await actions.refreshRunningExecutions();
-      } catch {
-        void 0;
-      } finally {
+      } catch {} finally {
         setReady(true);
       }
     })();

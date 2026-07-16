@@ -1,6 +1,9 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'] ?? 'https://auth.fookiecloud.com';
+const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'];
+if (AUTH_ISSUER === undefined || AUTH_ISSUER.length === 0) {
+  throw new Error('FOOKIE_AUTH_ISSUER required');
+}
 const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'];
 if (CLIENT_ID === undefined || CLIENT_ID.length === 0) {
   throw new Error('SCRIPT_CLIENT_ID required');

@@ -5,8 +5,8 @@ export function isAllowedBridgeMethod(method: string): boolean {
 }
 
 export function isAllowedBridgePath(rawPath: string): boolean {
-  let pathOnly = rawPath.split('?')[0] ?? '';
-  if (!pathOnly.startsWith('/')) {
+  let pathOnly = rawPath.split('?')[0];
+  if (pathOnly === undefined || !pathOnly.startsWith('/')) {
     return false;
   }
   try {

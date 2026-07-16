@@ -42,7 +42,7 @@ export function connectStream(): Stream {
           new CustomEvent('script:agent', {
             detail: {
               online: rec['online'] === true,
-              info: (rec['info'] as { hostname: string; version: string; connectedAt: number } | null) ?? null,
+              info: (rec['info'] as { hostname: string; version: string; connectedAt: number } | null) || null,
             },
           }),
         );

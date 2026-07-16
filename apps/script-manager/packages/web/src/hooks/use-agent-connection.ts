@@ -73,11 +73,11 @@ export function useAgentConnection(): AgentConnection {
 
     function onAgent(ev: Event): void {
       const detail = (ev as CustomEvent<{ online?: boolean; info?: AgentInfo | null }>).detail;
-      if (typeof detail?.online !== 'boolean') {
+      if (detail === undefined || typeof detail.online !== 'boolean') {
         return;
       }
       setOnline(detail.online);
-      setInfo(detail.info ?? null);
+      setInfo(detail.info || null);
       setChecking(false);
     }
     window.addEventListener('script:agent', onAgent);

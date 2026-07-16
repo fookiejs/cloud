@@ -6,7 +6,7 @@ import {
 } from './local-token.js';
 
 function requestPath(url: string): string {
-  return url.split('?')[0] ?? '/';
+  return url.split('?')[0] || '/';
 }
 
 export function registerLocalApiAuth(app: FastifyInstance, localApiToken: string): void {

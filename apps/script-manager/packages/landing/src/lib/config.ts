@@ -1,6 +1,6 @@
 const AUTH = 'https://auth.fookiecloud.com';
 const CLIENT_ID = 'script';
-const CLOUD_HOSTS = new Set(['script.fookiecloud.com', 'lotaru.fookiecloud.com']);
+const CLOUD_HOSTS = new Set(['script.fookiecloud.com']);
 const REDIRECT_URI =
   typeof window !== 'undefined' && CLOUD_HOSTS.has(window.location.hostname)
     ? `${window.location.origin}/callback`
@@ -49,7 +49,9 @@ function getAccessToken(): string | null {
 
 function getUser(): { id: string; email: string | null; name: string | null } | null {
   try {
-    return JSON.parse(localStorage.getItem(USER_KEY) || 'null') as {
+    const raw = localStorage.getItem(USER_KEY);
+    if (raw === null) return null;
+    return JSON.parse(raw) as {
       id: string;
       email: string | null;
       name: string | null;
@@ -100,8 +102,8 @@ async function exchangeCode(code: string, state: string): Promise<void> {
       USER_KEY,
       JSON.stringify({
         id: user['sub'],
-        email: user['email'] ?? null,
-        name: user['name'] ?? null,
+        email: typeof user['email'] === 'string' ? user['email'] : null,
+        name: typeof user['name'] === 'string' ? user['name'] : null,
       }),
     );
   }

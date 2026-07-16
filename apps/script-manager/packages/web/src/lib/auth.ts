@@ -1,6 +1,6 @@
 const AUTH = 'https://auth.fookiecloud.com';
 const CLIENT_ID = 'script';
-const CLOUD_HOSTS = new Set(['script.fookiecloud.com', 'lotaru.fookiecloud.com']);
+const CLOUD_HOSTS = new Set(['script.fookiecloud.com']);
 const REDIRECT_URI =
   typeof window !== 'undefined' && CLOUD_HOSTS.has(window.location.hostname)
     ? `${window.location.origin}/callback`
@@ -93,8 +93,8 @@ async function doExchange(code: string, state: string): Promise<void> {
       USER_KEY,
       JSON.stringify({
         id: user['sub'],
-        email: user['email'] ?? null,
-        name: user['name'] ?? null,
+        email: typeof user['email'] === 'string' ? user['email'] : null,
+        name: typeof user['name'] === 'string' ? user['name'] : null,
       }),
     );
   }

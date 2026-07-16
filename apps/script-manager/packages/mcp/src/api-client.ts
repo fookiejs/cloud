@@ -119,7 +119,7 @@ export class ScriptApi {
     },
   ): Promise<T> {
     let url = `${this.baseUrl}${path}`;
-    if (options?.query) {
+    if (options !== undefined && options.query !== undefined && options.query !== null) {
       url = `${url}${buildQuery(options.query)}`;
     }
     const headers: Record<string, string> = {
@@ -129,7 +129,7 @@ export class ScriptApi {
       headers['authorization'] = `Bearer ${this.token}`;
     }
     let body: string | undefined;
-    if (options?.body !== undefined && options.body !== null) {
+    if (options !== undefined && options.body !== undefined && options.body !== null) {
       headers['content-type'] = 'application/json';
       body = JSON.stringify(options.body);
     }
@@ -149,15 +149,15 @@ export class ScriptApi {
   }
 
   get<T>(path: string, query?: Record<string, string | number | boolean | null>): Promise<T> {
-    return this.request<T>('GET', path, { query: query ?? null });
+    return this.request<T>('GET', path, { query: query || null });
   }
 
   post<T>(path: string, body?: object): Promise<T> {
-    return this.request<T>('POST', path, { body: body ?? null });
+    return this.request<T>('POST', path, { body: body || null });
   }
 
   patch<T>(path: string, body?: object): Promise<T> {
-    return this.request<T>('PATCH', path, { body: body ?? null });
+    return this.request<T>('PATCH', path, { body: body || null });
   }
 
   delete<T>(path: string): Promise<T> {

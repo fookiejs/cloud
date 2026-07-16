@@ -5,7 +5,7 @@ import { homedir } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DEFAULT_PORT = 4317;
-const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] ?? 'https://script.fookiecloud.com';
+const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] || 'https://script.fookiecloud.com';
 
 interface StartOptions {
   port: number;

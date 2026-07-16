@@ -16,12 +16,12 @@ import {
 } from './registry.js';
 import { registerObservability } from './observability.js';
 
-const PORT = Number.parseInt(process.env['PORT'] ?? '8080', 10);
-const PUBLIC_URL = process.env['PUBLIC_URL'] ?? 'https://script.fookiecloud.com';
+const PORT = Number.parseInt(process.env['PORT'] || '8080', 10);
+const PUBLIC_URL = process.env['PUBLIC_URL'] || 'https://script.fookiecloud.com';
 const REDIRECT_URI = `${PUBLIC_URL}/callback`;
 
 const ALLOWED_ORIGINS = new Set(
-  (process.env['ALLOWED_ORIGINS'] ?? PUBLIC_URL)
+  (process.env['ALLOWED_ORIGINS'] || PUBLIC_URL)
     .split(',')
     .map((o) => o.trim())
     .filter((o) => o.length > 0),
@@ -43,7 +43,8 @@ function staticRoot(): string | null {
 }
 
 function tokenFromWsProtocols(raw: string | string[] | undefined): string | null {
-  const protocols = (Array.isArray(raw) ? raw.join(',') : (raw ?? ''))
+  if (raw === undefined) return null;
+  const protocols = (Array.isArray(raw) ? raw.join(',') : raw)
     .split(',')
     .map((p) => p.trim())
     .filter(Boolean);
@@ -103,8 +104,8 @@ async function attachAuthedSocket(
   }
   if (kind === 'agent') {
     const info = {
-      hostname: url.searchParams.get('hostname') ?? 'unknown',
-      version: url.searchParams.get('version') ?? '0.0.0',
+      hostname: url.searchParams.get('hostname') || 'unknown',
+      version: url.searchParams.get('version') || '0.0.0',
       connectedAt: Date.now(),
     };
     registerAgent(user.id, socket, info);
@@ -131,7 +132,7 @@ async function main(): Promise<void> {
           const rawUrl = typeof req.url === 'string' ? req.url : '';
           return {
             method: req.method,
-            url: rawUrl.split('?')[0] ?? '/',
+            url: rawUrl.split('?')[0] || '/',
             hostname: req.hostname,
             remoteAddress: req.ip,
           };
@@ -217,7 +218,8 @@ async function main(): Promise<void> {
   });
 
   app.all('/api/v1/*', async (req, reply) => {
-    if (req.headers.upgrade?.toLowerCase() === 'websocket') {
+    const upgrade = req.headers.upgrade;
+    if (typeof upgrade === 'string' && upgrade.toLowerCase() === 'websocket') {
       return reply.code(400).send({ error: 'use websocket endpoint' });
     }
     const token = bearerFromHeader(req.headers.authorization);
@@ -230,7 +232,7 @@ async function main(): Promise<void> {
     } catch {
       return reply.code(401).send({ error: 'unauthorized' });
     }
-    const path = req.raw.url ?? '/api/v1';
+    const path = req.raw.url || '/api/v1';
     let body: string | null = null;
     if (req.method !== 'GET' && req.method !== 'HEAD' && req.body !== undefined) {
       body = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
@@ -252,7 +254,7 @@ async function main(): Promise<void> {
       }
       return reply
         .code(res.status)
-        .type(res.headers['content-type'] ?? 'application/json')
+        .type(res.headers['content-type'] || 'application/json')
         .send(res.body);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'proxy failed';

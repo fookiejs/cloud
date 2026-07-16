@@ -5,12 +5,18 @@ import { join } from 'node:path';
 import { hostname as osHostname } from 'node:os';
 import { tightenFileMode, writeSecretFile } from './secure-file.js';
 
-const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'] ?? 'https://auth.fookiecloud.com';
-const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'] ?? 'script';
+const AUTH_ISSUER = process.env['FOOKIE_AUTH_ISSUER'];
+if (AUTH_ISSUER === undefined || AUTH_ISSUER.length === 0) {
+  throw new Error('FOOKIE_AUTH_ISSUER required');
+}
+const CLIENT_ID = process.env['SCRIPT_CLIENT_ID'];
+if (CLIENT_ID === undefined || CLIENT_ID.length === 0) {
+  throw new Error('SCRIPT_CLIENT_ID required');
+}
 const AGENT_REDIRECT_URI =
-  process.env['SCRIPT_AGENT_REDIRECT_URI'] ?? 'http://127.0.0.1:8743/callback';
+  process.env['SCRIPT_AGENT_REDIRECT_URI'] || 'http://127.0.0.1:8743/callback';
 const AGENT_CALLBACK_PORT = Number.parseInt(
-  process.env['SCRIPT_AGENT_CALLBACK_PORT'] ?? '8743',
+  process.env['SCRIPT_AGENT_CALLBACK_PORT'] || '8743',
   10,
 );
 
@@ -136,7 +142,7 @@ function interactiveLogin(dataDir: string): Promise<Credentials> {
     const server = createServer((req, res) => {
       void (async () => {
         try {
-          const url = new URL(req.url ?? '/', `http://127.0.0.1:${String(AGENT_CALLBACK_PORT)}`);
+          const url = new URL(req.url || '/', `http://127.0.0.1:${String(AGENT_CALLBACK_PORT)}`);
           if (url.pathname !== '/callback') {
             res.writeHead(404);
             res.end('not found');
@@ -194,9 +200,7 @@ export async function ensureAuth(dataDir: string): Promise<Credentials> {
     }
     try {
       return await refreshCredentials(dataDir, existing);
-    } catch {
-      void 0;
-    }
+    } catch {}
   }
   return await interactiveLogin(dataDir);
 }

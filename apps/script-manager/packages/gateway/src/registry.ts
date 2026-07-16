@@ -62,9 +62,7 @@ export function registerAgent(userId: string, socket: WebSocket, info: AgentInfo
     if (existing.socket !== socket && existing.socket.readyState === 1) {
       try {
         existing.socket.close(4000, 'replaced');
-      } catch {
-        void 0;
-      }
+      } catch {}
     }
   }
   const consoles = new Set<WebSocket>();
@@ -111,7 +109,7 @@ export function unregisterAgent(userId: string, socket: WebSocket): void {
 }
 
 export function getAgent(userId: string): AgentSession | null {
-  return agents.get(userId) ?? null;
+  return agents.get(userId) || null;
 }
 
 export function listAgentStatus(userId: string): {
@@ -142,8 +140,10 @@ export function addConsole(userId: string, socket: WebSocket): void {
 }
 
 export function removeConsole(userId: string, socket: WebSocket): void {
-  agents.get(userId)?.consoleSockets.delete(socket);
-  consoleOnly.get(userId)?.delete(socket);
+  const agent = agents.get(userId);
+  if (agent !== undefined) agent.consoleSockets.delete(socket);
+  const extras = consoleOnly.get(userId);
+  if (extras !== undefined) extras.delete(socket);
 }
 
 export function handleAgentMessage(userId: string, raw: string): void {
@@ -178,7 +178,7 @@ export function handleAgentMessage(userId: string, raw: string): void {
     return;
   }
   if (rec['type'] === 'event') {
-    fanout(userId, rec['payload'] ?? msg);
+    fanout(userId, rec['payload'] || msg);
   }
 }
 
