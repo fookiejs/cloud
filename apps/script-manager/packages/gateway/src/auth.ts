@@ -11,7 +11,9 @@ function requireEnv(name: string): string {
 const AUTH_ISSUER = requireEnv('FOOKIE_AUTH_ISSUER');
 const CLIENT_ID = requireEnv('SCRIPT_CLIENT_ID');
 const INTROSPECT_SECRET = requireEnv('FOOKIE_INTROSPECT_SECRET');
-const ALLOWED_CLIENT_IDS = new Set([CLIENT_ID]);
+const ALLOWED_CLIENT_IDS = new Set(
+  [CLIENT_ID, 'script', 'lotaru'].filter((id) => id.length > 0),
+);
 const PLATFORM_CLIENT_ID = 'fookie';
 const TOKEN_USE_API_KEY = 'api_key';
 const JWKS_URL = new URL(`${AUTH_ISSUER}/.well-known/jwks.json`);
