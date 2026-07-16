@@ -6,12 +6,10 @@ import { useAgentConnection } from '@/hooks/use-agent-connection';
 import { isCloudHost } from '@/lib/auth';
 import { useBootstrap, useStore } from '@/state/store';
 import { DashboardView } from '@/views/Dashboard';
-import { McpView } from '@/views/Mcp';
 import { WorkspaceView } from '@/views/Workspace';
 
 type Route =
   | { kind: 'list' }
-  | { kind: 'mcp' }
   | { kind: 'workspace'; id: string };
 
 function parsePathWithTaskRedirect(pathname: string): {
@@ -21,9 +19,6 @@ function parsePathWithTaskRedirect(pathname: string): {
   const clean = pathname.replace(/^\/+/, '').replace(/\/+$/, '');
   if (clean === '' || clean === 'dashboard') {
     return { route: { kind: 'list' }, taskRedirect: null };
-  }
-  if (clean === 'mcp') {
-    return { route: { kind: 'mcp' }, taskRedirect: null };
   }
   const parts = clean.split('/');
   if (parts.length === 2 && parts[0] === 'workspace' && typeof parts[1] === 'string') {
@@ -86,15 +81,11 @@ function useRouteWithRedirect(): { route: Route; taskRedirect: string | null } {
 function Shell(props: {
   children: React.ReactNode;
   activeWorkspaceId?: string | undefined;
-  activePage?: 'list' | 'mcp' | undefined;
 }): React.JSX.Element {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="relative flex-1">
-        <Sidebar
-          activeWorkspaceId={props.activeWorkspaceId}
-          activePage={props.activePage}
-        />
+        <Sidebar activeWorkspaceId={props.activeWorkspaceId} />
         <main className="pl-60 min-h-screen">{props.children}</main>
       </div>
     </div>
@@ -123,18 +114,8 @@ function ConnectedApp(): React.JSX.Element {
     );
   }
 
-  if (route.kind === 'mcp') {
-    return (
-      <Shell activePage="mcp">
-        <div className="max-w-[1600px] mx-auto px-8 py-8">
-          <McpView />
-        </div>
-      </Shell>
-    );
-  }
-
   return (
-    <Shell activePage="list">
+    <Shell>
       <div className="max-w-[1600px] mx-auto px-8 py-8">
         <DashboardView />
       </div>

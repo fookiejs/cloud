@@ -1,7 +1,6 @@
 import { NavLink, matchPath, useLocation } from "react-router-dom";
 import {
   BookOpen,
-  Cable,
   FolderKanban,
   GitBranch,
   Inbox,
@@ -58,7 +57,6 @@ export function AppSidebar() {
           <NavItem to="/projects" label="Projects" icon={FolderKanban} end />
           <NavItem to="/marketplace" label="Marketplace" icon={ShoppingBag} />
           <NavItem to="/workflow-templates" label="Workflow templates" icon={GitBranch} />
-          <NavItem to="/mcp" label="MCP" icon={Cable} />
         </div>
 
         {projectId ? (

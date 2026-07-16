@@ -1,5 +1,5 @@
 import type { MouseEvent, ReactNode } from 'react';
-import { Cable, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { FookieCloudMark } from '@/components/fookie-cloud-mark';
 import { getUser, isCloudHost } from '@/lib/auth';
 import { cn } from '@/lib/utils';
@@ -40,7 +40,6 @@ function NavItem(props: NavItemProps): React.JSX.Element {
 
 export function Sidebar(props: {
   activeWorkspaceId?: string | undefined;
-  activePage?: 'list' | 'mcp' | undefined;
 }): React.JSX.Element {
   const workspaces = useStore((s) => s.workspaces);
   const cloud = isCloudHost();
@@ -108,15 +107,6 @@ export function Sidebar(props: {
               );
             })}
           </div>
-        </div>
-
-        <div className="flex flex-col gap-0.5">
-          <NavItem
-            href="/mcp"
-            active={props.activePage === 'mcp'}
-            icon={<Cable className="w-4 h-4" />}
-            label="MCP"
-          />
         </div>
       </nav>
 
