@@ -185,7 +185,7 @@ services:
       PROMETHEUS_URL: http://prometheus:9090
       TASK_BRIDGE_URL: https://task.fookiecloud.com
       FOOKIE_API_KEY: ${OPS_FOOKIE_API_KEY}
-      TB_PROJECT_ID: ${OPS_TB_PROJECT_ID:-ops}
+      TB_PROJECT_ID: ${OPS_TB_PROJECT_ID:-cloud}
       OPS_INTERVAL_MS: ${OPS_INTERVAL_MS:-21600000}
       OPS_WINDOW: ${OPS_WINDOW:-6h}
       OPS_RUN_ON_START: ${OPS_RUN_ON_START:-1}
