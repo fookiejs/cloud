@@ -3,6 +3,7 @@ package httpapi
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -107,7 +108,7 @@ func (s *Server) handleOpenIDConfiguration(w http.ResponseWriter, _ *http.Reques
 		"subject_types_supported":               []string{"public"},
 		"id_token_signing_alg_values_supported": []string{"RS256"},
 		"scopes_supported":                      []string{"openid", "email", "profile"},
-		"token_endpoint_auth_methods_supported": []string{"none"},
+		"token_endpoint_auth_methods_supported": []string{"none", "client_secret_post", "client_secret_basic"},
 		"code_challenge_methods_supported":      []string{"S256"},
 		"grant_types_supported":                 []string{"authorization_code", "refresh_token"},
 	})
@@ -150,16 +151,20 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "invalid_request", "redirect_uri is not allowed for this client")
 		return
 	}
-	if codeChallenge == "" {
+	if codeChallenge == "" && s.clientSecret(clientID) == "" {
 		writeError(w, http.StatusBadRequest, "invalid_request", "code_challenge is required")
 		return
 	}
-	if codeChallengeMethod == "" {
-		codeChallengeMethod = "S256"
-	}
-	if !strings.EqualFold(codeChallengeMethod, "S256") {
-		writeError(w, http.StatusBadRequest, "invalid_request", "code_challenge_method must be S256")
-		return
+	challengeMethod := ""
+	if codeChallenge != "" {
+		if codeChallengeMethod == "" {
+			codeChallengeMethod = "S256"
+		}
+		if !strings.EqualFold(codeChallengeMethod, "S256") {
+			writeError(w, http.StatusBadRequest, "invalid_request", "code_challenge_method must be S256")
+			return
+		}
+		challengeMethod = "S256"
 	}
 
 	payload := loginState{
@@ -167,7 +172,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		RedirectURI:         redirectURI,
 		State:               state,
 		CodeChallenge:       codeChallenge,
-		CodeChallengeMethod: "S256",
+		CodeChallengeMethod: challengeMethod,
 	}
 
 	if user := s.sessionUser(r); user != nil {
@@ -269,8 +274,18 @@ type tokenRequest struct {
 	Code         string `json:"code"`
 	RedirectURI  string `json:"redirect_uri"`
 	ClientID     string `json:"client_id"`
+	ClientSecret string `json:"client_secret"`
 	CodeVerifier string `json:"code_verifier"`
 	RefreshToken string `json:"refresh_token"`
+}
+
+func (s *Server) clientSecret(clientID string) string {
+	for _, c := range s.cfg.Clients {
+		if c.ID == clientID {
+			return c.Secret
+		}
+	}
+	return ""
 }
 
 func (s *Server) handleToken(w http.ResponseWriter, r *http.Request) {
@@ -309,9 +324,21 @@ func (s *Server) exchangeCode(w http.ResponseWriter, r *http.Request, req tokenR
 		writeError(w, http.StatusBadRequest, "invalid_grant", "client_id or redirect_uri mismatch")
 		return
 	}
-	if ac.CodeChallenge == "" || req.CodeVerifier == "" || !token.VerifyPKCE(ac.CodeChallengeMethod, ac.CodeChallenge, req.CodeVerifier) {
-		writeError(w, http.StatusBadRequest, "invalid_grant", "pkce validation failed")
-		return
+	secret := s.clientSecret(req.ClientID)
+	if ac.CodeChallenge != "" {
+		if req.CodeVerifier == "" || !token.VerifyPKCE(ac.CodeChallengeMethod, ac.CodeChallenge, req.CodeVerifier) {
+			writeError(w, http.StatusBadRequest, "invalid_grant", "pkce validation failed")
+			return
+		}
+	} else {
+		if secret == "" {
+			writeError(w, http.StatusBadRequest, "invalid_grant", "pkce validation failed")
+			return
+		}
+		if subtle.ConstantTimeCompare([]byte(req.ClientSecret), []byte(secret)) != 1 {
+			writeError(w, http.StatusUnauthorized, "invalid_client", "client authentication failed")
+			return
+		}
 	}
 
 	user, err := s.store.GetUser(r.Context(), ac.UserID)
@@ -765,26 +792,35 @@ func (s *Server) handleIntrospect(w http.ResponseWriter, r *http.Request) {
 }
 
 func parseTokenRequest(r *http.Request) (tokenRequest, error) {
+	var req tokenRequest
 	ct := r.Header.Get("Content-Type")
 	if strings.Contains(ct, "application/json") {
-		var req tokenRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			return tokenRequest{}, errors.New("invalid json body")
 		}
-		return req, nil
+	} else {
+		if err := r.ParseForm(); err != nil {
+			return tokenRequest{}, errors.New("invalid form body")
+		}
+		req = tokenRequest{
+			GrantType:    r.Form.Get("grant_type"),
+			Code:         r.Form.Get("code"),
+			RedirectURI:  r.Form.Get("redirect_uri"),
+			ClientID:     r.Form.Get("client_id"),
+			ClientSecret: r.Form.Get("client_secret"),
+			CodeVerifier: r.Form.Get("code_verifier"),
+			RefreshToken: r.Form.Get("refresh_token"),
+		}
 	}
-
-	if err := r.ParseForm(); err != nil {
-		return tokenRequest{}, errors.New("invalid form body")
+	if basicID, basicSecret, ok := r.BasicAuth(); ok {
+		if req.ClientID == "" {
+			req.ClientID = basicID
+		}
+		if req.ClientSecret == "" {
+			req.ClientSecret = basicSecret
+		}
 	}
-	return tokenRequest{
-		GrantType:    r.Form.Get("grant_type"),
-		Code:         r.Form.Get("code"),
-		RedirectURI:  r.Form.Get("redirect_uri"),
-		ClientID:     r.Form.Get("client_id"),
-		CodeVerifier: r.Form.Get("code_verifier"),
-		RefreshToken: r.Form.Get("refresh_token"),
-	}, nil
+	return req, nil
 }
 
 func containsURI(list []string, uri string) bool {

@@ -13,6 +13,7 @@ type Client struct {
 	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	RedirectURIs []string `json:"redirect_uris"`
+	Secret       string   `json:"secret,omitempty"`
 }
 
 type Config struct {
