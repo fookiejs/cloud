@@ -26,23 +26,20 @@ async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  pickFolder(): Promise<{ path: string | null }> {
-    return jsonFetch('/api/v1/system/pick-folder', { method: 'POST' });
-  },
-  listWorkspaces(): Promise<{ workspaces: Workspace[] }> {
+  listWorkspaces(projectId?: string): Promise<{ workspaces: Workspace[] }> {
+    if (projectId !== undefined && projectId.length > 0) {
+      return jsonFetch(`/api/v1/workspaces?projectId=${encodeURIComponent(projectId)}`);
+    }
     return jsonFetch('/api/v1/workspaces');
   },
-  createWorkspace(name: string, path: string): Promise<{ workspace: Workspace }> {
+  createWorkspace(name: string, projectId: string): Promise<{ workspace: Workspace }> {
     return jsonFetch('/api/v1/workspaces', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name, path }),
+      body: JSON.stringify({ name, projectId }),
     });
   },
-  updateWorkspace(
-    id: string,
-    body: { name?: string; path?: string },
-  ): Promise<{ workspace: Workspace }> {
+  updateWorkspace(id: string, body: { name?: string }): Promise<{ workspace: Workspace }> {
     return jsonFetch(`/api/v1/workspaces/${id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
@@ -64,7 +61,7 @@ export const api = {
   importProject(body: {
     bundle: ProjectExportBundle;
     name: string;
-    path: string;
+    projectId: string;
   }): Promise<{ workspace: Workspace; taskCount: number }> {
     return jsonFetch('/api/v1/workspaces/import', {
       method: 'POST',

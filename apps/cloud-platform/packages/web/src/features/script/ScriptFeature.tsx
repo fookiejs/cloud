@@ -1,12 +1,7 @@
 import { useEffect } from "react";
-import { Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { BrandSplash } from "@/components/BrandSplash";
-import { Button } from "@/components/ui/button";
-import { WaitingForAgent } from "@script/components/waiting-for-agent";
-import { useAgentConnection } from "@script/hooks/use-agent-connection";
-import { isCloudHost } from "@/lib/auth";
 import { useBootstrap, useStore } from "@script/state/store";
-import { loadProjectWorkspaceId } from "@script/lib/project-node";
 import { DashboardView } from "@script/views/Dashboard";
 import { WorkspaceView } from "@script/views/Workspace";
 import { bindScriptNavigate, navigate } from "@script/navigate";
@@ -21,13 +16,13 @@ function ScriptNavigatorBinder(props: { basePath: string }): null {
   return null;
 }
 
-function TaskRedirect(): React.JSX.Element {
+function TaskRedirect(props: { basePath: string }): React.JSX.Element {
   const params = useParams();
   const taskId = params["taskId"];
   const tasksByWorkspace = useStore((s) => s.tasksByWorkspace);
   useEffect(() => {
     if (typeof taskId !== "string" || taskId.length === 0) {
-      navigate("/script");
+      navigate(props.basePath);
       return;
     }
     for (const key of Object.keys(tasksByWorkspace)) {
@@ -42,32 +37,32 @@ function TaskRedirect(): React.JSX.Element {
         }
       }
     }
-    navigate("/script");
-  }, [taskId, tasksByWorkspace]);
+    navigate(props.basePath);
+  }, [taskId, tasksByWorkspace, props.basePath]);
   return <BrandSplash title="Script Manager" subtitle="Opening task…" />;
 }
 
-function ScriptDashboardPage(): React.JSX.Element {
-  const { ready } = useBootstrap();
+function ScriptDashboardPage(props: { projectId: string }): React.JSX.Element {
+  const { ready } = useBootstrap(props.projectId);
   if (!ready) {
     return <BrandSplash title="Script Manager" subtitle="Loading…" />;
   }
   return (
     <div className="max-w-[1600px] mx-auto px-8 py-8">
-      <DashboardView />
+      <DashboardView projectId={props.projectId} />
     </div>
   );
 }
 
-function ScriptWorkspacePage(): React.JSX.Element {
+function ScriptWorkspacePage(props: { projectId: string; basePath: string }): React.JSX.Element {
   const params = useParams();
   const workspaceId = params["workspaceId"];
-  const { ready } = useBootstrap();
+  const { ready } = useBootstrap(props.projectId);
   if (!ready) {
     return <BrandSplash title="Script Manager" subtitle="Loading…" />;
   }
   if (typeof workspaceId !== "string" || workspaceId.length === 0) {
-    return <Navigate to="/script" replace />;
+    return <Navigate to={props.basePath} replace />;
   }
   return (
     <div className="w-full px-8 py-6">
@@ -76,66 +71,20 @@ function ScriptWorkspacePage(): React.JSX.Element {
   );
 }
 
-function ProjectScriptPage(props: { projectId: string }): React.JSX.Element {
-  const { ready } = useBootstrap();
-  const workspaces = useStore((state) => state.workspaces);
-  const workspaceId = loadProjectWorkspaceId(props.projectId);
-  if (!ready) {
-    return <div className="p-8 text-sm text-muted-foreground">Reading project scripts…</div>;
-  }
-  const workspace = workspaces.find((candidate) => candidate.id === workspaceId);
-  if (workspace === undefined) {
-    return (
-      <div className="grid min-h-full place-items-center p-6">
-        <div className="panel-card max-w-lg p-6">
-          <h2 className="text-base font-semibold text-white">Connect a project node</h2>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
-            Scripts run in a workspace on one of this project&apos;s nodes. Select that workspace first.
-          </p>
-          <Button className="mt-5" asChild>
-            <Link to={`/projects/${props.projectId}/nodes`}>Open nodes</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  return <Navigate to={`workspace/${workspace.id}`} replace />;
-}
-
-function ConnectedScriptRoutes(props: { projectId?: string }): React.JSX.Element {
-  const basePath = props.projectId === undefined ? "/script" : `/projects/${props.projectId}/scripts`;
+export function ScriptFeature(props: { projectId: string }): React.JSX.Element {
+  const basePath = `/projects/${props.projectId}/scripts`;
   return (
     <>
       <ScriptNavigatorBinder basePath={basePath} />
       <Routes>
+        <Route index element={<ScriptDashboardPage projectId={props.projectId} />} />
         <Route
-          index
-          element={
-            props.projectId === undefined
-              ? <ScriptDashboardPage />
-              : <ProjectScriptPage projectId={props.projectId} />
-          }
+          path="workspace/:workspaceId"
+          element={<ScriptWorkspacePage projectId={props.projectId} basePath={basePath} />}
         />
-        <Route path="workspace/:workspaceId" element={<ScriptWorkspacePage />} />
-        <Route path="task/:taskId" element={<TaskRedirect />} />
+        <Route path="task/:taskId" element={<TaskRedirect basePath={basePath} />} />
         <Route path="*" element={<Navigate to={basePath} replace />} />
       </Routes>
     </>
   );
-}
-
-export function ScriptFeature(props: { projectId?: string }): React.JSX.Element {
-  const agent = useAgentConnection();
-
-  if (isCloudHost()) {
-    if (agent.checking) {
-      return <BrandSplash title="Script Manager" subtitle="Checking agent…" />;
-    }
-    if (!agent.online) {
-      return <WaitingForAgent info={agent.info} />;
-    }
-    return <ConnectedScriptRoutes key="connected" projectId={props.projectId} />;
-  }
-
-  return <ConnectedScriptRoutes projectId={props.projectId} />;
 }

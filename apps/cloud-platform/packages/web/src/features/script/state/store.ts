@@ -243,9 +243,11 @@ function applyRunningSnapshot(s: State, running: readonly RunningSnapshot[]): St
   return { ...s, liveExecutions, liveLogsByTask, executionsByTask };
 }
 
+let currentProjectId: string | undefined;
+
 export const actions = {
   async refreshWorkspaces(): Promise<void> {
-    const r = await api.listWorkspaces();
+    const r = await api.listWorkspaces(currentProjectId);
     set((s) => ({ ...s, workspaces: r.workspaces }));
   },
   async refreshTasks(workspaceId: string): Promise<void> {
@@ -574,9 +576,10 @@ function handleMessage(msg: ServerMessage): void {
   actions.removeTask(msg.taskId);
 }
 
-export function useBootstrap(): { ready: boolean } {
+export function useBootstrap(projectId?: string): { ready: boolean } {
   const [ready, setReady] = useState(false);
   useEffect(() => {
+    currentProjectId = projectId;
     const stream = connectStream();
     const unsub = stream.subscribe(handleMessage);
     void (async () => {
@@ -603,7 +606,7 @@ export function useBootstrap(): { ready: boolean } {
       unsub();
       stream.close();
     };
-  }, []);
+  }, [projectId]);
   return { ready };
 }
 

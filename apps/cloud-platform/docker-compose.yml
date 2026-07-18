@@ -16,8 +16,13 @@ services:
       SCRIPT_CLIENT_ID: ${SCRIPT_CLIENT_ID:-script}
       FOOKIE_ADMIN_EMAILS: ${FOOKIE_ADMIN_EMAILS:-}
       FOOKIE_LOCAL_AUTH_EMAIL: ${FOOKIE_LOCAL_AUTH_EMAIL:-local@fookiecloud.test}
+      SCRIPT_WORKSPACES_HOST_DIR: ${SCRIPT_WORKSPACES_HOST_DIR:-}
+      SCRIPT_SANDBOX_IMAGE: ${SCRIPT_SANDBOX_IMAGE:-node:22-bookworm}
+      SCRIPT_MEMORY_LIMIT_MB: ${SCRIPT_MEMORY_LIMIT_MB:-1024}
+      SCRIPT_CPU_LIMIT: ${SCRIPT_CPU_LIMIT:-1}
     volumes:
       - fookie-cloud-data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/healthz').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
       interval: 10s

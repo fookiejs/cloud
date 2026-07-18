@@ -13,22 +13,12 @@ RUN npm ci
 COPY apps/task-bridge/apps/backend ./
 RUN npm run build
 
-FROM node:26-bookworm-slim AS script-module
-WORKDIR /repo/apps/script-manager
-COPY apps/script-manager/package.json apps/script-manager/package-lock.json ./
-COPY apps/script-manager/tsconfig.base.json ./
-COPY apps/script-manager/packages/gateway/package.json ./packages/gateway/package.json
-RUN npm ci --workspace @script/gateway
-COPY apps/script-manager/packages/gateway ./packages/gateway
-RUN npm --workspace @script/gateway run build
-
 FROM node:26-bookworm-slim AS build
 WORKDIR /repo/apps/cloud-platform
 COPY apps/cloud-platform/package.json apps/cloud-platform/package-lock.json ./
 COPY apps/cloud-platform/packages ./packages
 RUN npm ci
 COPY --from=task-module /repo/apps/task-bridge/apps/backend/dist /repo/apps/task-bridge/apps/backend/dist
-COPY --from=script-module /repo/apps/script-manager/packages/gateway/dist /repo/apps/script-manager/packages/gateway/dist
 RUN npm run build:web
 RUN npx tsc -p packages/server/tsconfig.json
 
@@ -44,7 +34,6 @@ COPY --from=build /repo/apps/cloud-platform/node_modules /app/node_modules
 COPY --from=build /repo/apps/cloud-platform/packages/server/dist ./packages/server/dist
 COPY --from=build /repo/apps/cloud-platform/packages/web/dist ./packages/web/dist
 COPY --from=task-module /repo/apps/task-bridge/apps/backend/dist /app/apps/task-bridge/apps/backend/dist
-COPY --from=script-module /repo/apps/script-manager/packages/gateway/dist /app/apps/script-manager/packages/gateway/dist
 COPY --from=auth-module /out/auth /app/bin/auth
 RUN mkdir -p /data
 VOLUME ["/data"]

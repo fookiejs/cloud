@@ -1,5 +1,5 @@
 import { useRef, useState, type MouseEvent } from 'react';
-import { Folder, FolderInput, Settings2, Trash2, Upload } from 'lucide-react';
+import { FolderInput, Settings2, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from '@script/components/ui/select';
 import { cn } from '@/lib/utils';
-import { folderBaseName } from '@script/lib/path';
 import {
   EMPTY_PROJECT_TEMPLATE_ID,
   PROJECT_TEMPLATES,
@@ -190,7 +189,6 @@ function ProjectCard(props: ProjectCardProps): React.JSX.Element {
               {badge}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground font-mono truncate">{w.path}</p>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span>{`${String(taskCount)} tasks`}</span>
             {running > 0 && <span className="text-running">{`${String(running)} running`}</span>}
@@ -222,50 +220,33 @@ function ProjectCard(props: ProjectCardProps): React.JSX.Element {
 }
 
 interface AddWorkspaceProps {
+  projectId: string;
   onDone(): void;
 }
 
 function AddWorkspace(props: AddWorkspaceProps): React.JSX.Element {
   const [name, setName] = useState('');
-  const [path, setPath] = useState('');
   const [templateId, setTemplateId] = useState(EMPTY_PROJECT_TEMPLATE_ID);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  async function pickDir(): Promise<void> {
-    setError(null);
-    try {
-      const { path: picked } = await api.pickFolder();
-      if (picked === null || picked.length === 0) {
-        return;
-      }
-      setPath(picked);
-      if (name.length === 0) {
-        setName(folderBaseName(picked));
-      }
-    } catch (e: unknown) {
-      setError(String(e));
-    }
-  }
-
   async function submit(): Promise<void> {
     setError(null);
-    if (name.length === 0 || path.length === 0) {
-      setError('Name and absolute path required.');
+    if (name.length === 0) {
+      setError('Name required.');
       return;
     }
     setBusy(true);
     try {
-      const { workspace } = await api.createWorkspace(name, path);
+      const { workspace } = await api.createWorkspace(name, props.projectId);
       const taskBodies = projectTemplateTasks(templateId);
       await seedWorkspaceTasks(workspace.id, taskBodies);
       await actions.refreshWorkspaces();
       await actions.refreshTasks(workspace.id);
       setName('');
-      setPath('');
       setTemplateId(EMPTY_PROJECT_TEMPLATE_ID);
       props.onDone();
-      toast.success(`Project created${projectCreatedTaskNote(taskBodies.length)}`);
+      toast.success(`Workspace created${projectCreatedTaskNote(taskBodies.length)}`);
       navigate(`/workspace/${workspace.id}`);
     } catch (e: unknown) {
       setError(String(e));
@@ -278,34 +259,18 @@ function AddWorkspace(props: AddWorkspaceProps): React.JSX.Element {
   return (
     <Card>
       <CardContent className="p-5 flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-xs" htmlFor="ws-name">
-              Name
-            </Label>
-            <Input
-              id="ws-name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-              placeholder="frontend"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-xs" htmlFor="ws-path">
-              Absolute path
-            </Label>
-            <Input
-              id="ws-path"
-              value={path}
-              onChange={(e) => {
-                setPath(e.target.value);
-              }}
-              placeholder="C:\Users\you\projects\frontend"
-              className="font-mono"
-            />
-          </div>
+        <div className="flex flex-col gap-1.5">
+          <Label className="text-xs" htmlFor="ws-name">
+            Name
+          </Label>
+          <Input
+            id="ws-name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+            placeholder="daily-report"
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label className="text-xs">Template</Label>
@@ -322,18 +287,11 @@ function AddWorkspace(props: AddWorkspaceProps): React.JSX.Element {
             </SelectContent>
           </Select>
         </div>
+        <p className="text-xs text-muted-foreground">
+          Scripts run in an isolated sandbox on Fookie Cloud with its own persistent storage.
+        </p>
         {error !== null && <div className="text-xs text-destructive">{error}</div>}
         <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            onClick={() => {
-              void pickDir();
-            }}
-            variant="ghost"
-            size="sm"
-          >
-            <Folder className="w-3.5 h-3.5" /> Browse
-          </Button>
           <Button type="button" onClick={props.onDone} variant="outline" size="sm">
             Cancel
           </Button>
@@ -353,7 +311,7 @@ function AddWorkspace(props: AddWorkspaceProps): React.JSX.Element {
   );
 }
 
-export function DashboardView(): React.JSX.Element {
+export function DashboardView(props: { projectId: string }): React.JSX.Element {
   const workspaces = useStore((s) => s.workspaces);
   const [adding, setAdding] = useState(false);
   const [importBundle, setImportBundle] = useState<ProjectExportBundle | null>(null);
@@ -402,7 +360,7 @@ export function DashboardView(): React.JSX.Element {
     <div className="flex flex-col gap-8">
       <header className="flex items-end justify-between gap-4 pb-6 border-b">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Projects</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Script workspaces</h1>
         </div>
         {!adding && (
           <div className="flex items-center gap-2 shrink-0">
@@ -416,7 +374,7 @@ export function DashboardView(): React.JSX.Element {
                 setAdding(true);
               }}
             >
-              Add project
+              Add workspace
             </Button>
           </div>
         )}
@@ -431,6 +389,7 @@ export function DashboardView(): React.JSX.Element {
       <ProjectImportDialog
         open={importOpen}
         bundle={importBundle}
+        projectId={props.projectId}
         onOpenChange={setImportOpen}
         onImported={(workspaceId) => {
           void actions.refreshWorkspaces();
@@ -440,6 +399,7 @@ export function DashboardView(): React.JSX.Element {
 
       {adding && (
         <AddWorkspace
+          projectId={props.projectId}
           onDone={() => {
             setAdding(false);
           }}
@@ -448,7 +408,7 @@ export function DashboardView(): React.JSX.Element {
 
       {workspaces.length === 0 && !adding && (
         <div className="text-center py-16 text-muted-foreground text-sm">
-          No projects yet. Add one to get started.
+          No workspaces yet. Add one to get started.
         </div>
       )}
 
