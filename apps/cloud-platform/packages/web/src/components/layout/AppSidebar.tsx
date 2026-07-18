@@ -68,6 +68,7 @@ export function AppSidebar() {
             <NavItem to={`/projects/${projectId}/tasks`} label="Tasks" icon={ListTodo} />
             <NavItem to={`/projects/${projectId}/scripts`} label="Scripts" icon={Terminal} />
             <NavItem to={`/projects/${projectId}/notes`} label="Notes" icon={NotebookPen} />
+            <NavItem to={`/projects/${projectId}/designs`} label="Designs" icon={Palette} />
           </div>
         ) : fallbackProjectId ? (
           <div className="space-y-0.5">
@@ -110,7 +111,6 @@ export function AppSidebar() {
             Platform
           </p>
           <ExternalNavItem href="https://grafana.fookiecloud.com" label="Grafana" icon={Activity} />
-          <ExternalNavItem href="https://penpot.fookiecloud.com" label="Penpot" icon={Palette} />
         </div>
       </nav>
 

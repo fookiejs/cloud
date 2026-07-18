@@ -9,6 +9,7 @@ import { registerObservability } from "../../../../task-bridge/apps/backend/dist
 import { registerEmbeddedAuth } from "./modules/embedded-auth.js";
 import { createIdentity } from "./modules/identity.js";
 import { registerNotesModule } from "./modules/notes.js";
+import { registerPenpotModule } from "./modules/penpot.js";
 import { registerProjectsModule } from "./modules/projects.js";
 import { registerScriptRunnerModule } from "./modules/script-runner.js";
 
@@ -77,6 +78,14 @@ await registerScriptRunnerModule(app, {
   dataDir: process.env.SCRIPT_DATA_DIR?.trim() || join(dataDirectory, "script"),
   workspacesHostDir: process.env.SCRIPT_WORKSPACES_HOST_DIR?.trim() || null,
   sandboxImage: process.env.SCRIPT_SANDBOX_IMAGE?.trim() || "node:22-bookworm",
+});
+const penpotAccessToken = process.env.PENPOT_ACCESS_TOKEN?.trim();
+await registerPenpotModule(app, {
+  identity,
+  dataFile: join(dataDirectory, "penpot-teams.json"),
+  publicUri: (process.env.PENPOT_PUBLIC_URI?.trim() || "https://penpot.fookiecloud.com").replace(/\/$/, ""),
+  accessToken:
+    penpotAccessToken !== undefined && penpotAccessToken.length > 0 ? penpotAccessToken : null,
 });
 
 const webRoot = resolve(process.env.WEB_DIST_DIR ?? join(process.cwd(), "packages", "web", "dist"));

@@ -16,6 +16,7 @@ import { MarketplacePage } from "@/pages/MarketplacePage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { ScriptFeature } from "@/features/script/ScriptFeature";
 import { NotesFeature } from "@/features/notes/NotesFeature";
+import { DesignsFeature } from "@/features/designs/DesignsFeature";
 import { loadSession } from "@/lib/session";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -72,6 +73,7 @@ export function App() {
             <Route path="tasks/marketplace" element={<MarketplacePage />} />
             <Route path="scripts/*" element={<ProjectScriptsRoute />} />
             <Route path="notes/*" element={<ProjectNotesRoute />} />
+            <Route path="designs" element={<ProjectDesignsRoute />} />
           </Route>
           <Route path="/tasks/projects" element={<Navigate to="/projects" replace />} />
           <Route path="/tasks/projects/:projectId/*" element={<LegacyProjectRedirect />} />
@@ -107,6 +109,14 @@ function ProjectNotesRoute(): React.JSX.Element {
     return <Navigate to="/projects" replace />;
   }
   return <NotesFeature projectId={projectId} />;
+}
+
+function ProjectDesignsRoute(): React.JSX.Element {
+  const { projectId } = useParams();
+  if (projectId === undefined) {
+    return <Navigate to="/projects" replace />;
+  }
+  return <DesignsFeature projectId={projectId} />;
 }
 
 function LegacyNotesRedirect(): React.JSX.Element {
