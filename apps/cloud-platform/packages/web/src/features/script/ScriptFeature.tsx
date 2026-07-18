@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBootstrap, useStore } from "@script/state/store";
-import { DashboardView } from "@script/views/Dashboard";
+import { api } from "@script/api/client";
+import { actions, useBootstrap, useStore } from "@script/state/store";
 import { WorkspaceView } from "@script/views/Workspace";
 import { bindScriptNavigate, navigate } from "@script/navigate";
 
@@ -51,57 +51,73 @@ function TaskRedirect(props: { basePath: string }): React.JSX.Element {
       }
       for (const task of list) {
         if (task.id === taskId) {
-          navigate(`/workspace/${task.workspace_id}`);
+          navigate(props.basePath);
           return;
         }
       }
     }
     navigate(props.basePath);
   }, [taskId, tasksByWorkspace, props.basePath]);
-  return <ScriptLoadingShell title="Script workspaces" />;
+  return <ScriptLoadingShell title="Scripts" />;
 }
 
-function ScriptDashboardPage(props: { projectId: string }): React.JSX.Element {
+function ScriptProjectPage(props: {
+  projectId: string;
+  projectName: string;
+}): React.JSX.Element {
   const { ready } = useBootstrap(props.projectId);
-  if (!ready) {
-    return <ScriptLoadingShell title="Script workspaces" />;
-  }
-  return (
-    <div className="mx-auto max-w-[1600px] px-8 py-8">
-      <DashboardView projectId={props.projectId} />
-    </div>
-  );
-}
-
-function ScriptWorkspacePage(props: { projectId: string; basePath: string }): React.JSX.Element {
-  const params = useParams();
-  const workspaceId = params["workspaceId"];
-  const { ready } = useBootstrap(props.projectId);
-  if (!ready) {
-    return <ScriptLoadingShell title="Workspace" />;
-  }
-  if (typeof workspaceId !== "string" || workspaceId.length === 0) {
-    return <Navigate to={props.basePath} replace />;
+  const workspaces = useStore((state) => state.workspaces);
+  const [ensuring, setEnsuring] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ready || ensuring || workspaces.length > 0) {
+      return;
+    }
+    setEnsuring(true);
+    setError(null);
+    void api
+      .ensureProjectWorkspace(props.projectId, props.projectName)
+      .then(async () => {
+        await actions.refreshWorkspaces();
+      })
+      .catch((failure: Error) => {
+        setError(failure.message);
+      })
+      .finally(() => {
+        setEnsuring(false);
+      });
+  }, [ensuring, props.projectId, props.projectName, ready, workspaces.length]);
+  const workspace = workspaces[0];
+  if (!ready || ensuring || workspace === undefined) {
+    if (error !== null) {
+      return <div className="p-8 text-sm text-destructive">{error}</div>;
+    }
+    return <ScriptLoadingShell title="Scripts" />;
   }
   return (
     <div className="w-full px-8 py-6">
-      <WorkspaceView workspaceId={workspaceId} />
+      <WorkspaceView workspaceId={workspace.id} projectName={props.projectName} />
     </div>
   );
 }
 
-export function ScriptFeature(props: { projectId: string }): React.JSX.Element {
+export function ScriptFeature(props: {
+  projectId: string;
+  projectName: string;
+}): React.JSX.Element {
   const basePath = `/projects/${props.projectId}/scripts`;
   return (
     <>
       <ScriptNavigatorBinder basePath={basePath} />
       <Routes>
-        <Route index element={<ScriptDashboardPage projectId={props.projectId} />} />
         <Route
-          path="workspace/:workspaceId"
-          element={<ScriptWorkspacePage projectId={props.projectId} basePath={basePath} />}
+          index
+          element={
+            <ScriptProjectPage projectId={props.projectId} projectName={props.projectName} />
+          }
         />
         <Route path="task/:taskId" element={<TaskRedirect basePath={basePath} />} />
+        <Route path="workspace/:workspaceId" element={<Navigate to={basePath} replace />} />
         <Route path="*" element={<Navigate to={basePath} replace />} />
       </Routes>
     </>

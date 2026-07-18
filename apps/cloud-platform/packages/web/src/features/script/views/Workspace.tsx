@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ResizeHandle } from '@script/components/resize-handle';
 import { useDragResize } from '@script/hooks/use-drag-resize';
-import { Download, Settings2 } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,7 +11,6 @@ import { Switch } from '@script/components/ui/switch';
 import { TaskTile } from '@script/components/task-tile';
 import { TaskDetailPanel } from '@script/components/task-detail-panel';
 import { api } from '@script/api/client';
-import { ProjectSettingsDialog } from '@script/components/project-settings';
 import { WorkspaceEnvironmentDialog } from '@script/components/workspace-environment-dialog';
 import { downloadProjectBundle, exportFileName } from '@script/lib/project-export';
 import { BLANK_TASK_BODY } from '@script/lib/project-templates';
@@ -32,6 +31,7 @@ function detailPanelWidth(open: boolean, size: number): number {
 
 interface Props {
   workspaceId: string;
+  projectName: string;
 }
 
 export function WorkspaceView(props: Props): React.JSX.Element {
@@ -58,7 +58,6 @@ export function WorkspaceView(props: Props): React.JSX.Element {
     min: 400,
     max: viewportMaxDetail,
   });
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
   const loadFirstPage = useCallback(async (): Promise<void> => {
     setLoadingTasks(true);
@@ -247,7 +246,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
     setExporting(true);
     try {
       const bundle = await api.exportProject(ws.id);
-      downloadProjectBundle(bundle, exportFileName(ws.name));
+      downloadProjectBundle(bundle, exportFileName(props.projectName));
       toast.success('Project exported');
     } catch (e: unknown) {
       toast.error(String(e));
@@ -353,16 +352,15 @@ export function WorkspaceView(props: Props): React.JSX.Element {
 
   return (
     <>
-      <ProjectSettingsDialog workspace={ws} open={settingsOpen} onOpenChange={setSettingsOpen} />
       <div className="flex h-[calc(100vh-4rem)] -mx-8 overflow-hidden">
         <div className="flex-1 min-w-[280px] flex flex-col px-6 border-r">
           <header className="flex items-center justify-between gap-3 py-3 border-b shrink-0">
             <div className="min-w-0">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>Project</span>
+                <span>{props.projectName}</span>
                 {stateBadge}
               </div>
-              <h1 className="text-lg font-semibold truncate">{ws.name}</h1>
+              <h1 className="text-lg font-semibold truncate">Scripts</h1>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <WorkspaceEnvironmentDialog
@@ -389,17 +387,6 @@ export function WorkspaceView(props: Props): React.JSX.Element {
               >
                 <Download className="w-3.5 h-3.5" />
                 Export JSON
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => {
-                  setSettingsOpen(true);
-                }}
-              >
-                <Settings2 className="w-4 h-4" />
               </Button>
               <Button
                 type="button"

@@ -39,6 +39,16 @@ export const api = {
       body: JSON.stringify({ name, projectId }),
     });
   },
+  ensureProjectWorkspace(
+    projectId: string,
+    projectName: string,
+  ): Promise<{ workspace: Workspace }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/script-workspace`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ projectName }),
+    });
+  },
   updateWorkspace(id: string, body: { name?: string }): Promise<{ workspace: Workspace }> {
     return jsonFetch(`/api/v1/workspaces/${id}`, {
       method: 'PATCH',

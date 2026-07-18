@@ -100,7 +100,16 @@ function ProjectScriptsRoute(): React.JSX.Element {
   if (projectId === undefined) {
     return <Navigate to="/projects" replace />;
   }
-  return <ScriptFeature projectId={projectId} />;
+  const session = loadSession();
+  let projectName = projectId;
+  if (
+    session !== null &&
+    session.projectId === projectId &&
+    session.projectName !== null
+  ) {
+    projectName = session.projectName;
+  }
+  return <ScriptFeature projectId={projectId} projectName={projectName} />;
 }
 
 function ProjectNotesRoute(): React.JSX.Element {

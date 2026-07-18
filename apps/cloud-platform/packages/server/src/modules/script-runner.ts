@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { PassThrough } from "node:stream";
 import { nanoid } from "nanoid";
 import type { WebSocket } from "ws";
+import { z } from "zod";
 import type { Identity, IdentityUser } from "./identity.js";
 
 type RuntimeKind = "shell" | "docker";
@@ -850,6 +851,31 @@ export async function registerScriptRunnerModule(
             .prepare("SELECT * FROM workspaces WHERE owner_id = ? ORDER BY created_at ASC")
             .all(user.id) as WorkspaceRow[]);
     return { workspaces: rows.map(toWorkspace) };
+  });
+
+  app.post("/api/v1/projects/:projectId/script-workspace", async (request, reply) => {
+    const user = await requireUser(request);
+    if (user === null) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+    const params = z.object({ projectId: z.string().trim().min(1) }).parse(request.params);
+    const body = z.object({ projectName: z.string().trim().min(1) }).parse(request.body);
+    const existing = db
+      .prepare(
+        "SELECT * FROM workspaces WHERE owner_id = ? AND project_id = ? ORDER BY created_at ASC LIMIT 1",
+      )
+      .get(user.id, params.projectId) as WorkspaceRow | undefined;
+    if (existing !== undefined) {
+      return { workspace: toWorkspace(existing) };
+    }
+    const id = nanoid(12);
+    mkdirSync(join(workspacesDir, id), { recursive: true });
+    db.prepare(
+      "INSERT INTO workspaces (id, owner_id, project_id, name, paused, active_environment_id, created_at) VALUES (?, ?, ?, ?, 0, NULL, ?)",
+    ).run(id, user.id, params.projectId, body.projectName, Date.now());
+    const workspace = getWorkspace(id);
+    broadcast(user.id, { kind: "workspace.updated", workspaceId: id });
+    return reply.code(201).send({ workspace });
   });
 
   app.post<{ Body: { name?: unknown; projectId?: unknown } }>(
