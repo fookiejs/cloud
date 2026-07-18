@@ -5,13 +5,11 @@ import {
   FolderKanban,
   GitBranch,
   Inbox,
-  LayoutDashboard,
   ListTodo,
   NotebookPen,
   Palette,
   ShoppingBag,
   Smartphone,
-  Server,
   Terminal,
   Users,
   type LucideIcon,
@@ -60,7 +58,6 @@ export function AppSidebar() {
       <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-3">
         <div className="space-y-0.5">
           <NavItem to="/projects" label="Projects" icon={FolderKanban} end />
-          <NavItem to="/notes" label="Notes" icon={NotebookPen} />
         </div>
 
         {projectId ? (
@@ -68,10 +65,9 @@ export function AppSidebar() {
             <p className="truncate px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {projectName}
             </p>
-            <NavItem to={`/projects/${projectId}`} label="Overview" icon={LayoutDashboard} end />
             <NavItem to={`/projects/${projectId}/tasks`} label="Tasks" icon={ListTodo} />
             <NavItem to={`/projects/${projectId}/scripts`} label="Scripts" icon={Terminal} />
-            <NavItem to={`/projects/${projectId}/nodes`} label="Nodes" icon={Server} />
+            <NavItem to={`/projects/${projectId}/notes`} label="Notes" icon={NotebookPen} />
           </div>
         ) : fallbackProjectId ? (
           <div className="space-y-0.5">
@@ -79,9 +75,9 @@ export function AppSidebar() {
               Recent project
             </p>
             <NavItem
-              to={`/projects/${fallbackProjectId}`}
+              to={`/projects/${fallbackProjectId}/tasks`}
               label={projectName !== null ? projectName : "Open project"}
-              icon={LayoutDashboard}
+              icon={ListTodo}
             />
           </div>
         ) : null}

@@ -44,7 +44,7 @@ export function LoginPage() {
       if (session) {
         await waitAtLeast(startedAt);
         if (cancelled) return;
-        navigate(session.projectId ? `/projects/${session.projectId}` : "/projects", {
+        navigate(session.projectId ? `/projects/${session.projectId}/tasks` : "/projects", {
           replace: true,
         });
         return;

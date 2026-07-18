@@ -16,7 +16,7 @@ type NoteListItem = {
   seen: boolean;
 };
 
-type Note = NoteListItem & { body: string };
+type Note = NoteListItem & { body: string; projectId: string };
 
 function fmt(iso: string): string {
   try {
@@ -47,8 +47,13 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data;
 }
 
-function NotesListPage(): React.JSX.Element {
+function notesBase(projectId: string): string {
+  return `/projects/${projectId}/notes`;
+}
+
+function NotesListPage(props: { projectId: string }): React.JSX.Element {
   const navigate = useNavigate();
+  const base = notesBase(props.projectId);
   const [notes, setNotes] = useState<NoteListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,14 +61,15 @@ function NotesListPage(): React.JSX.Element {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const data = await api<{ notes: NoteListItem[] }>("/api/notes");
+      const query = new URLSearchParams({ projectId: props.projectId });
+      const data = await api<{ notes: NoteListItem[] }>(`/api/notes?${query.toString()}`);
       setNotes(data.notes || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "load failed");
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [props.projectId]);
 
   useEffect(() => {
     void load();
@@ -77,7 +83,7 @@ function NotesListPage(): React.JSX.Element {
         <h1 className="text-sm font-semibold tracking-tight">Notes</h1>
         {unread > 0 ? <Badge variant="warn">{unread} unread</Badge> : null}
         <div className="flex-1" />
-        <Button type="button" size="sm" onClick={() => navigate("/notes/new")}>
+        <Button type="button" size="sm" onClick={() => navigate(`${base}/new`)}>
           <Plus className="h-4 w-4" />
           New note
         </Button>
@@ -93,7 +99,7 @@ function NotesListPage(): React.JSX.Element {
             {notes.map((n) => (
               <li key={n.id}>
                 <Link
-                  to={`/notes/${n.id}`}
+                  to={`${base}/${n.id}`}
                   className={cn(
                     "block w-full rounded-md border px-3.5 py-3 text-left transition-colors",
                     "hover:bg-secondary/60",
@@ -124,10 +130,11 @@ function NotesListPage(): React.JSX.Element {
   );
 }
 
-function NotesDetailPage(): React.JSX.Element {
+function NotesDetailPage(props: { projectId: string }): React.JSX.Element {
   const params = useParams();
   const noteId = params["noteId"];
   const navigate = useNavigate();
+  const base = notesBase(props.projectId);
   const [selected, setSelected] = useState<Note | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -173,7 +180,7 @@ function NotesDetailPage(): React.JSX.Element {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-14 items-center gap-3 border-b px-6 py-5">
-        <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/notes")}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => navigate(base)}>
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
@@ -206,8 +213,9 @@ function NotesDetailPage(): React.JSX.Element {
   );
 }
 
-function NotesCreatePage(): React.JSX.Element {
+function NotesCreatePage(props: { projectId: string }): React.JSX.Element {
   const navigate = useNavigate();
+  const base = notesBase(props.projectId);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -220,9 +228,9 @@ function NotesCreatePage(): React.JSX.Element {
     try {
       const note = await api<Note>("/api/notes", {
         method: "POST",
-        body: JSON.stringify({ title, body, source: "manual" }),
+        body: JSON.stringify({ title, body, source: "manual", projectId: props.projectId }),
       });
-      navigate(`/notes/${note.id}`, { replace: true });
+      navigate(`${base}/${note.id}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "create failed");
       setSaving(false);
@@ -232,7 +240,7 @@ function NotesCreatePage(): React.JSX.Element {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex h-14 items-center gap-3 border-b px-6 py-5">
-        <Button type="button" variant="ghost" size="sm" onClick={() => navigate("/notes")}>
+        <Button type="button" variant="ghost" size="sm" onClick={() => navigate(base)}>
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
@@ -261,13 +269,14 @@ function NotesCreatePage(): React.JSX.Element {
   );
 }
 
-export function NotesFeature(): React.JSX.Element {
+export function NotesFeature(props: { projectId: string }): React.JSX.Element {
+  const base = notesBase(props.projectId);
   return (
     <Routes>
-      <Route index element={<NotesListPage />} />
-      <Route path="new" element={<NotesCreatePage />} />
-      <Route path=":noteId" element={<NotesDetailPage />} />
-      <Route path="*" element={<Navigate to="/notes" replace />} />
+      <Route index element={<NotesListPage projectId={props.projectId} />} />
+      <Route path="new" element={<NotesCreatePage projectId={props.projectId} />} />
+      <Route path=":noteId" element={<NotesDetailPage projectId={props.projectId} />} />
+      <Route path="*" element={<Navigate to={base} replace />} />
     </Routes>
   );
 }

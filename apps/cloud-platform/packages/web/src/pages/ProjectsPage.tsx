@@ -65,7 +65,7 @@ export function ProjectsPage() {
 
   function openProject(project: Project) {
     setSelectedProject(project.id, project.name);
-    navigate(`/projects/${project.id}`);
+    navigate(`/projects/${project.id}/tasks`);
   }
 
   function handleCreated(project: Project) {

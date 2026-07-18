@@ -12,6 +12,7 @@ type Note = {
   createdAt: string;
   seenAt: string | null;
   createdBy: string;
+  projectId: string;
 };
 
 type Viewer = { email: string; sub: string };
@@ -50,12 +51,15 @@ async function saveNotes(dataFile: string, notes: Note[]): Promise<void> {
 }
 
 export async function registerNotesModule(app: FastifyInstance, options: NotesOptions): Promise<void> {
-  app.get("/api/notes", async (request, reply) => {
+  app.get<{ Querystring: { projectId?: string } }>("/api/notes", async (request, reply) => {
     const viewer = await viewerFrom(request, options);
     if (!viewer) return reply.code(401).send({ error: "unauthorized" });
+    const projectFilter = String(request.query?.projectId ?? "").trim();
+    if (projectFilter.length === 0) return reply.code(400).send({ error: "projectId required" });
     const notes = await readNotes(options.dataFile);
     return {
       notes: notes
+        .filter((note) => note.projectId === projectFilter)
         .slice()
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
         .map(({ id, title, source, createdAt, seenAt }) => ({ id, title, source, createdAt, seenAt, seen: Boolean(seenAt) })),
@@ -68,16 +72,18 @@ export async function registerNotesModule(app: FastifyInstance, options: NotesOp
     return note ? note : reply.code(404).send({ error: "not found" });
   });
 
-  app.post<{ Body: { title?: unknown; body?: unknown; text?: unknown; source?: unknown } }>("/api/notes", async (request, reply) => {
+  app.post<{ Body: { title?: unknown; body?: unknown; text?: unknown; source?: unknown; projectId?: unknown } }>("/api/notes", async (request, reply) => {
     const viewer = await viewerFrom(request, options);
     if (!viewer) return reply.code(401).send({ error: "unauthorized" });
     const title = String(request.body?.title ?? "").trim();
     const body = String(request.body?.body ?? request.body?.text ?? "").trim();
+    const projectId = String(request.body?.projectId ?? "").trim();
     if (!title || !body) return reply.code(400).send({ error: "title and body required" });
+    if (!projectId) return reply.code(400).send({ error: "projectId required" });
     const note: Note = {
       id: randomUUID(), title: title.slice(0, 200), body: body.slice(0, 200_000),
       source: String(request.body?.source ?? "manual").slice(0, 80), createdAt: new Date().toISOString(),
-      seenAt: null, createdBy: viewer.email,
+      seenAt: null, createdBy: viewer.email, projectId,
     };
     const notes = await readNotes(options.dataFile);
     notes.push(note);
