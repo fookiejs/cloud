@@ -4,6 +4,7 @@ import { ArrowLeft, Check, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -91,7 +92,17 @@ function NotesListPage(props: { projectId: string }): React.JSX.Element {
       <div className="p-6">
         {error ? <p className="mb-4 text-sm text-destructive">{error}</p> : null}
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <ul className="flex max-w-3xl flex-col gap-1">
+            <li>
+              <Skeleton className="h-[4.25rem] w-full rounded-md" />
+            </li>
+            <li>
+              <Skeleton className="h-[4.25rem] w-full rounded-md" />
+            </li>
+            <li>
+              <Skeleton className="h-[4.25rem] w-full rounded-md" />
+            </li>
+          </ul>
         ) : notes.length === 0 ? (
           <p className="text-sm text-muted-foreground">No notes yet.</p>
         ) : (
@@ -206,7 +217,11 @@ function NotesDetailPage(props: { projectId: string }): React.JSX.Element {
             </pre>
           </article>
         ) : error ? null : (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <div className="max-w-3xl space-y-3">
+            <Skeleton className="h-7 w-2/3" />
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-40 w-full rounded-lg" />
+          </div>
         )}
       </div>
     </div>
