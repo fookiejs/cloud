@@ -15,6 +15,14 @@ export type FookieAuthUser = {
   clientId: string;
 };
 
+type AccessTokenVerifier = (raw: string) => Promise<FookieAuthUser>;
+
+let configuredVerifier: AccessTokenVerifier | null = null;
+
+export function configureFookieAccessTokenVerifier(verifier: AccessTokenVerifier | null): void {
+  configuredVerifier = verifier;
+}
+
 async function introspectApiKey(token: string): Promise<boolean> {
   const cached = introspectCache.get(token);
   if (cached !== undefined && cached.expiresAt > Date.now()) {
@@ -44,6 +52,9 @@ async function introspectApiKey(token: string): Promise<boolean> {
 }
 
 export async function verifyFookieAccessToken(raw: string): Promise<FookieAuthUser> {
+  if (configuredVerifier !== null) {
+    return configuredVerifier(raw);
+  }
   const { payload } = await jwtVerify(raw, jwks, {
     issuer: config.fookieAuthIssuer,
     algorithms: ["RS256"],

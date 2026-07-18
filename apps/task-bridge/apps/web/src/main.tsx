@@ -10,7 +10,7 @@ const rootElement = document.getElementById("root");
 if (rootElement !== null) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>
-      <BrowserRouter basename="/app">
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <ConfirmDialogProvider>
           <App />
           <Toaster richColors closeButton position="top-right" />

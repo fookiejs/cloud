@@ -1,10 +1,6 @@
-import Fastify from 'fastify';
-import fastifyWebsocket from '@fastify/websocket';
-import fastifyStatic from '@fastify/static';
-import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { AUTH_ISSUER, CLIENT_ID, bearerFromHeader, verifyAccessToken } from './auth.js';
+import type { FastifyInstance } from 'fastify';
+import '@fastify/websocket';
+import { bearerFromHeader, type GatewayAuth } from './auth.js';
 import {
   addConsole,
   handleAgentMessage,
@@ -16,30 +12,11 @@ import {
 } from './registry.js';
 import { registerObservability } from './observability.js';
 
-const PORT = Number.parseInt(process.env['PORT'] || '8080', 10);
-const PUBLIC_URL = process.env['PUBLIC_URL'] || 'https://script.fookiecloud.com';
-const REDIRECT_URI = `${PUBLIC_URL}/callback`;
-
-const ALLOWED_ORIGINS = new Set(
-  (process.env['ALLOWED_ORIGINS'] || PUBLIC_URL)
-    .split(',')
-    .map((o) => o.trim())
-    .filter((o) => o.length > 0),
-);
-
-function staticRoot(): string | null {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const candidates = [
-    join(here, '..', 'public'),
-    join(here, '..', '..', 'web', 'dist'),
-    join(here, '..', '..', '..', 'packages', 'web', 'dist'),
-  ];
-  for (const c of candidates) {
-    if (existsSync(join(c, 'index.html'))) {
-      return c;
-    }
-  }
-  return null;
+export interface ScriptGatewayOptions {
+  auth: GatewayAuth;
+  publicUrl: string;
+  allowedOrigins: ReadonlySet<string>;
+  observability: boolean;
 }
 
 function tokenFromWsProtocols(raw: string | string[] | undefined): string | null {
@@ -71,8 +48,8 @@ function tokenFromRequest(req: {
   return tokenFromWsProtocols(req.headers['sec-websocket-protocol']);
 }
 
-function corsOrigin(reqOrigin: string | undefined): string | null {
-  if (reqOrigin !== undefined && ALLOWED_ORIGINS.has(reqOrigin)) {
+function corsOrigin(reqOrigin: string | undefined, allowedOrigins: ReadonlySet<string>): string | null {
+  if (reqOrigin !== undefined && allowedOrigins.has(reqOrigin)) {
     return reqOrigin;
   }
   return null;
@@ -88,6 +65,7 @@ async function attachAuthedSocket(
     };
   },
   kind: 'agent' | 'console',
+  auth: GatewayAuth,
 ): Promise<void> {
   const url = new URL(req.url, 'http://localhost');
   const token = tokenFromRequest(req);
@@ -98,7 +76,7 @@ async function attachAuthedSocket(
   }
   let user;
   try {
-    user = await verifyAccessToken(token);
+    user = await auth.verifyAccessToken(token);
   } catch (err) {
     const reason = err instanceof Error ? err.message : 'verify_failed';
     console.log(JSON.stringify({ msg: 'ws_auth_fail', kind, reason }));
@@ -145,38 +123,25 @@ async function attachAuthedSocket(
   });
 }
 
-async function main(): Promise<void> {
-  const app = Fastify({
-    logger: {
-      serializers: {
-        req(req) {
-          const rawUrl = typeof req.url === 'string' ? req.url : '';
-          return {
-            method: req.method,
-            url: rawUrl.split('?')[0] || '/',
-            hostname: req.hostname,
-            remoteAddress: req.ip,
-          };
-        },
-      },
-    },
-    trustProxy: true,
-  });
-  await registerObservability(app);
-  await app.register(fastifyWebsocket);
-
-  app.get('/healthz', async () => ({ ok: true }));
+export async function registerScriptGatewayModule(
+  app: FastifyInstance,
+  options: ScriptGatewayOptions,
+): Promise<void> {
+  if (options.observability) {
+    await registerObservability(app);
+  }
 
   app.get('/v1/config', async () => ({
-    authIssuer: AUTH_ISSUER,
-    clientId: CLIENT_ID,
-    redirectUri: REDIRECT_URI,
-    publicUrl: PUBLIC_URL,
+    authIssuer: options.auth.issuer,
+    clientId: options.auth.clientId,
+    redirectUri: `${options.publicUrl}/callback`,
+    publicUrl: options.publicUrl,
   }));
 
   app.options('/api/*', async (req, reply) => {
     const origin = corsOrigin(
       typeof req.headers.origin === 'string' ? req.headers.origin : undefined,
+      options.allowedOrigins,
     );
     if (origin !== null) {
       void reply.header('Access-Control-Allow-Origin', origin);
@@ -192,6 +157,7 @@ async function main(): Promise<void> {
   app.addHook('onSend', async (req, reply, payload) => {
     const origin = corsOrigin(
       typeof req.headers.origin === 'string' ? req.headers.origin : undefined,
+      options.allowedOrigins,
     );
     if (origin !== null) {
       void reply.header('Access-Control-Allow-Origin', origin);
@@ -206,7 +172,7 @@ async function main(): Promise<void> {
       return reply.code(401).send({ error: 'unauthorized' });
     }
     try {
-      const user = await verifyAccessToken(token);
+      const user = await options.auth.verifyAccessToken(token);
       return { user, agent: listAgentStatus(user.id) };
     } catch {
       return reply.code(401).send({ error: 'unauthorized' });
@@ -219,7 +185,7 @@ async function main(): Promise<void> {
       return reply.code(401).send({ error: 'unauthorized' });
     }
     try {
-      const user = await verifyAccessToken(token);
+      const user = await options.auth.verifyAccessToken(token);
       return listAgentStatus(user.id);
     } catch {
       return reply.code(401).send({ error: 'unauthorized' });
@@ -227,15 +193,15 @@ async function main(): Promise<void> {
   });
 
   app.get('/api/v1/stream', { websocket: true }, (socket, req) => {
-    void attachAuthedSocket(socket, req, 'console');
+    void attachAuthedSocket(socket, req, 'console', options.auth);
   });
 
   app.get('/v1/console', { websocket: true }, (socket, req) => {
-    void attachAuthedSocket(socket, req, 'console');
+    void attachAuthedSocket(socket, req, 'console', options.auth);
   });
 
   app.get('/v1/agent', { websocket: true }, (socket, req) => {
-    void attachAuthedSocket(socket, req, 'agent');
+    void attachAuthedSocket(socket, req, 'agent', options.auth);
   });
 
   app.all('/api/v1/*', async (req, reply) => {
@@ -249,7 +215,7 @@ async function main(): Promise<void> {
     }
     let user;
     try {
-      user = await verifyAccessToken(token);
+      user = await options.auth.verifyAccessToken(token);
     } catch {
       return reply.code(401).send({ error: 'unauthorized' });
     }
@@ -286,22 +252,4 @@ async function main(): Promise<void> {
     }
   });
 
-  const root = staticRoot();
-  if (root !== null) {
-    await app.register(fastifyStatic, { root, prefix: '/' });
-    app.setNotFoundHandler((req, reply) => {
-      if (req.url.startsWith('/api/') || req.url.startsWith('/v1/')) {
-        void reply.code(404).send({ error: 'not found' });
-        return;
-      }
-      void reply.sendFile('index.html');
-    });
-  }
-
-  await app.listen({ port: PORT, host: '0.0.0.0' });
 }
-
-main().catch((err: unknown) => {
-  console.error(err);
-  process.exit(1);
-});

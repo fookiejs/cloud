@@ -12,11 +12,24 @@ type Route =
   | { kind: 'list' }
   | { kind: 'workspace'; id: string };
 
+const BASE_PATH = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+function appPath(pathname: string): string {
+  if (!BASE_PATH) return pathname;
+  if (pathname === BASE_PATH) return '/';
+  return pathname.startsWith(`${BASE_PATH}/`) ? pathname.slice(BASE_PATH.length) : pathname;
+}
+
+function appUrl(pathname: string): string {
+  const clean = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return `${BASE_PATH}${clean}` || '/';
+}
+
 function parsePathWithTaskRedirect(pathname: string): {
   route: Route;
   taskRedirect: string | null;
 } {
-  const clean = pathname.replace(/^\/+/, '').replace(/\/+$/, '');
+  const clean = appPath(pathname).replace(/^\/+/, '').replace(/\/+$/, '');
   if (clean === '' || clean === 'dashboard') {
     return { route: { kind: 'list' }, taskRedirect: null };
   }
@@ -35,10 +48,11 @@ export function navigate(path: string): void {
   if (!p.startsWith('/')) {
     p = `/${p}`;
   }
-  if (window.location.pathname === p) {
+  const target = appUrl(p);
+  if (window.location.pathname === target) {
     return;
   }
-  window.history.pushState({}, '', p);
+  window.history.pushState({}, '', target);
   window.dispatchEvent(new Event('script:navigate'));
 }
 

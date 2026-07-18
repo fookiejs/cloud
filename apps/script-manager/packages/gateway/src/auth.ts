@@ -1,26 +1,7 @@
 import { createRemoteJWKSet, jwtVerify } from 'jose';
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (value === undefined || value.length === 0) {
-    throw new Error(`${name} required`);
-  }
-  return value;
-}
-
-const AUTH_ISSUER = requireEnv('FOOKIE_AUTH_ISSUER');
-const CLIENT_ID = requireEnv('SCRIPT_CLIENT_ID');
-const INTROSPECT_SECRET = requireEnv('FOOKIE_INTROSPECT_SECRET');
-const ALLOWED_CLIENT_IDS = new Set(
-  [CLIENT_ID, 'script', 'lotaru'].filter((id) => id.length > 0),
-);
 const PLATFORM_CLIENT_ID = 'fookie';
 const TOKEN_USE_API_KEY = 'api_key';
-const JWKS_URL = new URL(`${AUTH_ISSUER}/.well-known/jwks.json`);
-
-const jwks = createRemoteJWKSet(JWKS_URL);
-
-const introspectCache = new Map<string, { active: boolean; expiresAt: number }>();
 
 export interface AuthUser {
   id: string;
@@ -29,73 +10,83 @@ export interface AuthUser {
   clientId: string;
 }
 
-async function introspectApiKey(token: string): Promise<boolean> {
-  const cached = introspectCache.get(token);
-  if (cached !== undefined && cached.expiresAt > Date.now()) {
-    return cached.active;
-  }
-  try {
-    const res = await fetch(`${AUTH_ISSUER}/v1/introspect`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${INTROSPECT_SECRET}`,
-      },
-      body: JSON.stringify({ token }),
-    });
-    if (!res.ok) {
+export interface GatewayAuth {
+  issuer: string;
+  clientId: string;
+  verifyAccessToken(raw: string): Promise<AuthUser>;
+}
+
+export function createGatewayAuth(options: {
+  issuer: string;
+  clientId: string;
+  introspectSecret: string;
+}): GatewayAuth {
+  const issuer = options.issuer.replace(/\/$/, '');
+  const jwks = createRemoteJWKSet(new URL(`${issuer}/.well-known/jwks.json`));
+  const allowedClientIds = new Set([options.clientId, 'script', 'lotaru']);
+  const introspectCache = new Map<string, { active: boolean; expiresAt: number }>();
+  async function introspectApiKey(token: string): Promise<boolean> {
+    const cached = introspectCache.get(token);
+    if (cached !== undefined && cached.expiresAt > Date.now()) {
+      return cached.active;
+    }
+    try {
+      const response = await fetch(`${issuer}/v1/introspect`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          authorization: `Bearer ${options.introspectSecret}`,
+        },
+        body: JSON.stringify({ token }),
+      });
+      const active = response.ok && ((await response.json()) as { active?: boolean }).active === true;
+      introspectCache.set(token, { active, expiresAt: Date.now() + (active ? 60_000 : 15_000) });
+      return active;
+    } catch {
       introspectCache.set(token, { active: false, expiresAt: Date.now() + 15_000 });
       return false;
     }
-    const data = (await res.json()) as { active?: boolean };
-    const active = data.active === true;
-    introspectCache.set(token, { active, expiresAt: Date.now() + 60_000 });
-    return active;
-  } catch {
-    introspectCache.set(token, { active: false, expiresAt: Date.now() + 15_000 });
-    return false;
   }
-}
-
-export async function verifyAccessToken(raw: string): Promise<AuthUser> {
-  const { payload } = await jwtVerify(raw, jwks, {
-    issuer: AUTH_ISSUER,
-    algorithms: ['RS256'],
-  });
-  const sub = payload.sub;
-  if (typeof sub !== 'string' || sub.length === 0) {
-    throw new Error('missing sub');
-  }
-  const clientIdRaw = payload['client_id'];
-  const aud = payload.aud;
-  const clientId =
-    typeof clientIdRaw === 'string'
-      ? clientIdRaw
-      : typeof aud === 'string'
-        ? aud
-        : Array.isArray(aud) && typeof aud[0] === 'string'
-          ? aud[0]
-          : undefined;
-  if (clientId === undefined || clientId.length === 0) {
-    throw new Error('invalid client');
-  }
-  const tokenUse =
-    typeof payload['token_use'] === 'string' ? payload['token_use'] : undefined;
-
-  if (tokenUse === TOKEN_USE_API_KEY && clientId === PLATFORM_CLIENT_ID) {
-    const active = await introspectApiKey(raw);
-    if (!active) {
-      throw new Error('api key revoked');
-    }
-  } else if (!ALLOWED_CLIENT_IDS.has(clientId)) {
-    throw new Error('invalid client');
-  }
-
   return {
-    id: sub,
-    email: typeof payload['email'] === 'string' ? payload['email'] : null,
-    name: typeof payload['name'] === 'string' ? payload['name'] : null,
-    clientId,
+    issuer,
+    clientId: options.clientId,
+    async verifyAccessToken(raw: string): Promise<AuthUser> {
+      const { payload } = await jwtVerify(raw, jwks, {
+        issuer,
+        algorithms: ['RS256'],
+      });
+      const sub = payload.sub;
+      if (typeof sub !== 'string' || sub.length === 0) {
+        throw new Error('missing sub');
+      }
+      const clientIdRaw = payload['client_id'];
+      const audience = payload.aud;
+      const clientId =
+        typeof clientIdRaw === 'string'
+          ? clientIdRaw
+          : typeof audience === 'string'
+            ? audience
+            : Array.isArray(audience) && typeof audience[0] === 'string'
+              ? audience[0]
+              : '';
+      if (clientId.length === 0) {
+        throw new Error('invalid client');
+      }
+      const tokenUse = typeof payload['token_use'] === 'string' ? payload['token_use'] : '';
+      if (tokenUse === TOKEN_USE_API_KEY && clientId === PLATFORM_CLIENT_ID) {
+        if (options.introspectSecret.length === 0 || !(await introspectApiKey(raw))) {
+          throw new Error('api key revoked');
+        }
+      } else if (!allowedClientIds.has(clientId)) {
+        throw new Error('invalid client');
+      }
+      return {
+        id: sub,
+        email: typeof payload['email'] === 'string' ? payload['email'] : null,
+        name: typeof payload['name'] === 'string' ? payload['name'] : null,
+        clientId,
+      };
+    },
   };
 }
 
@@ -112,5 +103,3 @@ export function bearerFromHeader(header: string | string[] | undefined): string 
   }
   return token;
 }
-
-export { AUTH_ISSUER, CLIENT_ID };

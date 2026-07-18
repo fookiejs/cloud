@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 
 export default defineConfig({
+  base: process.env.VITE_PUBLIC_BASE_PATH?.trim() || '/',
   plugins: [react()],
   resolve: {
     alias: {

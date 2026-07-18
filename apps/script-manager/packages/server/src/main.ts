@@ -16,7 +16,7 @@ import { registerLocalApiAuth } from './auth/local-auth.js';
 import { ensureLocalApiToken } from './auth/local-token.js';
 
 const DEFAULT_PORT = 4317;
-const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] || 'https://script.fookiecloud.com';
+const CONSOLE_URL = process.env['SCRIPT_CONSOLE_URL'] || 'https://fookiecloud.com';
 
 interface StartOptions {
   port: number;

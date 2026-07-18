@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "lib": ["ES2024"],
     "strict": true,
+    "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,

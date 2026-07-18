@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { clearFookieTokens, getAccessToken, signInUrl } from "@/lib/auth";
+import { clearFookieTokens, getAccessToken, restoreAccessToken, signInUrl } from "@/lib/auth";
 import { fetchAuthMe } from "@/lib/api";
 import { loadSession, saveSession, type UserRole } from "@/lib/session";
 import { BrandSplash } from "@/components/BrandSplash";
@@ -50,7 +50,14 @@ export function LoginPage() {
         return;
       }
 
-      const token = getAccessToken();
+      let token = getAccessToken();
+      if (!token) {
+        try {
+          token = await restoreAccessToken();
+        } catch {
+          clearFookieTokens();
+        }
+      }
       if (token) {
         try {
           await hydrateSessionFromToken(token);

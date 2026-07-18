@@ -10,9 +10,9 @@ const OAUTH_STATE_KEY = "fookie_oauth_state";
 const PKCE_VERIFIER_KEY = "fookie_pkce_verifier";
 
 const APPS = {
-  "script-manager": "https://script.fookiecloud.com",
-  "task-bridge": "https://task.fookiecloud.com",
-  notes: "https://notes.fookiecloud.com",
+  "script-manager": "/script/",
+  "task-bridge": "/tasks/",
+  notes: "/notes/",
 };
 
 const isProfile = document.body?.dataset?.page === "profile";

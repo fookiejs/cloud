@@ -1,0 +1,183 @@
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 8% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 8% 8%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 232 60% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 14%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 240 5% 12%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 5% 14%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5% 16%;
+    --input: 240 5% 16%;
+    --ring: 232 60% 60%;
+    --sidebar: 240 10% 4%;
+    --workspace: 240 8% 5%;
+    --success: 142 60% 50%;
+    --warn: 38 90% 60%;
+    --radius: 0.75rem;
+    --cloud-grad: linear-gradient(90deg, #ec4899, #a855f7, #22d3ee);
+  }
+
+  * {
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.28) transparent;
+  }
+
+  html {
+    overflow: hidden;
+  }
+
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: Geist, ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  *::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: hsl(var(--muted) / 0.25);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.22);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.4);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:active {
+    background: hsl(var(--primary) / 0.5);
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  .app-shell {
+    @apply fixed inset-0 flex overflow-hidden bg-background;
+  }
+
+  .app-sidebar {
+    @apply flex w-60 shrink-0 flex-col border-r border-border bg-card/40;
+  }
+
+  .app-main {
+    @apply flex min-h-0 min-w-0 flex-1 flex-col bg-background;
+  }
+
+  .page-toolbar {
+    @apply flex shrink-0 items-center justify-between gap-4 border-b border-border/60 px-8 py-4;
+  }
+
+  .panel-card {
+    @apply rounded-2xl border border-border/70 bg-card shadow-[0_8px_30px_rgba(0,0,0,0.35)];
+  }
+
+  .cutting-mat {
+    background-color: hsl(var(--background));
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.45) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.45) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .scrollbar-gutter {
+    scrollbar-gutter: stable;
+  }
+
+  .scrollbar-inset::-webkit-scrollbar-track {
+    margin: 4px 0;
+  }
+
+  .inspector-reveal {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .inspector-reveal-active {
+    animation: inspector-reveal 280ms ease-out;
+  }
+
+  @keyframes inspector-reveal {
+    0% {
+      opacity: 0.35;
+      transform: translateX(12px);
+    }
+    45% {
+      opacity: 0.85;
+      transform: translateX(4px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+.fookie-cloud-mark {
+  display: inline-flex;
+  align-items: center;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.fookie-cloud-mark:hover {
+  opacity: 0.9;
+}
+
+.fookie-cloud-mark--sm {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.fookie-cloud-mark--sm:hover {
+  color: hsl(var(--foreground));
+}
+
+.fookie-cloud-word {
+  background-image: var(--cloud-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

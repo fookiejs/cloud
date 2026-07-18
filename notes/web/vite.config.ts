@@ -7,6 +7,7 @@ const root = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root,
+  base: process.env.VITE_PUBLIC_BASE_PATH?.trim() || "/",
   plugins: [react()],
   resolve: {
     alias: {

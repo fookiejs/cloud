@@ -6,6 +6,7 @@ import {
   exchangeCode,
   getAccessToken,
   isCloudHost,
+  restoreSessionToken,
   signInUrl,
   tokenStillValid,
 } from "@/lib/auth";
@@ -68,14 +69,17 @@ export function AuthGate(props: { children: React.ReactNode }): React.JSX.Elemen
       };
     }
 
-    const token = getAccessToken();
+    let token = getAccessToken();
     if (token === null) {
-      void goSignIn().catch((err: unknown) => {
-        if (!cancelled) {
-          setBoot("error");
-          setAuthError(err instanceof Error ? err.message : "Sign in failed");
-        }
-      });
+      void restoreSessionToken()
+        .then(async (restoredToken) => {
+          await waitAtLeast(startedAt);
+          if (!cancelled) {
+            void restoredToken;
+            setBoot("ready");
+          }
+        })
+        .catch(() => void goSignIn());
       return () => {
         cancelled = true;
       };

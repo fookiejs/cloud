@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
   };
 
   return {
-  base: "/app/",
+  base: process.env.VITE_PUBLIC_BASE_PATH?.trim() || "/app/",
   plugins: [react()],
   resolve: {
     alias: {

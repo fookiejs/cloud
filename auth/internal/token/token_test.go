@@ -3,7 +3,9 @@ package token_test
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"testing"
 	"time"
@@ -40,14 +42,13 @@ func TestPKCEAndAccessToken(t *testing.T) {
 	}
 
 	verifier := "abc123verifier"
-	sum := token.HashToken(verifier)
-	_ = sum
-	challengeRaw, err := token.RandomURLToken(32)
-	if err != nil {
-		t.Fatal(err)
+	sum := sha256.Sum256([]byte(verifier))
+	challenge := base64.RawURLEncoding.EncodeToString(sum[:])
+	if !token.VerifyPKCE("S256", challenge, verifier) {
+		t.Fatal("valid s256 pkce should match")
 	}
-	if !token.VerifyPKCE("plain", challengeRaw, challengeRaw) {
-		t.Fatal("plain pkce should match")
+	if token.VerifyPKCE("plain", verifier, verifier) {
+		t.Fatal("plain pkce should fail")
 	}
 	if token.VerifyPKCE("S256", "nope", verifier) {
 		t.Fatal("bad s256 should fail")
