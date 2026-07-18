@@ -58,7 +58,7 @@ function ChangePasswordForm({ session }: { session: Session }) {
           <div>
             <CardTitle className="text-2xl">Change your password</CardTitle>
             <CardDescription className="mt-2">
-              You must set a new password before using Task Bridge.
+              You must set a new password before using FookieCloud.
             </CardDescription>
           </div>
         </CardHeader>

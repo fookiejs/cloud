@@ -65,12 +65,12 @@ export function CallbackPage() {
   if (error) {
     return (
       <BrandSplash
-        title="Task Bridge"
+        title="FookieCloud"
         error={error}
         onRetry={() => navigate("/login", { replace: true })}
       />
     );
   }
 
-  return <BrandSplash title="Task Bridge" subtitle="Signing in…" />;
+  return <BrandSplash title="FookieCloud" subtitle="Signing in…" />;
 }

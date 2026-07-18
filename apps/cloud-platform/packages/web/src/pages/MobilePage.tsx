@@ -103,7 +103,7 @@ export function MobilePage() {
                     <QRCodeSVG value={mobileUri} size={240} level="L" includeMargin />
                   </div>
                   <p className="text-center text-xs leading-relaxed text-muted-foreground">
-                    Scan with the Task Bridge Android app. The QR encodes your personal token — keep it private.
+                    Scan with the FookieCloud Android app. The QR encodes your personal token — keep it private.
                   </p>
                 </div>
               </SensitiveReveal>
