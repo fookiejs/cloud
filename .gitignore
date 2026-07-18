@@ -11,3 +11,5 @@ packages/*/dist/
 notes/node_modules/
 notes/public/
 notes/data/
+
+.cursor/
