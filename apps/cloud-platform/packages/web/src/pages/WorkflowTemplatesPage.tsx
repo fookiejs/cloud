@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Download, Loader2, Plus, Save, ShoppingBag, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 export function WorkflowTemplatesPage() {
   const session = useSession();
   const navigate = useNavigate();
+  const { projectId } = useParams();
   const { confirmDestructive } = useConfirm();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -460,7 +461,7 @@ export function WorkflowTemplatesPage() {
               {selectedId && !PROTECTED_WORKFLOW_TEMPLATE_IDS.has(selectedId) ? (
                 <Button
                   variant="outline"
-                  onClick={() => navigate(`/tasks/marketplace?publish=${encodeURIComponent(selectedId)}`)}
+                  onClick={() => navigate(`/projects/${projectId}/tasks/marketplace?publish=${encodeURIComponent(selectedId)}`)}
                 >
                   <ShoppingBag className="h-4 w-4" />
                   Share on marketplace

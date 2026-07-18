@@ -20,6 +20,7 @@ import {
 
 export type TaskBridgeModuleOptions = {
   verifyAccessToken?: (raw: string) => Promise<FookieAuthUser>;
+  registerProjectRoutes?: boolean;
 };
 
 export async function registerTaskBridgeModule(
@@ -49,7 +50,9 @@ export async function registerTaskBridgeModule(
       if (!config.fookieMode) {
         adminUserRoutes(apiApp);
       }
-      projectRoutes(apiApp);
+      if (options.registerProjectRoutes !== false) {
+        projectRoutes(apiApp);
+      }
       taskRoutes(apiApp);
       workflowRoutes(apiApp);
       workflowTemplateRoutes(apiApp);

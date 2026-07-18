@@ -47,7 +47,7 @@ export function CallbackPage() {
         });
         await waitAtLeast(startedAt);
         if (cancelled) return;
-        navigate("/tasks/projects", { replace: true });
+        navigate("/projects", { replace: true });
       } catch (err: unknown) {
         clearFookieTokens();
         if (!cancelled) {

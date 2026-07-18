@@ -35,7 +35,7 @@ function ChangePasswordForm({ session }: { session: Session }) {
         newPassword,
       });
       saveSession(Object.assign({}, session, { mustChangePassword: false }));
-      navigate("/tasks/projects", { replace: true });
+      navigate("/projects", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Password change failed");
     } finally {
@@ -129,6 +129,6 @@ function ChangePasswordForm({ session }: { session: Session }) {
 export function ChangePasswordPage() {
   const session = loadSession();
   if (!session) return <Navigate to="/login" replace />;
-  if (!session.mustChangePassword) return <Navigate to="/tasks/projects" replace />;
+  if (!session.mustChangePassword) return <Navigate to="/projects" replace />;
   return <ChangePasswordForm session={session} />;
 }

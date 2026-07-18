@@ -44,7 +44,7 @@ export function LoginPage() {
       if (session) {
         await waitAtLeast(startedAt);
         if (cancelled) return;
-        navigate(session.projectId ? `/tasks/projects/${session.projectId}/tasks` : "/tasks/projects", {
+        navigate(session.projectId ? `/projects/${session.projectId}` : "/projects", {
           replace: true,
         });
         return;
@@ -63,7 +63,7 @@ export function LoginPage() {
           await hydrateSessionFromToken(token);
           await waitAtLeast(startedAt);
           if (cancelled) return;
-          navigate("/tasks/projects", { replace: true });
+          navigate("/projects", { replace: true });
         } catch {
           clearFookieTokens();
           try {

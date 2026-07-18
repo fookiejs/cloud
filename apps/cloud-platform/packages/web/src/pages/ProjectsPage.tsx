@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ChevronRight, FolderKanban, MoreVertical, Plus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { CreateProjectPanel } from "@/components/CreateProjectPanel";
@@ -13,10 +13,8 @@ import { fetchProjects, type Project } from "@/lib/api";
 import { clearSelectedProject, setSelectedProject } from "@/lib/session";
 
 export function ProjectsPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const session = useSession();
-  const templateIdFromUrl = searchParams.get("templateId") ?? "";
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,12 +45,6 @@ export function ProjectsPage() {
   );
 
   useEffect(() => {
-    if (templateIdFromUrl) {
-      setCreateOpen(true);
-    }
-  }, [templateIdFromUrl]);
-
-  useEffect(() => {
     clearSelectedProject();
   }, []);
 
@@ -73,7 +65,7 @@ export function ProjectsPage() {
 
   function openProject(project: Project) {
     setSelectedProject(project.id, project.name);
-    navigate(`/tasks/projects/${project.id}/tasks`);
+    navigate(`/projects/${project.id}`);
   }
 
   function handleCreated(project: Project) {
@@ -98,13 +90,9 @@ export function ProjectsPage() {
         <div className="flex-1 overflow-y-auto p-8">
           <CreateProjectPanel
             session={activeSession}
-            initialTemplateId={templateIdFromUrl}
             onCreated={handleCreated}
             onCancel={() => {
               setCreateOpen(false);
-              if (templateIdFromUrl) {
-                setSearchParams({});
-              }
             }}
           />
         </div>
@@ -114,10 +102,10 @@ export function ProjectsPage() {
             title="Projects"
             subtitle={
               loading
-                ? "Loading workspaces…"
+                ? "Loading projects…"
                 : projects.length > 0
-                  ? `${projects.length} workspace${projects.length === 1 ? "" : "s"}`
-                  : "Create your first workspace to get started"
+                  ? `${projects.length} project${projects.length === 1 ? "" : "s"}`
+                  : "Create your first project to get started"
             }
             actions={
               <Button size="sm" onClick={() => setCreateOpen(true)}>
@@ -145,7 +133,9 @@ export function ProjectsPage() {
             ) : projects.length === 0 ? (
               <div className="panel-card flex flex-col items-center justify-center px-6 py-16 text-center">
                 <FolderKanban className="mb-4 h-10 w-10 text-muted-foreground/60" />
-                <p className="text-sm text-muted-foreground">No projects yet. Create one to start building epics.</p>
+                <p className="text-sm text-muted-foreground">
+                  No projects yet. Create one to connect tasks, scripts, and nodes.
+                </p>
                 <Button className="mt-4" size="sm" onClick={() => setCreateOpen(true)}>
                   <Plus className="h-4 w-4" />
                   New project

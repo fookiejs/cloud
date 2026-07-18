@@ -85,16 +85,16 @@ export function InboxPage() {
   } else if (projectId !== null) {
     projectLabel = projectId;
   }
-  let projectTasksPath = "/tasks/projects";
+  let projectTasksPath = "/projects";
   if (projectId !== null) {
-    projectTasksPath = `/tasks/projects/${projectId}/tasks`;
+    projectTasksPath = `/projects/${projectId}/tasks`;
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         breadcrumb={[
-          { label: "Projects", to: "/tasks/projects" },
+          { label: "Projects", to: "/projects" },
           { label: projectLabel, to: projectTasksPath },
           { label: "Inbox", to: null },
         ]}
@@ -127,7 +127,7 @@ export function InboxPage() {
               return (
                 <Link
                   key={item.taskId}
-                  to={`/tasks/projects/${projectId}/tasks/${item.taskId}`}
+                  to={`/projects/${projectId}/tasks/${item.taskId}`}
                   onClick={() => {
                     if (unread) {
                       markTaskRead(item.taskId);

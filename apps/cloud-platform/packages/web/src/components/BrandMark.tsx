@@ -20,7 +20,7 @@ export function BrandMark(rawProps: Partial<BrandMarkProps> = {}) {
   if ("compact" in rawProps && rawProps.compact === true) {
     compact = true;
   }
-  let linkTo: string | null = "/tasks/projects";
+  let linkTo: string | null = "/projects";
   if ("linkTo" in rawProps) {
     if (rawProps.linkTo === null) {
       linkTo = null;
@@ -42,7 +42,7 @@ export function BrandMark(rawProps: Partial<BrandMarkProps> = {}) {
   }
 
   let linkState: { from: string } | null = null;
-  if (location.pathname.startsWith("/tasks/projects/")) {
+  if (location.pathname.startsWith("/projects/")) {
     linkState = { from: location.pathname };
   }
 

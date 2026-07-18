@@ -94,7 +94,7 @@ export function EpicTaskInspector({
           </div>
 
           <Button type="button" variant="outline" size="sm" asChild className="w-full justify-start">
-            <Link to={`/tasks/projects/${projectId}/tasks/${selected.taskId}`}>
+            <Link to={`/projects/${projectId}/tasks/${selected.taskId}`}>
               <ExternalLink className="mr-2 h-4 w-4" />
               Open task page
             </Link>

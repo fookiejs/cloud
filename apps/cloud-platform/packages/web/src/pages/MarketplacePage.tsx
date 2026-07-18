@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Loader2, Pencil, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -333,6 +333,7 @@ function ListingCard({
 export function MarketplacePage() {
   const session = useSession();
   const navigate = useNavigate();
+  const { projectId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const selectForProject = searchParams.get("selectFor") === "project";
   const publishTemplateFromUrl = searchParams.get("publish") ?? "";
@@ -466,19 +467,19 @@ export function MarketplacePage() {
     if (!session) return;
     if (listing.owned && listing.purchasedTemplateId) {
       if (selectForProject) {
-        navigate(`/tasks/projects?templateId=${encodeURIComponent(listing.purchasedTemplateId)}`);
+        navigate(`/projects/${projectId}/tasks/workflow-templates`);
       }
       return;
     }
     setPurchasingId(listing.id);
     try {
-      const result = await purchaseMarketplaceListing(session, listing.id);
+      await purchaseMarketplaceListing(session, listing.id);
       toast.success(
         listing.priceCents > 0 ? "Template purchased" : "Template added to your library",
       );
       await reload();
       if (selectForProject) {
-        navigate(`/tasks/projects?templateId=${encodeURIComponent(result.purchasedTemplateId)}`);
+        navigate(`/projects/${projectId}/tasks/workflow-templates`);
       }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Purchase failed");
@@ -620,7 +621,7 @@ export function MarketplacePage() {
                     size="sm"
                     variant="outline"
                     onClick={() =>
-                      navigate(`/tasks/projects?templateId=${encodeURIComponent(purchase.purchasedTemplateId)}`)
+                      navigate(`/projects/${projectId}/tasks/workflow-templates`)
                     }
                   >
                     Use in project

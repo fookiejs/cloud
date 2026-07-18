@@ -32,8 +32,8 @@ export function WaitingForAgent(_props: Props): React.JSX.Element {
 
           <div className="space-y-3 rounded-xl border bg-card/50 p-5">
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Projects and tasks live on the agent running on your machine. Start it in a terminal —
-              sign in when asked — then this page connects automatically.
+              Project scripts run on a node connected from your machine. Start the node in a terminal,
+              sign in when asked, then attach its workspace from this project&apos;s Nodes page.
             </p>
             <div className="flex items-center gap-2 rounded-md border bg-background p-1.5 pl-3 font-mono text-sm">
               <span className="select-none text-muted-foreground">$</span>

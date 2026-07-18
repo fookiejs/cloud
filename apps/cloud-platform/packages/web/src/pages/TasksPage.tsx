@@ -102,16 +102,16 @@ export function TasksPage() {
   } else if (projectId !== null) {
     projectLabel = projectId;
   }
-  let projectTasksPath = "/tasks/projects";
+  let projectTasksPath = "/projects";
   if (projectId !== null) {
-    projectTasksPath = `/tasks/projects/${projectId}/tasks`;
+    projectTasksPath = `/projects/${projectId}/tasks`;
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
         breadcrumb={[
-          { label: "Projects", to: "/tasks/projects" },
+          { label: "Projects", to: "/projects" },
           { label: projectLabel, to: projectTasksPath },
           { label: "Epics", to: null },
         ]}
@@ -145,7 +145,7 @@ export function TasksPage() {
             {items.map((item) => (
               <Link
                 key={item.taskId}
-                to={`/tasks/projects/${projectId}/tasks/${item.taskId}`}
+                to={`/projects/${projectId}/tasks/${item.taskId}`}
                 className="panel-card group flex min-h-[7rem] flex-col justify-between p-4 transition-colors hover:border-white/[0.14] hover:bg-[#141414]"
               >
                 <div className="space-y-2">

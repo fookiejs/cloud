@@ -1,8 +1,6 @@
-import { Navigate, Route, Routes } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProjectLayout } from "@/components/layout/ProjectLayout";
-import { BrandSplash } from "@/components/BrandSplash";
 import { InboxPage } from "@/pages/InboxPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { CallbackPage } from "@/pages/CallbackPage";
@@ -19,8 +17,8 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { ScriptFeature } from "@/features/script/ScriptFeature";
 import { NotesFeature } from "@/features/notes/NotesFeature";
 import { loadSession } from "@/lib/session";
-
-const MIN_SPLASH_MS = 2000;
+import { ProjectOverviewPage } from "@/pages/ProjectOverviewPage";
+import { ProjectNodesPage } from "@/pages/ProjectNodesPage";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const session = loadSession();
@@ -36,7 +34,7 @@ function RequireAdmin({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
   if (session.userRole !== "admin") {
-    return <Navigate to="/tasks/projects" replace />;
+    return <Navigate to="/projects" replace />;
   }
   return <>{children}</>;
 }
@@ -54,30 +52,33 @@ export function App() {
             </RequireAuth>
           }
         >
-          <Route path="/tasks/projects" element={<ProjectsPage />} />
-          <Route path="/tasks/profile" element={<ProfilePage />} />
-          <Route path="/tasks/workflow-templates" element={<WorkflowTemplatesPage />} />
-          <Route path="/tasks/marketplace" element={<MarketplacePage />} />
+          <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route
-            path="/tasks/admin/users"
+            path="/admin/users"
             element={
               <RequireAdmin>
                 <AdminUsersPage />
               </RequireAdmin>
             }
           />
-          <Route path="/tasks/projects/:projectId" element={<ProjectLayout />}>
-            <Route index element={<Navigate to="tasks" replace />} />
-            <Route path="board" element={<Navigate to="tasks" replace />} />
+          <Route path="/projects/:projectId" element={<ProjectLayout />}>
+            <Route index element={<ProjectOverviewPage />} />
             <Route path="tasks" element={<TasksPage />} />
             <Route path="tasks/:taskId" element={<TaskPage />} />
-            <Route path="inbox" element={<InboxPage />} />
-            <Route path="library" element={<LibraryPage />} />
-            <Route path="mobile" element={<MobilePage />} />
-            <Route path="workflow" element={<WorkflowPage />} />
+            <Route path="tasks/inbox" element={<InboxPage />} />
+            <Route path="tasks/library" element={<LibraryPage />} />
+            <Route path="tasks/mobile" element={<MobilePage />} />
+            <Route path="tasks/workflow" element={<WorkflowPage />} />
+            <Route path="tasks/workflow-templates" element={<WorkflowTemplatesPage />} />
+            <Route path="tasks/marketplace" element={<MarketplacePage />} />
+            <Route path="scripts/*" element={<ProjectScriptsRoute />} />
+            <Route path="nodes" element={<ProjectNodesPage />} />
           </Route>
-          <Route path="/script/*" element={<ScriptFeature />} />
           <Route path="/notes/*" element={<NotesFeature />} />
+          <Route path="/tasks/projects" element={<Navigate to="/projects" replace />} />
+          <Route path="/tasks/projects/:projectId/*" element={<LegacyProjectRedirect />} />
+          <Route path="/script/*" element={<LegacyScriptRedirect />} />
         </Route>
         <Route path="/" element={<RootRedirect />} />
         <Route path="*" element={<RootRedirect />} />
@@ -86,24 +87,34 @@ export function App() {
   );
 }
 
-function RootRedirect() {
-  const session = loadSession();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const t = window.setTimeout(() => setReady(true), MIN_SPLASH_MS);
-    return () => window.clearTimeout(t);
-  }, []);
-
-  if (!ready) {
-    return <BrandSplash title="FookieCloud" subtitle="Loading…" />;
+function ProjectScriptsRoute(): React.JSX.Element {
+  const { projectId } = useParams();
+  if (projectId === undefined) {
+    return <Navigate to="/projects" replace />;
   }
+  return <ScriptFeature projectId={projectId} />;
+}
 
-  if (!session) {
+function LegacyProjectRedirect(): React.JSX.Element {
+  const { projectId } = useParams();
+  if (projectId === undefined) {
+    return <Navigate to="/projects" replace />;
+  }
+  return <Navigate to={`/projects/${projectId}`} replace />;
+}
+
+function LegacyScriptRedirect(): React.JSX.Element {
+  const session = loadSession();
+  if (session === null || session.projectId === null) {
+    return <Navigate to="/projects" replace />;
+  }
+  return <Navigate to={`/projects/${session.projectId}/scripts`} replace />;
+}
+
+function RootRedirect(): React.JSX.Element {
+  const session = loadSession();
+  if (session === null) {
     return <Navigate to="/login" replace />;
   }
-  if (session.projectId) {
-    return <Navigate to={`/tasks/projects/${session.projectId}/tasks`} replace />;
-  }
-  return <Navigate to="/tasks/projects" replace />;
+  return <Navigate to="/projects" replace />;
 }

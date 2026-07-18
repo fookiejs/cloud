@@ -18,7 +18,7 @@ export function ProjectLayout() {
       if (!active) return;
       const project = projects.find((item) => item.id === projectId);
       if (!project) {
-        navigate("/tasks/projects", { replace: true });
+        navigate("/projects", { replace: true });
         return;
       }
       setSelectedProject(project.id, project.name);
@@ -30,7 +30,7 @@ export function ProjectLayout() {
   }, [session, projectId, navigate]);
 
   if (!session) return <Navigate to="/login" replace />;
-  if (!projectId) return <Navigate to="/tasks/projects" replace />;
+  if (!projectId) return <Navigate to="/projects" replace />;
 
   return <Outlet />;
 }

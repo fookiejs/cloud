@@ -1,18 +1,21 @@
 import { NavLink, matchPath, useLocation } from "react-router-dom";
 import {
+  Activity,
   BookOpen,
   FolderKanban,
   GitBranch,
   Inbox,
-  Layers,
+  LayoutDashboard,
+  ListTodo,
   NotebookPen,
+  Palette,
   ShoppingBag,
   Smartphone,
+  Server,
   Terminal,
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
 import { FookieCloudMark } from "@/components/FookieCloudMark";
 import { cn } from "@/lib/utils";
 import { useCommentNotifications } from "@/hooks/useCommentNotifications";
@@ -23,7 +26,7 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const session = useSession();
 
-  const projectMatch = matchPath("/tasks/projects/:projectId/*", pathname);
+  const projectMatch = matchPath("/projects/:projectId/*", pathname);
   let activeProjectId: string | null = null;
   if (projectMatch !== null) {
     const paramId = projectMatch.params.projectId;
@@ -51,22 +54,13 @@ export function AppSidebar() {
   return (
     <aside className="app-sidebar">
       <div className="flex h-14 shrink-0 items-center border-b px-4">
-        <BrandMark compact />
+        <FookieCloudMark href="/projects" />
       </div>
 
       <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-3">
         <div className="space-y-0.5">
-          <NavItem to="/tasks/projects" label="Projects" icon={FolderKanban} end />
-          <NavItem to="/script" label="Script" icon={Terminal} />
+          <NavItem to="/projects" label="Projects" icon={FolderKanban} end />
           <NavItem to="/notes" label="Notes" icon={NotebookPen} />
-        </div>
-
-        <div className="space-y-0.5">
-          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-            Tasks
-          </p>
-          <NavItem to="/tasks/marketplace" label="Marketplace" icon={ShoppingBag} />
-          <NavItem to="/tasks/workflow-templates" label="Workflow templates" icon={GitBranch} />
         </div>
 
         {projectId ? (
@@ -74,11 +68,10 @@ export function AppSidebar() {
             <p className="truncate px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               {projectName}
             </p>
-            <NavItem to={`/tasks/projects/${projectId}/tasks`} label="Epics" icon={Layers} />
-            <NavItem to={`/tasks/projects/${projectId}/inbox`} label="Inbox" icon={Inbox} badge={unread} />
-            <NavItem to={`/tasks/projects/${projectId}/library`} label="Library" icon={BookOpen} />
-            <NavItem to={`/tasks/projects/${projectId}/mobile`} label="Mobile" icon={Smartphone} />
-            <NavItem to={`/tasks/projects/${projectId}/workflow`} label="Pipeline" icon={GitBranch} />
+            <NavItem to={`/projects/${projectId}`} label="Overview" icon={LayoutDashboard} end />
+            <NavItem to={`/projects/${projectId}/tasks`} label="Tasks" icon={ListTodo} />
+            <NavItem to={`/projects/${projectId}/scripts`} label="Scripts" icon={Terminal} />
+            <NavItem to={`/projects/${projectId}/nodes`} label="Nodes" icon={Server} />
           </div>
         ) : fallbackProjectId ? (
           <div className="space-y-0.5">
@@ -86,10 +79,24 @@ export function AppSidebar() {
               Recent project
             </p>
             <NavItem
-              to={`/tasks/projects/${fallbackProjectId}/tasks`}
+              to={`/projects/${fallbackProjectId}`}
               label={projectName !== null ? projectName : "Open project"}
-              icon={Layers}
+              icon={LayoutDashboard}
             />
+          </div>
+        ) : null}
+
+        {projectId && pathname.startsWith(`/projects/${projectId}/tasks`) ? (
+          <div className="space-y-0.5">
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+              Task Bridge
+            </p>
+            <NavItem to={`/projects/${projectId}/tasks/inbox`} label="Inbox" icon={Inbox} badge={unread} />
+            <NavItem to={`/projects/${projectId}/tasks/library`} label="Library" icon={BookOpen} />
+            <NavItem to={`/projects/${projectId}/tasks/mobile`} label="Mobile" icon={Smartphone} />
+            <NavItem to={`/projects/${projectId}/tasks/workflow`} label="Pipeline" icon={GitBranch} />
+            <NavItem to={`/projects/${projectId}/tasks/marketplace`} label="Marketplace" icon={ShoppingBag} />
+            <NavItem to={`/projects/${projectId}/tasks/workflow-templates`} label="Workflow templates" icon={GitBranch} />
           </div>
         ) : null}
 
@@ -98,21 +105,24 @@ export function AppSidebar() {
             <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Admin
             </p>
-            <NavItem to="/tasks/admin/users" label="Team members" icon={Users} />
+            <NavItem to="/admin/users" label="Team members" icon={Users} />
           </div>
         ) : null}
+
+        <div className="space-y-0.5">
+          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            Platform
+          </p>
+          <ExternalNavItem href="https://grafana.fookiecloud.com" label="Grafana" icon={Activity} />
+          <ExternalNavItem href="https://penpot.fookiecloud.com" label="Penpot" icon={Palette} />
+        </div>
       </nav>
 
       <div className="shrink-0">
-        <div className="border-t px-2 py-2">
-          <div className="px-2.5 py-2">
-            <FookieCloudMark size="sm" />
-          </div>
-        </div>
         {session ? (
           <div className="border-t px-2 py-2">
             <a
-              href="https://fookiecloud.com/profile"
+              href="/profile"
               className="flex w-full items-center rounded-md px-2.5 py-2 text-left transition-colors hover:bg-secondary/60"
             >
               <div className="min-w-0 flex-1">
@@ -126,6 +136,23 @@ export function AppSidebar() {
         ) : null}
       </div>
     </aside>
+  );
+}
+
+function ExternalNavItem(props: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}): React.JSX.Element {
+  const Icon = props.icon;
+  const linkClass = "flex h-9 items-center gap-2 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary/60 hover:text-foreground";
+  const target = "_blank";
+  const relationship = "noreferrer";
+  return (
+    <a href={props.href} target={target} rel={relationship} className={linkClass}>
+      <Icon className="h-4 w-4 shrink-0 opacity-90" />
+      <span className="flex-1 truncate">{props.label}</span>
+    </a>
   );
 }
 

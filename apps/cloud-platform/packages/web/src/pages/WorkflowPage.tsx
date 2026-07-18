@@ -280,16 +280,16 @@ export function WorkflowPage() {
   } else if (projectId.length > 0) {
     projectLabel = projectId;
   }
-  let projectTasksPath = "/tasks/projects";
+  let projectTasksPath = "/projects";
   if (projectId.length > 0) {
-    projectTasksPath = `/tasks/projects/${projectId}/tasks`;
+    projectTasksPath = `/projects/${projectId}/tasks`;
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <PageHeader
         breadcrumb={[
-          { label: "Projects", to: "/tasks/projects" },
+          { label: "Projects", to: "/projects" },
           { label: projectLabel, to: projectTasksPath },
           { label: "Pipeline", to: null },
         ]}

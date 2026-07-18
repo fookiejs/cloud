@@ -233,9 +233,9 @@ export function TaskPage() {
     }
   }
 
-  const tasksPath = `/tasks/projects/${projectId}/tasks`;
+  const tasksPath = `/projects/${projectId}/tasks`;
   const crumbs = [
-    { label: "Projects", to: "/tasks/projects" },
+    { label: "Projects", to: "/projects" },
     { label: session !== null && session.projectName !== null ? session.projectName : projectId !== null ? projectId : "Project", to: tasksPath },
     { label: "Epics", to: tasksPath },
   ];
@@ -265,7 +265,7 @@ export function TaskPage() {
                 <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
                   {detail.parent ? (
                     <Link
-                      to={`/tasks/projects/${projectId}/tasks/${detail.parent.taskId}`}
+                      to={`/projects/${projectId}/tasks/${detail.parent.taskId}`}
                       className="rounded-full border px-2 py-0.5 hover:text-foreground"
                     >
                       Parent: {detail.parent.title}

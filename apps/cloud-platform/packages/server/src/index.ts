@@ -10,6 +10,7 @@ import { registerObservability } from "../../../../task-bridge/apps/backend/dist
 import { registerEmbeddedAuth } from "./modules/embedded-auth.js";
 import { createIdentity } from "./modules/identity.js";
 import { registerNotesModule } from "./modules/notes.js";
+import { registerProjectsModule } from "./modules/projects.js";
 
 function requiredProductionValue(name: string, developmentFallback: string): string {
   const value = process.env[name]?.trim();
@@ -66,6 +67,7 @@ const identity = await createIdentity({
 });
 
 await identity.register(app);
+await registerProjectsModule(app, identity);
 await registerNotesModule(app, {
   dataFile: join(dataDirectory, "notes.json"),
   adminEmails,
@@ -73,6 +75,7 @@ await registerNotesModule(app, {
 });
 await registerTaskBridgeModule(app, {
   verifyAccessToken: identity.verifyAccessToken,
+  registerProjectRoutes: false,
 });
 await registerScriptGatewayModule(app, {
   auth: {

@@ -139,7 +139,7 @@ export function TaskLibraryLinks({
             >
               <div className="min-w-0">
                 <Link
-                  to={`/tasks/projects/${projectId}/library?doc=${entry.documentId}`}
+                  to={`/projects/${projectId}/tasks/library?doc=${entry.documentId}`}
                   className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                 >
                   <Link2 className="h-3.5 w-3.5 shrink-0" />

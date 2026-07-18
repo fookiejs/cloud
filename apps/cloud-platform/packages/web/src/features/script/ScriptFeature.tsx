@@ -1,21 +1,23 @@
 import { useEffect } from "react";
-import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { Link, Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { BrandSplash } from "@/components/BrandSplash";
+import { Button } from "@/components/ui/button";
 import { WaitingForAgent } from "@script/components/waiting-for-agent";
 import { useAgentConnection } from "@script/hooks/use-agent-connection";
 import { isCloudHost } from "@/lib/auth";
 import { useBootstrap, useStore } from "@script/state/store";
+import { loadProjectWorkspaceId } from "@script/lib/project-node";
 import { DashboardView } from "@script/views/Dashboard";
 import { WorkspaceView } from "@script/views/Workspace";
 import { bindScriptNavigate, navigate } from "@script/navigate";
 
-function ScriptNavigatorBinder(): null {
+function ScriptNavigatorBinder(props: { basePath: string }): null {
   const routerNavigate = useNavigate();
   useEffect(() => {
     bindScriptNavigate((to: string) => {
       routerNavigate(to);
-    });
-  }, [routerNavigate]);
+    }, props.basePath);
+  }, [props.basePath, routerNavigate]);
   return null;
 }
 
@@ -74,21 +76,55 @@ function ScriptWorkspacePage(): React.JSX.Element {
   );
 }
 
-function ConnectedScriptRoutes(): React.JSX.Element {
+function ProjectScriptPage(props: { projectId: string }): React.JSX.Element {
+  const { ready } = useBootstrap();
+  const workspaces = useStore((state) => state.workspaces);
+  const workspaceId = loadProjectWorkspaceId(props.projectId);
+  if (!ready) {
+    return <div className="p-8 text-sm text-muted-foreground">Reading project scripts…</div>;
+  }
+  const workspace = workspaces.find((candidate) => candidate.id === workspaceId);
+  if (workspace === undefined) {
+    return (
+      <div className="grid min-h-full place-items-center p-6">
+        <div className="panel-card max-w-lg p-6">
+          <h2 className="text-base font-semibold text-white">Connect a project node</h2>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            Scripts run in a workspace on one of this project&apos;s nodes. Select that workspace first.
+          </p>
+          <Button className="mt-5" asChild>
+            <Link to={`/projects/${props.projectId}/nodes`}>Open nodes</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return <Navigate to={`workspace/${workspace.id}`} replace />;
+}
+
+function ConnectedScriptRoutes(props: { projectId?: string }): React.JSX.Element {
+  const basePath = props.projectId === undefined ? "/script" : `/projects/${props.projectId}/scripts`;
   return (
     <>
-      <ScriptNavigatorBinder />
+      <ScriptNavigatorBinder basePath={basePath} />
       <Routes>
-        <Route index element={<ScriptDashboardPage />} />
+        <Route
+          index
+          element={
+            props.projectId === undefined
+              ? <ScriptDashboardPage />
+              : <ProjectScriptPage projectId={props.projectId} />
+          }
+        />
         <Route path="workspace/:workspaceId" element={<ScriptWorkspacePage />} />
         <Route path="task/:taskId" element={<TaskRedirect />} />
-        <Route path="*" element={<Navigate to="/script" replace />} />
+        <Route path="*" element={<Navigate to={basePath} replace />} />
       </Routes>
     </>
   );
 }
 
-export function ScriptFeature(): React.JSX.Element {
+export function ScriptFeature(props: { projectId?: string }): React.JSX.Element {
   const agent = useAgentConnection();
 
   if (isCloudHost()) {
@@ -98,8 +134,8 @@ export function ScriptFeature(): React.JSX.Element {
     if (!agent.online) {
       return <WaitingForAgent info={agent.info} />;
     }
-    return <ConnectedScriptRoutes key="connected" />;
+    return <ConnectedScriptRoutes key="connected" projectId={props.projectId} />;
   }
 
-  return <ConnectedScriptRoutes />;
+  return <ConnectedScriptRoutes projectId={props.projectId} />;
 }

@@ -1,7 +1,9 @@
 let navigateImpl: ((to: string) => void) | null = null;
+let navigateBase = "/script";
 
-export function bindScriptNavigate(navigate: (to: string) => void): void {
+export function bindScriptNavigate(navigate: (to: string) => void, basePath = "/script"): void {
   navigateImpl = navigate;
+  navigateBase = basePath;
 }
 
 export function navigate(path: string): void {
@@ -11,13 +13,13 @@ export function navigate(path: string): void {
   }
   let target = p;
   if (p === "/" || p === "/dashboard") {
-    target = "/script";
+    target = navigateBase;
   } else if (p.startsWith("/script")) {
     target = p;
   } else if (p.startsWith("/workspace/") || p.startsWith("/task/")) {
-    target = `/script${p}`;
+    target = `${navigateBase}${p}`;
   } else {
-    target = `/script${p}`;
+    target = `${navigateBase}${p}`;
   }
   if (navigateImpl === null) {
     window.history.pushState({}, "", target);
