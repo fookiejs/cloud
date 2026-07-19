@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@script/api/client";
 import { actions, useBootstrap, useStore } from "@script/state/store";
@@ -17,24 +16,29 @@ function ScriptNavigatorBinder(props: { basePath: string }): null {
   return null;
 }
 
-function ScriptBodySkeleton(): React.JSX.Element {
+function ScriptHeader(props: { projectName: string }): React.JSX.Element {
   return (
-    <div className="grid grid-cols-1 gap-4 p-8 sm:grid-cols-2 lg:grid-cols-3">
-      <Skeleton className="h-36 rounded-xl" />
-      <Skeleton className="h-36 rounded-xl" />
-      <Skeleton className="h-36 rounded-xl" />
+    <div className="flex h-14 items-center gap-3 border-b px-6 py-5">
+      <h1 className="text-sm font-semibold tracking-tight">Scripts</h1>
+      <span className="text-xs text-muted-foreground">{props.projectName}</span>
     </div>
   );
 }
 
-function ScriptPageShell(props: {
-  projectName: string;
-  children: React.ReactNode;
-}): React.JSX.Element {
+function ScriptBodySkeleton(): React.JSX.Element {
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-8">
-      <PageHeader title="Scripts" subtitle={props.projectName} />
-      {props.children}
+    <div className="p-6">
+      <ul className="flex max-w-3xl flex-col gap-1">
+        <li>
+          <Skeleton className="h-[4.25rem] w-full rounded-md" />
+        </li>
+        <li>
+          <Skeleton className="h-[4.25rem] w-full rounded-md" />
+        </li>
+        <li>
+          <Skeleton className="h-[4.25rem] w-full rounded-md" />
+        </li>
+      </ul>
     </div>
   );
 }
@@ -63,9 +67,10 @@ function TaskRedirect(props: { basePath: string; projectName: string }): React.J
     navigate(props.basePath);
   }, [taskId, tasksByWorkspace, props.basePath]);
   return (
-    <ScriptPageShell projectName={props.projectName}>
+    <div className="flex min-h-0 flex-1 flex-col">
+      <ScriptHeader projectName={props.projectName} />
       <ScriptBodySkeleton />
-    </ScriptPageShell>
+    </div>
   );
 }
 
@@ -99,15 +104,17 @@ function ScriptProjectPage(props: {
   if (!ready || ensuring || workspace === undefined) {
     if (error !== null) {
       return (
-        <ScriptPageShell projectName={props.projectName}>
-          <div className="p-8 text-sm text-destructive">{error}</div>
-        </ScriptPageShell>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <ScriptHeader projectName={props.projectName} />
+          <div className="p-6 text-sm text-destructive">{error}</div>
+        </div>
       );
     }
     return (
-      <ScriptPageShell projectName={props.projectName}>
+      <div className="flex min-h-0 flex-1 flex-col">
+        <ScriptHeader projectName={props.projectName} />
         <ScriptBodySkeleton />
-      </ScriptPageShell>
+      </div>
     );
   }
   return (
