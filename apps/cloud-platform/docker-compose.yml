@@ -1,11 +1,18 @@
 services:
   fookie-cloud:
+    container_name: fookie-cloud
     build:
       context: ../..
       dockerfile: apps/cloud-platform/Dockerfile
     ports:
       - "8088:8080"
+    networks:
+      - default
+      - fookie-obs
     environment:
+      # Shared secret Prometheus sends as a Bearer token to GET /metrics — must match
+      # the contents of observability/metrics_token on the same host.
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
       NODE_ENV: development
       PORT: "8080"
       DATA_DIR: /data
@@ -34,6 +41,11 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+
+networks:
+  default: {}
+  fookie-obs:
+    external: true
 
 volumes:
   fookie-cloud-data:

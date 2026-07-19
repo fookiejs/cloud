@@ -29,6 +29,7 @@
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.11.1",
     "dockerode": "^5.0.1",
+    "dotenv": "^17.4.2",
     "fastify": "5.8.5",
     "http-proxy": "^1.18.1",
     "jose": "^6.0.11",

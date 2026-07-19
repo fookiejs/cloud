@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest } from "fastify";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { dirname } from "node:path";
+import { userCanAccessProject } from "../../../../../task-bridge/apps/backend/dist/services/project-registry.js";
 import type { Identity } from "./identity.js";
 
 type Note = {
@@ -56,6 +57,7 @@ export async function registerNotesModule(app: FastifyInstance, options: NotesOp
     if (!viewer) return reply.code(401).send({ error: "unauthorized" });
     const projectFilter = String(request.query?.projectId ?? "").trim();
     if (projectFilter.length === 0) return reply.code(400).send({ error: "projectId required" });
+    if (!userCanAccessProject(projectFilter, viewer.sub)) return reply.code(404).send({ error: "not found" });
     const notes = await readNotes(options.dataFile);
     return {
       notes: notes
@@ -67,9 +69,13 @@ export async function registerNotesModule(app: FastifyInstance, options: NotesOp
   });
 
   app.get<{ Params: { id: string } }>("/api/notes/:id", async (request, reply) => {
-    if (!(await viewerFrom(request, options))) return reply.code(401).send({ error: "unauthorized" });
+    const viewer = await viewerFrom(request, options);
+    if (!viewer) return reply.code(401).send({ error: "unauthorized" });
     const note = (await readNotes(options.dataFile)).find((item) => item.id === request.params.id);
-    return note ? note : reply.code(404).send({ error: "not found" });
+    if (!note || !userCanAccessProject(note.projectId, viewer.sub)) {
+      return reply.code(404).send({ error: "not found" });
+    }
+    return note;
   });
 
   app.post<{ Body: { title?: unknown; body?: unknown; text?: unknown; source?: unknown; projectId?: unknown } }>("/api/notes", async (request, reply) => {
@@ -80,6 +86,7 @@ export async function registerNotesModule(app: FastifyInstance, options: NotesOp
     const projectId = String(request.body?.projectId ?? "").trim();
     if (!title || !body) return reply.code(400).send({ error: "title and body required" });
     if (!projectId) return reply.code(400).send({ error: "projectId required" });
+    if (!userCanAccessProject(projectId, viewer.sub)) return reply.code(404).send({ error: "not found" });
     const note: Note = {
       id: randomUUID(), title: title.slice(0, 200), body: body.slice(0, 200_000),
       source: String(request.body?.source ?? "manual").slice(0, 80), createdAt: new Date().toISOString(),
@@ -92,10 +99,13 @@ export async function registerNotesModule(app: FastifyInstance, options: NotesOp
   });
 
   app.patch<{ Params: { id: string }; Body: { seen?: unknown } }>("/api/notes/:id", async (request, reply) => {
-    if (!(await viewerFrom(request, options))) return reply.code(401).send({ error: "unauthorized" });
+    const viewer = await viewerFrom(request, options);
+    if (!viewer) return reply.code(401).send({ error: "unauthorized" });
     const notes = await readNotes(options.dataFile);
     const index = notes.findIndex((item) => item.id === request.params.id);
-    if (index < 0) return reply.code(404).send({ error: "not found" });
+    if (index < 0 || !userCanAccessProject(notes[index].projectId, viewer.sub)) {
+      return reply.code(404).send({ error: "not found" });
+    }
     if (Object.hasOwn(request.body ?? {}, "seen")) notes[index].seenAt = request.body?.seen ? new Date().toISOString() : null;
     await saveNotes(options.dataFile, notes);
     return notes[index];

@@ -1,9 +1,14 @@
 import fastifyStatic from "@fastify/static";
 import fastifyWebsocket from "@fastify/websocket";
 import "@fastify/multipart";
+import { config as loadDotenv } from "dotenv";
 import Fastify from "fastify";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
+
+// Docker Compose reads .env itself; this is only for `npm run dev`/`npm start`
+// running the server directly, where nothing else loads it into process.env.
+loadDotenv();
 import { registerTaskBridgeModule } from "../../../../task-bridge/apps/backend/dist/index.js";
 import { registerObservability } from "../../../../task-bridge/apps/backend/dist/observability.js";
 import { registerCodeServerModule } from "./modules/code-server.js";

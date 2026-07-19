@@ -94,7 +94,11 @@ export async function registerCodeServerModule(
     }
     try {
       const info = await docker.getContainer(hostname()).inspect();
-      selfNetworks = Object.keys(info.NetworkSettings.Networks);
+      // Exclude the observability network — it's attached for Prometheus/Alloy
+      // scraping only, sibling containers shouldn't land there by accident.
+      selfNetworks = Object.keys(info.NetworkSettings.Networks).filter(
+        (name) => name !== "fookie-obs",
+      );
     } catch {
       selfNetworks = [];
     }
