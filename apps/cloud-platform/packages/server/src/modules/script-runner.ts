@@ -10,6 +10,7 @@ import type { WebSocket } from "ws";
 import { z } from "zod";
 import { userCanAccessProject } from "../../../../../task-bridge/apps/backend/dist/services/project-registry.js";
 import type { Identity, IdentityUser } from "./identity.js";
+import { hostProjectDir, projectDir } from "./project-paths.js";
 
 type RuntimeKind = "shell" | "docker";
 type TriggerKind = "save" | "manual" | "startup" | "scheduled";
@@ -406,7 +407,7 @@ export async function registerScriptRunnerModule(
     db.prepare(
       "INSERT INTO project_settings (project_id, owner_id, paused, active_environment_id, created_at) VALUES (?, ?, 0, NULL, ?)",
     ).run(projectId, ownerId, Date.now());
-    mkdirSync(join(projectsDir, projectId), { recursive: true });
+    mkdirSync(projectDir(options, projectId), { recursive: true });
     return {
       project_id: projectId,
       owner_id: ownerId,
@@ -531,10 +532,7 @@ export async function registerScriptRunnerModule(
   }
 
   function hostProjectPath(projectId: string): string {
-    if (options.workspacesHostDir !== null && options.workspacesHostDir.length > 0) {
-      return `${options.workspacesHostDir.replace(/\/$/, "")}/${projectId}`;
-    }
-    return join(projectsDir, projectId);
+    return hostProjectDir(options, projectId);
   }
 
   function sandboxEnv(custom: Record<string, string>): string[] {

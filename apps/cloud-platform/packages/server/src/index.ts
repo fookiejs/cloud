@@ -6,7 +6,10 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { registerTaskBridgeModule } from "../../../../task-bridge/apps/backend/dist/index.js";
 import { registerObservability } from "../../../../task-bridge/apps/backend/dist/observability.js";
+import { registerCodeServerModule } from "./modules/code-server.js";
 import { registerEmbeddedAuth } from "./modules/embedded-auth.js";
+import { registerGitProjectsModule } from "./modules/git-projects.js";
+import { registerGithubAuthModule } from "./modules/github-auth.js";
 import { createIdentity } from "./modules/identity.js";
 import { registerNotesModule } from "./modules/notes.js";
 import { registerPenpotModule } from "./modules/penpot.js";
@@ -73,11 +76,35 @@ await registerTaskBridgeModule(app, {
   verifyAccessToken: identity.verifyAccessToken,
   registerProjectRoutes: false,
 });
-await registerScriptRunnerModule(app, {
-  identity,
+// Every per-project backing service (scripts, git checkout, code-server) shares this
+// same data dir / host-dir pair so they all resolve to one project root folder.
+const projectPaths = {
   dataDir: process.env.SCRIPT_DATA_DIR?.trim() || join(dataDirectory, "script"),
   workspacesHostDir: process.env.SCRIPT_WORKSPACES_HOST_DIR?.trim() || null,
+};
+await registerScriptRunnerModule(app, {
+  identity,
+  ...projectPaths,
   sandboxImage: process.env.SCRIPT_SANDBOX_IMAGE?.trim() || "node:22-bookworm",
+});
+const githubClientId = process.env.GITHUB_CLIENT_ID?.trim();
+const githubClientSecret = process.env.GITHUB_CLIENT_SECRET?.trim();
+const github = await registerGithubAuthModule(app, {
+  identity,
+  dataDir: dataDirectory,
+  publicUrl,
+  clientId: githubClientId !== undefined && githubClientId.length > 0 ? githubClientId : null,
+  clientSecret:
+    githubClientSecret !== undefined && githubClientSecret.length > 0 ? githubClientSecret : null,
+});
+await registerGitProjectsModule(app, { ...projectPaths, identity, github });
+const codeServerDomain = process.env.CODE_SERVER_DOMAIN?.trim();
+await registerCodeServerModule(app, {
+  ...projectPaths,
+  identity,
+  publicUrl,
+  image: process.env.CODE_SERVER_IMAGE?.trim() || "codercom/code-server:latest",
+  domain: codeServerDomain !== undefined && codeServerDomain.length > 0 ? codeServerDomain : null,
 });
 const penpotAccessToken = process.env.PENPOT_ACCESS_TOKEN?.trim();
 await registerPenpotModule(app, {

@@ -2,6 +2,7 @@ import { NavLink, matchPath, useLocation } from "react-router-dom";
 import {
   Activity,
   BookOpen,
+  Code2,
   FolderKanban,
   GitBranch,
   Inbox,
@@ -67,6 +68,7 @@ export function AppSidebar() {
             </p>
             <NavItem to={`/projects/${projectId}/tasks`} label="Tasks" icon={ListTodo} />
             <NavItem to={`/projects/${projectId}/scripts`} label="Scripts" icon={Terminal} />
+            <NavItem to={`/projects/${projectId}/code`} label="Code" icon={Code2} />
             <NavItem to={`/projects/${projectId}/notes`} label="Notes" icon={NotebookPen} />
             <NavItem to={`/projects/${projectId}/designs`} label="Designs" icon={Palette} />
           </div>

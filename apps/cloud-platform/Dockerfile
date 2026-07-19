@@ -29,6 +29,10 @@ ENV PORT=8080
 ENV DATA_DIR=/data
 ENV EMBEDDED_AUTH_BINARY=/app/bin/auth
 ENV AUTH_PUBLIC_URL=https://auth.fookiecloud.com
+# git is needed at runtime: the server itself (not a sandbox container) shells out to
+# `git clone`/`push`/`pull` for the per-project GitHub integration.
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 COPY --from=build /repo/apps/cloud-platform/package.json ./
 COPY --from=build /repo/apps/cloud-platform/node_modules /app/node_modules
 COPY --from=build /repo/apps/cloud-platform/packages/server/dist ./packages/server/dist

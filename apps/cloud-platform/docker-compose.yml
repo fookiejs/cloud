@@ -20,6 +20,12 @@ services:
       SCRIPT_SANDBOX_IMAGE: ${SCRIPT_SANDBOX_IMAGE:-node:22-bookworm}
       SCRIPT_MEMORY_LIMIT_MB: ${SCRIPT_MEMORY_LIMIT_MB:-1024}
       SCRIPT_CPU_LIMIT: ${SCRIPT_CPU_LIMIT:-1}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      CODE_SERVER_IMAGE: ${CODE_SERVER_IMAGE:-codercom/code-server:latest}
+      # Leave unset to disable the browser-IDE feature entirely. When set, requires a
+      # wildcard DNS record (and TLS cert) for "*.<this value>" pointing at this host.
+      CODE_SERVER_DOMAIN: ${CODE_SERVER_DOMAIN:-}
     volumes:
       - fookie-cloud-data:/data
       - /var/run/docker.sock:/var/run/docker.sock

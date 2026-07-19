@@ -17,6 +17,7 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { ScriptFeature } from "@/features/script/ScriptFeature";
 import { NotesFeature } from "@/features/notes/NotesFeature";
 import { DesignsFeature } from "@/features/designs/DesignsFeature";
+import { CodeFeature } from "@/features/code/CodeFeature";
 import { loadSession } from "@/lib/session";
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -72,6 +73,7 @@ export function App() {
             <Route path="tasks/workflow-templates" element={<WorkflowTemplatesPage />} />
             <Route path="tasks/marketplace" element={<MarketplacePage />} />
             <Route path="scripts/*" element={<ProjectScriptsRoute />} />
+            <Route path="code" element={<ProjectCodeRoute />} />
             <Route path="notes/*" element={<ProjectNotesRoute />} />
             <Route path="designs" element={<ProjectDesignsRoute />} />
           </Route>
@@ -110,6 +112,14 @@ function ProjectScriptsRoute(): React.JSX.Element {
     projectName = session.projectName;
   }
   return <ScriptFeature projectId={projectId} projectName={projectName} />;
+}
+
+function ProjectCodeRoute(): React.JSX.Element {
+  const { projectId } = useParams();
+  if (projectId === undefined) {
+    return <Navigate to="/projects" replace />;
+  }
+  return <CodeFeature projectId={projectId} />;
 }
 
 function ProjectNotesRoute(): React.JSX.Element {
