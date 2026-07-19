@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useBootstrap, useStore } from "@script/state/store";
+import { useBootstrap } from "@script/state/store";
 import { ProjectScriptView } from "@script/views/Workspace";
 import { bindScriptNavigate, navigate } from "@script/navigate";
 
@@ -24,24 +23,6 @@ function ScriptHeader(props: { projectName: string }): React.JSX.Element {
   );
 }
 
-function ScriptBodySkeleton(): React.JSX.Element {
-  return (
-    <div className="p-6">
-      <ul className="flex max-w-3xl flex-col gap-1">
-        <li>
-          <Skeleton className="h-[4.25rem] w-full rounded-md" />
-        </li>
-        <li>
-          <Skeleton className="h-[4.25rem] w-full rounded-md" />
-        </li>
-        <li>
-          <Skeleton className="h-[4.25rem] w-full rounded-md" />
-        </li>
-      </ul>
-    </div>
-  );
-}
-
 function ScriptRedirect(props: { basePath: string; projectName: string }): React.JSX.Element {
   const params = useParams();
   useEffect(() => {
@@ -50,7 +31,6 @@ function ScriptRedirect(props: { basePath: string; projectName: string }): React
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <ScriptHeader projectName={props.projectName} />
-      <ScriptBodySkeleton />
     </div>
   );
 }
@@ -59,16 +39,7 @@ function ScriptProjectPage(props: {
   projectId: string;
   projectName: string;
 }): React.JSX.Element {
-  const { ready } = useBootstrap(props.projectId);
-  const settings = useStore((state) => state.settings);
-  if (!ready || settings === null) {
-    return (
-      <div className="flex min-h-0 flex-1 flex-col">
-        <ScriptHeader projectName={props.projectName} />
-        <ScriptBodySkeleton />
-      </div>
-    );
-  }
+  useBootstrap(props.projectId);
   return (
     <div className="w-full px-8 py-6">
       <ProjectScriptView projectId={props.projectId} projectName={props.projectName} />

@@ -32,8 +32,17 @@ interface Props {
   projectName: string;
 }
 
+const PENDING_SETTINGS = Object.freeze({
+  project_id: '',
+  paused: false,
+  active_environment_id: null,
+  created_at: 0,
+});
+
 export function ProjectScriptView(props: Props): React.JSX.Element {
-  const settings = useStore((s) => s.settings);
+  // Falls back to a placeholder instead of bailing out, so the header/toolbar stays
+  // mounted the whole time — no separate "loading" page swapped in once data arrives.
+  const settings = useStore((s) => s.settings) ?? PENDING_SETTINGS;
   const scripts = useStore((s) => s.scripts);
   const liveExec = useStore((s) => s.liveExecutions);
   const [creating, setCreating] = useState(false);
@@ -75,10 +84,6 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
     }
     void actions.refreshExecutionsForScript(selectedId, 50);
   }, [selectedId]);
-
-  if (settings === null) {
-    return <div className="text-sm text-muted-foreground">Project not found.</div>;
-  }
 
   let running = 0;
   for (const t of scripts) {
