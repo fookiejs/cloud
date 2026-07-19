@@ -5,7 +5,6 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { codeApi, type GithubRepo, type GithubStatus, type GitStatus } from "@/features/code/api";
 
 function repoNoteFor(status: GitStatus): string {
@@ -131,9 +130,8 @@ export function CodeFeature(props: { projectId: string }): React.JSX.Element {
   let body: React.JSX.Element;
   if (loading) {
     body = (
-      <div className="mx-auto max-w-xl space-y-3">
-        <Skeleton className="h-28 w-full rounded-2xl" />
-        <Skeleton className="h-10 w-40 rounded-md" />
+      <div className="panel-card mx-auto max-w-xl p-6 text-center text-sm text-muted-foreground">
+        Loading…
       </div>
     );
   } else if (github === null || !github.configured) {
