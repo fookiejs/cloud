@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@script/api/client";
-import { actions, useBootstrap, useStore } from "@script/state/store";
-import { WorkspaceView } from "@script/views/Workspace";
+import { useBootstrap, useStore } from "@script/state/store";
+import { ProjectScriptView } from "@script/views/Workspace";
 import { bindScriptNavigate, navigate } from "@script/navigate";
 
 function ScriptNavigatorBinder(props: { basePath: string }): null {
@@ -45,27 +44,9 @@ function ScriptBodySkeleton(): React.JSX.Element {
 
 function TaskRedirect(props: { basePath: string; projectName: string }): React.JSX.Element {
   const params = useParams();
-  const taskId = params["taskId"];
-  const tasksByWorkspace = useStore((s) => s.tasksByWorkspace);
   useEffect(() => {
-    if (typeof taskId !== "string" || taskId.length === 0) {
-      navigate(props.basePath);
-      return;
-    }
-    for (const key of Object.keys(tasksByWorkspace)) {
-      const list = tasksByWorkspace[key];
-      if (list === undefined) {
-        continue;
-      }
-      for (const task of list) {
-        if (task.id === taskId) {
-          navigate(props.basePath);
-          return;
-        }
-      }
-    }
     navigate(props.basePath);
-  }, [taskId, tasksByWorkspace, props.basePath]);
+  }, [params["taskId"], props.basePath]);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <ScriptHeader projectName={props.projectName} />
@@ -79,37 +60,8 @@ function ScriptProjectPage(props: {
   projectName: string;
 }): React.JSX.Element {
   const { ready } = useBootstrap(props.projectId);
-  const workspaces = useStore((state) => state.workspaces);
-  const [ensuring, setEnsuring] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    if (!ready || ensuring || workspaces.length > 0) {
-      return;
-    }
-    setEnsuring(true);
-    setError(null);
-    void api
-      .ensureProjectWorkspace(props.projectId, props.projectName)
-      .then(async () => {
-        await actions.refreshWorkspaces();
-      })
-      .catch((failure: Error) => {
-        setError(failure.message);
-      })
-      .finally(() => {
-        setEnsuring(false);
-      });
-  }, [ensuring, props.projectId, props.projectName, ready, workspaces.length]);
-  const workspace = workspaces[0];
-  if (!ready || ensuring || workspace === undefined) {
-    if (error !== null) {
-      return (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <ScriptHeader projectName={props.projectName} />
-          <div className="p-6 text-sm text-destructive">{error}</div>
-        </div>
-      );
-    }
+  const settings = useStore((state) => state.settings);
+  if (!ready || settings === null) {
     return (
       <div className="flex min-h-0 flex-1 flex-col">
         <ScriptHeader projectName={props.projectName} />
@@ -119,7 +71,7 @@ function ScriptProjectPage(props: {
   }
   return (
     <div className="w-full px-8 py-6">
-      <WorkspaceView workspaceId={workspace.id} projectName={props.projectName} />
+      <ProjectScriptView projectId={props.projectId} projectName={props.projectName} />
     </div>
   );
 }

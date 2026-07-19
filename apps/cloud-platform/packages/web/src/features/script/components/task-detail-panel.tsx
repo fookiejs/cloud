@@ -25,7 +25,7 @@ import { LogPanel } from '@script/components/log-panel';
 import type { InspectTarget } from '@script/components/run-dots';
 import { cn } from '@/lib/utils';
 import { api } from '@script/api/client';
-import { actions, useStore, selectTasksOf } from '@script/state/store';
+import { actions, useStore } from '@script/state/store';
 import type { Task, RuntimeKind, TriggerKind, ConcurrencyKind } from '@script/types';
 
 const runtimeOptions: readonly { value: RuntimeKind; label: string }[] = [
@@ -84,8 +84,7 @@ function detailTabClass(active: boolean): string {
 
 export function TaskDetailPanel(props: Props): React.JSX.Element {
   const t = useStore((s) => {
-    const list = selectTasksOf(s, props.task.workspace_id);
-    for (const row of list) {
+    for (const row of s.tasks) {
       if (row.id === props.task.id) {
         return row;
       }
@@ -133,7 +132,7 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
 
   async function duplicate(): Promise<void> {
     const body = duplicateTaskBody(t, props.existingTaskNames);
-    const r = await api.createTask(t.workspace_id, body);
+    const r = await api.createTask(t.project_id, body);
     actions.upsertTask(r.task);
     toast.success('Task duplicated');
     props.onDuplicated(r.task);

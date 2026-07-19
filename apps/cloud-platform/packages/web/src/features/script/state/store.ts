@@ -2,7 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import { api } from '../api/client.js';
 import { connectStream } from '../api/stream.js';
 import type {
-  Workspace,
+  ProjectScriptSettings,
   Task,
   Execution,
   ExecutionStatus,
@@ -21,18 +21,16 @@ interface ExecutionRuntime {
 }
 
 interface State {
-  workspaces: Workspace[];
-  tasksByWorkspace: Record<string, Task[]>;
-  recentExecutions: Execution[];
+  settings: ProjectScriptSettings | null;
+  tasks: Task[];
   executionsByTask: Record<string, Execution[]>;
   liveExecutions: Record<string, ExecutionRuntime>;
   liveLogsByTask: Record<string, ExecutionRuntime[]>;
 }
 
 const initial: State = {
-  workspaces: [],
-  tasksByWorkspace: {},
-  recentExecutions: [],
+  settings: null,
+  tasks: [],
   executionsByTask: {},
   liveExecutions: {},
   liveLogsByTask: {},
@@ -69,17 +67,8 @@ export function useStore<T>(selector: (s: State) => T): T {
   );
 }
 
-const EMPTY_TASKS: readonly Task[] = Object.freeze([]);
 const EMPTY_EXECUTIONS: readonly Execution[] = Object.freeze([]);
 const EMPTY_RUNTIMES: readonly ExecutionRuntime[] = Object.freeze([]);
-
-export function selectTasksOf(s: State, workspaceId: string): readonly Task[] {
-  const list = s.tasksByWorkspace[workspaceId];
-  if (list === undefined) {
-    return EMPTY_TASKS;
-  }
-  return list;
-}
 
 export function selectExecutionsOf(s: State, taskId: string): readonly Execution[] {
   const list = s.executionsByTask[taskId];
@@ -246,24 +235,18 @@ function applyRunningSnapshot(s: State, running: readonly RunningSnapshot[]): St
 let currentProjectId: string | undefined;
 
 export const actions = {
-  async refreshWorkspaces(): Promise<void> {
-    const r = await api.listWorkspaces(currentProjectId);
-    set((s) => ({ ...s, workspaces: r.workspaces }));
+  setSettings(settings: ProjectScriptSettings): void {
+    set((s) => ({ ...s, settings }));
   },
-  async refreshTasks(workspaceId: string): Promise<void> {
-    const r = await api.listTasks(workspaceId);
-    set((s) => ({ ...s, tasksByWorkspace: { ...s.tasksByWorkspace, [workspaceId]: r.tasks } }));
+  async refreshTasks(projectId: string): Promise<void> {
+    const r = await api.listTasks(projectId);
+    set((s) => ({ ...s, tasks: r.tasks }));
   },
   upsertTask(task: Task): void {
     set((s) => {
-      const list = s.tasksByWorkspace[task.workspace_id];
-      if (list === undefined) {
-        const tasksByWorkspace = { ...s.tasksByWorkspace, [task.workspace_id]: [task] };
-        return { ...s, tasksByWorkspace };
-      }
       const next: Task[] = [];
       let found = false;
-      for (const row of list) {
+      for (const row of s.tasks) {
         if (row.id === task.id) {
           next.push(task);
           found = true;
@@ -274,8 +257,7 @@ export const actions = {
       if (!found) {
         next.push(task);
       }
-      const tasksByWorkspace = { ...s.tasksByWorkspace, [task.workspace_id]: next };
-      return { ...s, tasksByWorkspace };
+      return { ...s, tasks: next };
     });
   },
   async syncTask(taskId: string): Promise<void> {
@@ -286,48 +268,14 @@ export const actions = {
   },
   removeTask(taskId: string): void {
     set((s) => {
-      const tasksByWorkspace: Record<string, Task[]> = { ...s.tasksByWorkspace };
-      for (const key of Object.keys(tasksByWorkspace)) {
-        const list = tasksByWorkspace[key];
-        if (list === undefined) {
-          continue;
-        }
-        const next: Task[] = [];
-        for (const row of list) {
-          if (row.id !== taskId) {
-            next.push(row);
-          }
-        }
-        if (next.length !== list.length) {
-          tasksByWorkspace[key] = next;
+      const next: Task[] = [];
+      for (const row of s.tasks) {
+        if (row.id !== taskId) {
+          next.push(row);
         }
       }
-      return { ...s, tasksByWorkspace };
+      return { ...s, tasks: next };
     });
-  },
-  mergeWorkspaceTasks(workspaceId: string, pageTasks: readonly Task[]): void {
-    set((s) => {
-      const list = s.tasksByWorkspace[workspaceId];
-      const byId = new Map<string, Task>();
-      if (list !== undefined) {
-        for (const row of list) {
-          byId.set(row.id, row);
-        }
-      }
-      for (const row of pageTasks) {
-        byId.set(row.id, row);
-      }
-      const merged: Task[] = [];
-      for (const row of byId.values()) {
-        merged.push(row);
-      }
-      const tasksByWorkspace = { ...s.tasksByWorkspace, [workspaceId]: merged };
-      return { ...s, tasksByWorkspace };
-    });
-  },
-  async refreshRecentExecutions(): Promise<void> {
-    const r = await api.listExecutions(null, 30);
-    set((s) => ({ ...s, recentExecutions: r.executions }));
   },
   async refreshRunningExecutions(): Promise<void> {
     const r = await api.listRunningExecutions();
@@ -339,32 +287,6 @@ export const actions = {
       ...s,
       executionsByTask: { ...s.executionsByTask, [taskId]: r.executions },
     }));
-  },
-  async prefetchExecutionsForTasks(taskIds: readonly string[], limit = 20): Promise<void> {
-    if (taskIds.length === 0) {
-      return;
-    }
-    const rows = await Promise.all(
-      taskIds.map(async (taskId) => {
-        const r = await api.listExecutions(taskId, limit);
-        return { taskId, executions: r.executions };
-      }),
-    );
-    set((s) => {
-      const executionsByTask = { ...s.executionsByTask };
-      for (const row of rows) {
-        executionsByTask[row.taskId] = row.executions;
-      }
-      return { ...s, executionsByTask };
-    });
-  },
-  async refreshExecutionsForWorkspace(workspaceId: string): Promise<void> {
-    const tasks = selectTasksOf(state, workspaceId);
-    const ids: string[] = [];
-    for (const t of tasks) {
-      ids.push(t.id);
-    }
-    await actions.prefetchExecutionsForTasks(ids, 20);
   },
 };
 
@@ -518,7 +440,6 @@ function handleMessage(msg: ServerMessage): void {
         nextList = [updated];
       }
       const liveLogsByTask = { ...s.liveLogsByTask, [taskId]: nextList };
-      void actions.refreshRecentExecutions();
       scheduleExecutionRefresh(taskId, 800);
       const endedExec: Execution = {
         id: msg.executionId,
@@ -565,8 +486,12 @@ function handleMessage(msg: ServerMessage): void {
     });
     return;
   }
-  if (msg.kind === 'workspace.updated' || msg.kind === 'workspace.deleted') {
-    void actions.refreshWorkspaces();
+  if (msg.kind === 'project.updated') {
+    if (currentProjectId !== undefined) {
+      void api.getScriptSnapshot(currentProjectId).then((snapshot) => {
+        actions.setSettings(snapshot.settings);
+      });
+    }
     return;
   }
   if (msg.kind === 'task.updated') {
@@ -580,31 +505,38 @@ export function useBootstrap(projectId?: string): { ready: boolean } {
   const [ready, setReady] = useState(false);
   useEffect(() => {
     currentProjectId = projectId;
+    setReady(false);
+    if (projectId === undefined) {
+      return;
+    }
     const stream = connectStream();
     const unsub = stream.subscribe(handleMessage);
     void (async () => {
       try {
-        await Promise.all([
-          actions.refreshWorkspaces(),
-          actions.refreshRunningExecutions(),
-        ]);
-        const ws = state.workspaces;
-        await Promise.all(
-          ws.map(async (w) => {
-            await actions.refreshTasks(w.id);
-            const taskList = selectTasksOf(state, w.id);
-            const ids: string[] = [];
-            for (const t of taskList) {
-              ids.push(t.id);
+        const snapshot = await api.getScriptSnapshot(projectId);
+        set((s) => {
+          const executionsByTask: Record<string, Execution[]> = {};
+          for (const task of snapshot.tasks) {
+            executionsByTask[task.id] = [];
+          }
+          for (const exec of snapshot.executions) {
+            const list = executionsByTask[exec.task_id];
+            if (list === undefined) {
+              executionsByTask[exec.task_id] = [exec];
+            } else {
+              list.push(exec);
             }
-            await actions.prefetchExecutionsForTasks(ids, 20);
-          }),
-        );
-        await Promise.all([
-          actions.refreshRecentExecutions(),
-          actions.refreshRunningExecutions(),
-        ]);
-      } catch {} finally {
+          }
+          return {
+            ...s,
+            settings: snapshot.settings,
+            tasks: snapshot.tasks,
+            executionsByTask,
+          };
+        });
+        await actions.refreshRunningExecutions();
+      } catch {
+      } finally {
         setReady(true);
       }
     })();

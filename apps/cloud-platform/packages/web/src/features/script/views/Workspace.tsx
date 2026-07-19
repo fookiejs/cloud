@@ -11,14 +11,12 @@ import { Switch } from '@script/components/ui/switch';
 import { TaskTile } from '@script/components/task-tile';
 import { TaskDetailPanel } from '@script/components/task-detail-panel';
 import { api } from '@script/api/client';
-import { WorkspaceEnvironmentDialog } from '@script/components/workspace-environment-dialog';
+import { ProjectEnvironmentDialog } from '@script/components/workspace-environment-dialog';
 import { downloadProjectBundle, exportFileName } from '@script/lib/project-export';
 import { BLANK_TASK_BODY } from '@script/lib/project-templates';
 import type { InspectTarget } from '@script/components/run-dots';
-import { actions, useStore, selectTasksOf } from '@script/state/store';
+import { actions, useStore } from '@script/state/store';
 import type { Task } from '@script/types';
-
-const TASK_PAGE_SIZE = 24;
 
 type DetailTab = 'task' | 'logs';
 
@@ -30,23 +28,14 @@ function detailPanelWidth(open: boolean, size: number): number {
 }
 
 interface Props {
-  workspaceId: string;
+  projectId: string;
   projectName: string;
 }
 
-export function WorkspaceView(props: Props): React.JSX.Element {
-  const workspace = useStore((s) => {
-    for (const w of s.workspaces) {
-      if (w.id === props.workspaceId) {
-        return w;
-      }
-    }
-    return null;
-  });
+export function ProjectScriptView(props: Props): React.JSX.Element {
+  const settings = useStore((s) => s.settings);
+  const tasks = useStore((s) => s.tasks);
   const liveExec = useStore((s) => s.liveExecutions);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
-  const [loadingTasks, setLoadingTasks] = useState(false);
   const [creating, setCreating] = useState(false);
   const [inspect, setInspect] = useState<InspectTarget | null>(null);
   const [detailTab, setDetailTab] = useState<DetailTab>('task');
@@ -59,32 +48,15 @@ export function WorkspaceView(props: Props): React.JSX.Element {
     max: viewportMaxDetail,
   });
   const [exporting, setExporting] = useState(false);
-  const loadFirstPage = useCallback(async (): Promise<void> => {
-    setLoadingTasks(true);
-    try {
-      const r = await api.listTasksPage(props.workspaceId, null, TASK_PAGE_SIZE);
-      actions.mergeWorkspaceTasks(props.workspaceId, r.tasks);
-      setNextCursor(r.nextCursor);
-      const ids: string[] = [];
-      for (const t of r.tasks) {
-        ids.push(t.id);
-      }
-      await actions.refreshRunningExecutions();
-      await actions.prefetchExecutionsForTasks(ids, 20);
-      await actions.refreshRunningExecutions();
-      setTasks(r.tasks);
-    } catch (e: unknown) {
-      toast.error(String(e));
-    } finally {
-      setLoadingTasks(false);
-    }
-  }, [props.workspaceId]);
 
-  useEffect(() => {
-    void loadFirstPage();
+  const resetSelection = useCallback((): void => {
     setSelectedId(null);
     setInspect(null);
-  }, [loadFirstPage]);
+  }, []);
+
+  useEffect(() => {
+    resetSelection();
+  }, [props.projectId, resetSelection]);
 
   useEffect(() => {
     function syncMax(): void {
@@ -104,35 +76,9 @@ export function WorkspaceView(props: Props): React.JSX.Element {
     void actions.refreshExecutionsForTask(selectedId, 50);
   }, [selectedId]);
 
-  const storeTasks = useStore((s) => selectTasksOf(s, props.workspaceId));
-
-  useEffect(() => {
-    setTasks((prev) => {
-      if (prev.length === 0) {
-        return prev;
-      }
-      const freshById = new Map<string, Task>();
-      for (const row of storeTasks) {
-        freshById.set(row.id, row);
-      }
-      const next: Task[] = [];
-      for (const row of prev) {
-        const fresh = freshById.get(row.id);
-        if (fresh !== undefined) {
-          next.push(fresh);
-        } else {
-          next.push(row);
-        }
-      }
-      return next;
-    });
-  }, [storeTasks]);
-
-  if (workspace === null) {
+  if (settings === null) {
     return <div className="text-sm text-muted-foreground">Project not found.</div>;
   }
-
-  const ws = workspace;
 
   let running = 0;
   for (const t of tasks) {
@@ -163,7 +109,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
         if (e.taskId === selectedId) {
           selectedTask = {
             id: selectedId,
-            workspace_id: props.workspaceId,
+            project_id: props.projectId,
             name: 'Task',
             command: '',
             runtime: 'shell',
@@ -188,8 +134,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
 
   function selectTask(taskId: string): void {
     if (selectedId === taskId) {
-      setSelectedId(null);
-      setInspect(null);
+      resetSelection();
       setDetailTab('task');
       return;
     }
@@ -204,48 +149,10 @@ export function WorkspaceView(props: Props): React.JSX.Element {
     setDetailTab('logs');
   }
 
-  async function loadMore(): Promise<void> {
-    if (nextCursor === null) {
-      return;
-    }
-    setLoadingTasks(true);
-    try {
-      const r = await api.listTasksPage(props.workspaceId, nextCursor, TASK_PAGE_SIZE);
-      setTasks((prev) => {
-        const merged = [...prev];
-        for (const t of r.tasks) {
-          let found = false;
-          for (const existing of merged) {
-            if (existing.id === t.id) {
-              found = true;
-            }
-          }
-          if (!found) {
-            merged.push(t);
-          }
-        }
-        return merged;
-      });
-      setNextCursor(r.nextCursor);
-      actions.mergeWorkspaceTasks(props.workspaceId, r.tasks);
-      const ids: string[] = [];
-      for (const t of r.tasks) {
-        ids.push(t.id);
-      }
-      await actions.refreshRunningExecutions();
-      await actions.prefetchExecutionsForTasks(ids, 20);
-      await actions.refreshRunningExecutions();
-    } catch (e: unknown) {
-      toast.error(String(e));
-    } finally {
-      setLoadingTasks(false);
-    }
-  }
-
   async function exportProject(): Promise<void> {
     setExporting(true);
     try {
-      const bundle = await api.exportProject(ws.id);
+      const bundle = await api.exportProject(props.projectId);
       downloadProjectBundle(bundle, exportFileName(props.projectName));
       toast.success('Project exported');
     } catch (e: unknown) {
@@ -257,12 +164,10 @@ export function WorkspaceView(props: Props): React.JSX.Element {
 
   async function setProjectLive(live: boolean): Promise<void> {
     try {
-      if (live) {
-        await api.resumeWorkspace(ws.id);
-      } else {
-        await api.pauseWorkspace(ws.id);
-      }
-      await actions.refreshWorkspaces();
+      const r = live
+        ? await api.resumeProject(props.projectId)
+        : await api.pauseProject(props.projectId);
+      actions.setSettings(r.settings);
       toast.success('Saved');
     } catch (e: unknown) {
       toast.error(String(e));
@@ -270,7 +175,6 @@ export function WorkspaceView(props: Props): React.JSX.Element {
   }
 
   function adoptCreatedTask(task: Task): void {
-    setTasks((prev) => [task, ...prev]);
     actions.upsertTask(task);
     setSelectedId(task.id);
     setInspect(null);
@@ -280,7 +184,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
   async function createTask(): Promise<void> {
     setCreating(true);
     try {
-      const r = await api.createTask(ws.id, BLANK_TASK_BODY);
+      const r = await api.createTask(props.projectId, BLANK_TASK_BODY);
       adoptCreatedTask(r.task);
       toast.success('Task created');
     } catch (e: unknown) {
@@ -291,7 +195,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
   }
 
   let stateBadge: React.JSX.Element;
-  if (ws.paused) {
+  if (settings.paused) {
     stateBadge = <Badge variant="warn">Paused</Badge>;
   } else if (running > 0) {
     stateBadge = <Badge variant="running">{`${String(running)} running`}</Badge>;
@@ -319,26 +223,15 @@ export function WorkspaceView(props: Props): React.JSX.Element {
           void api.cancelExecution(id);
         }}
         onClosePanel={() => {
-          setSelectedId(null);
-          setInspect(null);
+          resetSelection();
           setDetailTab('task');
         }}
         onDuplicated={(task) => {
           adoptCreatedTask(task);
         }}
-        onDeleted={(taskId) => {
-          setSelectedId(null);
-          setInspect(null);
+        onDeleted={() => {
+          resetSelection();
           setDetailTab('task');
-          setTasks((prev) => {
-            const next: Task[] = [];
-            for (const row of prev) {
-              if (row.id !== taskId) {
-                next.push(row);
-              }
-            }
-            return next;
-          });
         }}
       />
     );
@@ -363,13 +256,13 @@ export function WorkspaceView(props: Props): React.JSX.Element {
               <h1 className="text-lg font-semibold truncate">Scripts</h1>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <WorkspaceEnvironmentDialog
-                workspaceId={ws.id}
-                activeEnvironmentId={ws.active_environment_id}
+              <ProjectEnvironmentDialog
+                projectId={props.projectId}
+                activeEnvironmentId={settings.active_environment_id}
               />
               <div className="flex items-center gap-2 px-2">
                 <Switch
-                  checked={!ws.paused}
+                  checked={!settings.paused}
                   onCheckedChange={(v) => {
                     void setProjectLive(v);
                   }}
@@ -402,7 +295,7 @@ export function WorkspaceView(props: Props): React.JSX.Element {
           </header>
 
           <div className="flex-1 min-h-0 overflow-y-auto py-3">
-            {tasks.length === 0 && !loadingTasks && (
+            {tasks.length === 0 && (
               <Card className="border-dashed">
                 <div className="p-8 text-center text-sm text-muted-foreground">No tasks yet</div>
               </Card>
@@ -413,28 +306,13 @@ export function WorkspaceView(props: Props): React.JSX.Element {
                   key={t.id}
                   task={t}
                   selected={selectedId === t.id}
-                  workspacePaused={ws.paused}
+                  workspacePaused={settings.paused}
                   onSelect={() => {
                     selectTask(t.id);
                   }}
                 />
               ))}
             </div>
-            {nextCursor !== null && (
-              <div className="flex justify-center pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    void loadMore();
-                  }}
-                  disabled={loadingTasks}
-                >
-                  Load more
-                </Button>
-              </div>
-            )}
           </div>
         </div>
 

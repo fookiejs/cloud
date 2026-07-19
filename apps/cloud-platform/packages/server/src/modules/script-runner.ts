@@ -8,6 +8,7 @@ import { PassThrough } from "node:stream";
 import { nanoid } from "nanoid";
 import type { WebSocket } from "ws";
 import { z } from "zod";
+import { userCanAccessProject } from "../../../../../task-bridge/apps/backend/dist/services/project-registry.js";
 import type { Identity, IdentityUser } from "./identity.js";
 
 type RuntimeKind = "shell" | "docker";
@@ -15,12 +16,9 @@ type TriggerKind = "save" | "manual" | "startup" | "scheduled";
 type ConcurrencyKind = "restart" | "queue" | "ignore" | "parallel";
 type ExecutionStatus = "pending" | "running" | "success" | "failed" | "cancelled";
 
-type Workspace = {
-  id: string;
-  owner_id: string;
+type ProjectSettings = {
   project_id: string;
-  name: string;
-  path: string;
+  owner_id: string;
   paused: boolean;
   active_environment_id: string | null;
   created_at: number;
@@ -28,7 +26,7 @@ type Workspace = {
 
 type Environment = {
   id: string;
-  workspace_id: string;
+  project_id: string;
   name: string;
   vars: Record<string, string>;
   created_at: number;
@@ -36,7 +34,7 @@ type Environment = {
 
 type Task = {
   id: string;
-  workspace_id: string;
+  project_id: string;
   name: string;
   command: string;
   runtime: RuntimeKind;
@@ -73,8 +71,7 @@ type ServerMessage =
     }
   | { kind: "task.updated"; taskId: string }
   | { kind: "task.deleted"; taskId: string }
-  | { kind: "workspace.updated"; workspaceId: string }
-  | { kind: "workspace.deleted"; workspaceId: string }
+  | { kind: "project.updated"; projectId: string }
   | {
       kind: "hello";
       ts: number;
@@ -89,28 +86,26 @@ export type ScriptRunnerOptions = {
 };
 
 const SCHEMA = `
-CREATE TABLE IF NOT EXISTS workspaces (
-  id TEXT PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS project_settings (
+  project_id TEXT PRIMARY KEY,
   owner_id TEXT NOT NULL,
-  project_id TEXT NOT NULL,
-  name TEXT NOT NULL,
   paused INTEGER NOT NULL DEFAULT 0,
   active_environment_id TEXT,
   created_at INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_workspaces_owner ON workspaces(owner_id, project_id);
 CREATE TABLE IF NOT EXISTS environments (
   id TEXT PRIMARY KEY,
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  project_id TEXT NOT NULL,
   name TEXT NOT NULL,
   vars_json TEXT NOT NULL DEFAULT '{}',
   created_at INTEGER NOT NULL,
-  UNIQUE(workspace_id, name)
+  UNIQUE(project_id, name)
 );
-CREATE INDEX IF NOT EXISTS idx_environments_workspace ON environments(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_environments_project ON environments(project_id);
 CREATE TABLE IF NOT EXISTS tasks (
   id TEXT PRIMARY KEY,
-  workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  project_id TEXT NOT NULL,
+  owner_id TEXT NOT NULL,
   name TEXT NOT NULL,
   command TEXT NOT NULL,
   runtime TEXT NOT NULL,
@@ -123,7 +118,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   enabled INTEGER NOT NULL DEFAULT 1,
   created_at INTEGER NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_tasks_workspace ON tasks(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_project ON tasks(project_id, owner_id);
 CREATE TABLE IF NOT EXISTS executions (
   id TEXT PRIMARY KEY,
   task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
@@ -290,13 +285,25 @@ export async function registerScriptRunnerModule(
   app: FastifyInstance,
   options: ScriptRunnerOptions,
 ): Promise<void> {
-  const workspacesDir = join(options.dataDir, "workspaces");
+  const projectsDir = join(options.dataDir, "workspaces");
   const logsDir = join(options.dataDir, "logs");
-  mkdirSync(workspacesDir, { recursive: true });
+  mkdirSync(projectsDir, { recursive: true });
   mkdirSync(logsDir, { recursive: true });
 
   const db = new Database(join(options.dataDir, "script.db"));
   db.pragma("journal_mode = WAL");
+  // Pre-rewrite DBs keyed tasks/environments off a "workspaces" table that no longer
+  // exists in this schema. Drop the old shape rather than trying to migrate it — the
+  // workspace concept never carried meaning beyond a redundant project_id container.
+  const hasOldWorkspacesTable =
+    db
+      .prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'workspaces'")
+      .get() !== undefined;
+  if (hasOldWorkspacesTable) {
+    db.exec(
+      "DROP TABLE IF EXISTS executions; DROP TABLE IF EXISTS tasks; DROP TABLE IF EXISTS environments; DROP TABLE IF EXISTS workspaces;",
+    );
+  }
   db.exec(SCHEMA);
 
   const docker = new Docker();
@@ -304,25 +311,24 @@ export async function registerScriptRunnerModule(
   const cpuLimit = Number(process.env.SCRIPT_CPU_LIMIT ?? 1);
   const startedAtBoot = Date.now();
 
-  type WorkspaceRow = {
-    id: string;
-    owner_id: string;
+  type ProjectSettingsRow = {
     project_id: string;
-    name: string;
+    owner_id: string;
     paused: number;
     active_environment_id: string | null;
     created_at: number;
   };
   type EnvironmentRow = {
     id: string;
-    workspace_id: string;
+    project_id: string;
     name: string;
     vars_json: string;
     created_at: number;
   };
   type TaskRow = {
     id: string;
-    workspace_id: string;
+    project_id: string;
+    owner_id: string;
     name: string;
     command: string;
     runtime: string;
@@ -336,13 +342,10 @@ export async function registerScriptRunnerModule(
     created_at: number;
   };
 
-  function toWorkspace(row: WorkspaceRow): Workspace {
+  function toProjectSettings(row: ProjectSettingsRow): ProjectSettings {
     return {
-      id: row.id,
-      owner_id: row.owner_id,
       project_id: row.project_id,
-      name: row.name,
-      path: `/workspaces/${row.id}`,
+      owner_id: row.owner_id,
       paused: row.paused === 1,
       active_environment_id: row.active_environment_id,
       created_at: row.created_at,
@@ -365,7 +368,7 @@ export async function registerScriptRunnerModule(
     }
     return {
       id: row.id,
-      workspace_id: row.workspace_id,
+      project_id: row.project_id,
       name: row.name,
       vars,
       created_at: row.created_at,
@@ -375,7 +378,7 @@ export async function registerScriptRunnerModule(
   function toTask(row: TaskRow): Task {
     return {
       id: row.id,
-      workspace_id: row.workspace_id,
+      project_id: row.project_id,
       name: row.name,
       command: row.command,
       runtime: isRuntime(row.runtime) ? row.runtime : "shell",
@@ -390,19 +393,43 @@ export async function registerScriptRunnerModule(
     };
   }
 
-  function getWorkspace(id: string): Workspace | null {
-    const row = db.prepare("SELECT * FROM workspaces WHERE id = ?").get(id) as
-      | WorkspaceRow
-      | undefined;
-    return row === undefined ? null : toWorkspace(row);
+  function getOrCreateProjectSettings(projectId: string, ownerId: string): ProjectSettings {
+    const row = db
+      .prepare("SELECT * FROM project_settings WHERE project_id = ?")
+      .get(projectId) as ProjectSettingsRow | undefined;
+    if (row !== undefined) {
+      return toProjectSettings(row);
+    }
+    db.prepare(
+      "INSERT INTO project_settings (project_id, owner_id, paused, active_environment_id, created_at) VALUES (?, ?, 0, NULL, ?)",
+    ).run(projectId, ownerId, Date.now());
+    mkdirSync(join(projectsDir, projectId), { recursive: true });
+    return {
+      project_id: projectId,
+      owner_id: ownerId,
+      paused: false,
+      active_environment_id: null,
+      created_at: Date.now(),
+    };
   }
 
-  function getOwnedWorkspace(id: string, user: IdentityUser): Workspace | null {
-    const w = getWorkspace(id);
-    if (w === null || w.owner_id !== user.id) {
+  function getProjectSettings(projectId: string): ProjectSettings | null {
+    const row = db
+      .prepare("SELECT * FROM project_settings WHERE project_id = ?")
+      .get(projectId) as ProjectSettingsRow | undefined;
+    return row === undefined ? null : toProjectSettings(row);
+  }
+
+  // Every route entered through this checks real project ownership via task-bridge's
+  // project registry, not just a locally-stored owner_id column.
+  async function requireProjectAccess(
+    projectId: string,
+    user: IdentityUser,
+  ): Promise<ProjectSettings | null> {
+    if (!userCanAccessProject(projectId, user.id)) {
       return null;
     }
-    return w;
+    return getOrCreateProjectSettings(projectId, user.id);
   }
 
   function getTask(id: string): Task | null {
@@ -410,16 +437,22 @@ export async function registerScriptRunnerModule(
     return row === undefined ? null : toTask(row);
   }
 
-  function getOwnedTask(id: string, user: IdentityUser): { task: Task; workspace: Workspace } | null {
+  async function getOwnedTask(
+    id: string,
+    user: IdentityUser,
+  ): Promise<{ task: Task; project: ProjectSettings } | null> {
     const task = getTask(id);
     if (task === null) {
       return null;
     }
-    const workspace = getOwnedWorkspace(task.workspace_id, user);
-    if (workspace === null) {
+    if (!userCanAccessProject(task.project_id, user.id)) {
       return null;
     }
-    return { task, workspace };
+    const project = getProjectSettings(task.project_id);
+    if (project === null) {
+      return null;
+    }
+    return { task, project };
   }
 
   function getExecution(id: string): Execution | null {
@@ -429,27 +462,27 @@ export async function registerScriptRunnerModule(
     return row === undefined ? null : { ...row, status: row.status };
   }
 
-  function listEnvironments(workspaceId: string): Environment[] {
+  function listEnvironments(projectId: string): Environment[] {
     const rows = db
-      .prepare("SELECT * FROM environments WHERE workspace_id = ? ORDER BY created_at ASC")
-      .all(workspaceId) as EnvironmentRow[];
+      .prepare("SELECT * FROM environments WHERE project_id = ? ORDER BY created_at ASC")
+      .all(projectId) as EnvironmentRow[];
     return rows.map(toEnvironment);
   }
 
-  function listTasks(workspaceId: string): Task[] {
+  function listTasks(projectId: string): Task[] {
     const rows = db
-      .prepare("SELECT * FROM tasks WHERE workspace_id = ? ORDER BY created_at ASC")
-      .all(workspaceId) as TaskRow[];
+      .prepare("SELECT * FROM tasks WHERE project_id = ? ORDER BY created_at ASC")
+      .all(projectId) as TaskRow[];
     return rows.map(toTask);
   }
 
-  function resolveActiveEnvVars(workspace: Workspace): Record<string, string> {
-    if (workspace.active_environment_id === null) {
+  function resolveActiveEnvVars(project: ProjectSettings): Record<string, string> {
+    if (project.active_environment_id === null) {
       return {};
     }
     const row = db
       .prepare("SELECT * FROM environments WHERE id = ?")
-      .get(workspace.active_environment_id) as EnvironmentRow | undefined;
+      .get(project.active_environment_id) as EnvironmentRow | undefined;
     if (row === undefined) {
       return {};
     }
@@ -459,7 +492,7 @@ export async function registerScriptRunnerModule(
   const sockets = new Map<string, Set<WebSocket>>();
   const running = new Map<
     string,
-    { taskId: string; ownerId: string; startedAt: number; cancel: () => void }
+    { taskId: string; ownerId: string; projectId: string; startedAt: number; cancel: () => void }
   >();
   const queued = new Set<string>();
   const cronJobs = new Map<string, ScheduledTask>();
@@ -477,21 +510,28 @@ export async function registerScriptRunnerModule(
     }
   }
 
-  function runningSnapshotFor(ownerId: string): { executionId: string; taskId: string; startedAt: number }[] {
+  function runningSnapshotFor(
+    ownerId: string,
+    projectId?: string,
+  ): { executionId: string; taskId: string; startedAt: number }[] {
     const out: { executionId: string; taskId: string; startedAt: number }[] = [];
     for (const [executionId, info] of running.entries()) {
-      if (info.ownerId === ownerId) {
-        out.push({ executionId, taskId: info.taskId, startedAt: info.startedAt });
+      if (info.ownerId !== ownerId) {
+        continue;
       }
+      if (projectId !== undefined && info.projectId !== projectId) {
+        continue;
+      }
+      out.push({ executionId, taskId: info.taskId, startedAt: info.startedAt });
     }
     return out;
   }
 
-  function hostWorkspacePath(workspaceId: string): string {
+  function hostProjectPath(projectId: string): string {
     if (options.workspacesHostDir !== null && options.workspacesHostDir.length > 0) {
-      return `${options.workspacesHostDir.replace(/\/$/, "")}/${workspaceId}`;
+      return `${options.workspacesHostDir.replace(/\/$/, "")}/${projectId}`;
     }
-    return join(workspacesDir, workspaceId);
+    return join(projectsDir, projectId);
   }
 
   function sandboxEnv(custom: Record<string, string>): string[] {
@@ -555,14 +595,14 @@ export async function registerScriptRunnerModule(
     }
   }
 
-  function startExecution(task: Task, workspace: Workspace, reason: string): void {
+  function startExecution(task: Task, project: ProjectSettings, reason: string): void {
     const executionId = nanoid(12);
     const now = Date.now();
     const logPath = join(logsDir, `${executionId}.log`);
     db.prepare(
       "INSERT INTO executions (id, task_id, status, started_at, ended_at, exit_code, trigger_reason, log_path) VALUES (?, ?, 'running', ?, NULL, NULL, ?, ?)",
     ).run(executionId, task.id, now, reason, logPath);
-    broadcast(workspace.owner_id, {
+    broadcast(project.owner_id, {
       kind: "execution.started",
       executionId,
       taskId: task.id,
@@ -577,7 +617,7 @@ export async function registerScriptRunnerModule(
     function write(line: string, stream: "out" | "err"): void {
       const clean = line.replace(/\r$/, "");
       logFile.write(`${stream}\t${clean}\n`);
-      broadcast(workspace.owner_id, {
+      broadcast(project.owner_id, {
         kind: "execution.log",
         executionId,
         line: clean,
@@ -603,12 +643,13 @@ export async function registerScriptRunnerModule(
       }
       exited = true;
       logFile.end();
-      finalizeExecution(executionId, workspace.owner_id, status, exitCode);
+      finalizeExecution(executionId, project.owner_id, status, exitCode);
     }
 
     running.set(executionId, {
       taskId: task.id,
-      ownerId: workspace.owner_id,
+      ownerId: project.owner_id,
+      projectId: task.project_id,
       startedAt: now,
       cancel(): void {
         if (cancelled || exited) {
@@ -652,8 +693,8 @@ export async function registerScriptRunnerModule(
           });
         }
 
-        const customEnv = resolveActiveEnvVars(workspace);
-        write(`[script] sandbox image=${image} workspace=${workspace.id}`, "out");
+        const customEnv = resolveActiveEnvVars(project);
+        write(`[script] sandbox image=${image} project=${task.project_id}`, "out");
 
         const createOpts: Docker.ContainerCreateOptions = {
           Image: image,
@@ -663,7 +704,7 @@ export async function registerScriptRunnerModule(
           Tty: false,
           HostConfig: {
             AutoRemove: true,
-            Binds: [`${hostWorkspacePath(workspace.id)}:/workspace:rw`],
+            Binds: [`${hostProjectPath(task.project_id)}:/workspace:rw`],
             Memory: memoryLimitMb * 1024 * 1024,
             NanoCpus: Math.round(cpuLimit * 1_000_000_000),
             PidsLimit: 512,
@@ -718,13 +759,13 @@ export async function registerScriptRunnerModule(
     if (!task.enabled) {
       return;
     }
-    const workspace = getWorkspace(task.workspace_id);
-    if (workspace === null || workspace.paused) {
+    const project = getProjectSettings(task.project_id);
+    if (project === null || project.paused) {
       return;
     }
     if (isTaskRunning(task.id)) {
       if (task.concurrency === "parallel") {
-        startExecution(task, workspace, reason);
+        startExecution(task, project, reason);
         return;
       }
       if (task.concurrency === "restart") {
@@ -738,7 +779,7 @@ export async function registerScriptRunnerModule(
       }
       return;
     }
-    startExecution(task, workspace, reason);
+    startExecution(task, project, reason);
   }
 
   function unschedule(taskId: string): void {
@@ -834,329 +875,165 @@ export async function registerScriptRunnerModule(
     })();
   });
 
-  app.get<{ Querystring: { projectId?: string } }>("/api/v1/workspaces", async (request, reply) => {
-    const user = await requireUser(request);
-    if (user === null) {
-      return reply.code(401).send({ error: "unauthorized" });
-    }
-    const projectId = String(request.query.projectId ?? "").trim();
-    const rows =
-      projectId.length > 0
-        ? (db
-            .prepare(
-              "SELECT * FROM workspaces WHERE owner_id = ? AND project_id = ? ORDER BY created_at ASC",
-            )
-            .all(user.id, projectId) as WorkspaceRow[])
-        : (db
-            .prepare("SELECT * FROM workspaces WHERE owner_id = ? ORDER BY created_at ASC")
-            .all(user.id) as WorkspaceRow[]);
-    return { workspaces: rows.map(toWorkspace) };
-  });
-
-  app.post("/api/v1/projects/:projectId/script-workspace", async (request, reply) => {
-    const user = await requireUser(request);
-    if (user === null) {
-      return reply.code(401).send({ error: "unauthorized" });
-    }
-    const params = z.object({ projectId: z.string().trim().min(1) }).parse(request.params);
-    const body = z.object({ projectName: z.string().trim().min(1) }).parse(request.body);
-    const existing = db
-      .prepare(
-        "SELECT * FROM workspaces WHERE owner_id = ? AND project_id = ? ORDER BY created_at ASC LIMIT 1",
-      )
-      .get(user.id, params.projectId) as WorkspaceRow | undefined;
-    if (existing !== undefined) {
-      return { workspace: toWorkspace(existing) };
-    }
-    const id = nanoid(12);
-    mkdirSync(join(workspacesDir, id), { recursive: true });
-    db.prepare(
-      "INSERT INTO workspaces (id, owner_id, project_id, name, paused, active_environment_id, created_at) VALUES (?, ?, ?, ?, 0, NULL, ?)",
-    ).run(id, user.id, params.projectId, body.projectName, Date.now());
-    const workspace = getWorkspace(id);
-    broadcast(user.id, { kind: "workspace.updated", workspaceId: id });
-    return reply.code(201).send({ workspace });
-  });
-
-  app.post<{ Body: { name?: unknown; projectId?: unknown } }>(
-    "/api/v1/workspaces",
+  // Single project-scoped snapshot route: settings + environments + tasks + recent
+  // executions for every task in the project, in one round trip. Replaces the old
+  // workspace-fetch -> per-task-execution-fetch waterfall.
+  app.get<{ Params: { projectId: string }; Querystring: { limit?: string } }>(
+    "/api/v1/projects/:projectId/script-snapshot",
     async (request, reply) => {
       const user = await requireUser(request);
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
-      const projectId =
-        typeof request.body?.projectId === "string" ? request.body.projectId.trim() : "";
-      if (name.length === 0) {
-        return reply.code(400).send({ error: "name required" });
-      }
-      if (projectId.length === 0) {
-        return reply.code(400).send({ error: "projectId required" });
-      }
-      const id = nanoid(12);
-      mkdirSync(join(workspacesDir, id), { recursive: true });
-      db.prepare(
-        "INSERT INTO workspaces (id, owner_id, project_id, name, paused, active_environment_id, created_at) VALUES (?, ?, ?, ?, 0, NULL, ?)",
-      ).run(id, user.id, projectId, name, Date.now());
-      const workspace = getWorkspace(id);
-      broadcast(user.id, { kind: "workspace.updated", workspaceId: id });
-      return { workspace };
-    },
-  );
-
-  app.patch<{ Params: { id: string }; Body: { name?: unknown } }>(
-    "/api/v1/workspaces/:id",
-    async (request, reply) => {
-      const user = await requireUser(request);
-      if (user === null) {
-        return reply.code(401).send({ error: "unauthorized" });
-      }
-      const workspace = getOwnedWorkspace(request.params.id, user);
-      if (workspace === null) {
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
         return reply.code(404).send({ error: "not found" });
       }
-      const name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
-      if (name.length === 0) {
-        return reply.code(400).send({ error: "name required" });
+      // Per-task recent history, not a single project-wide LIMIT — otherwise a
+      // chatty task would crowd quieter tasks out of the initial snapshot.
+      let perTaskLimit = 20;
+      if (typeof request.query.limit === "string") {
+        const n = Number.parseInt(request.query.limit, 10);
+        if (Number.isFinite(n) && n > 0 && n <= 200) {
+          perTaskLimit = n;
+        }
       }
-      db.prepare("UPDATE workspaces SET name = ? WHERE id = ?").run(name, workspace.id);
-      broadcast(user.id, { kind: "workspace.updated", workspaceId: workspace.id });
-      return { workspace: { ...workspace, name } };
+      const tasks = listTasks(project.project_id);
+      const executions =
+        tasks.length === 0
+          ? []
+          : (db
+              .prepare(
+                `SELECT id, task_id, status, started_at, ended_at, exit_code, trigger_reason, log_path
+                 FROM (
+                   SELECT e.*, ROW_NUMBER() OVER (
+                     PARTITION BY e.task_id ORDER BY e.started_at DESC
+                   ) AS rn
+                   FROM executions e
+                   JOIN tasks t ON t.id = e.task_id
+                   WHERE t.project_id = ?
+                 )
+                 WHERE rn <= ?
+                 ORDER BY started_at DESC`,
+              )
+              .all(project.project_id, perTaskLimit) as Execution[]);
+      return {
+        settings: project,
+        environments: listEnvironments(project.project_id),
+        tasks,
+        executions,
+        running: runningSnapshotFor(user.id, project.project_id),
+      };
     },
   );
 
-  app.post<{ Params: { id: string } }>("/api/v1/workspaces/:id/pause", async (request, reply) => {
-    const user = await requireUser(request);
-    if (user === null) {
-      return reply.code(401).send({ error: "unauthorized" });
-    }
-    const workspace = getOwnedWorkspace(request.params.id, user);
-    if (workspace === null) {
-      return reply.code(404).send({ error: "not found" });
-    }
-    db.prepare("UPDATE workspaces SET paused = 1 WHERE id = ?").run(workspace.id);
-    broadcast(user.id, { kind: "workspace.updated", workspaceId: workspace.id });
-    return { workspace: { ...workspace, paused: true } };
-  });
-
-  app.post<{ Params: { id: string } }>("/api/v1/workspaces/:id/resume", async (request, reply) => {
-    const user = await requireUser(request);
-    if (user === null) {
-      return reply.code(401).send({ error: "unauthorized" });
-    }
-    const workspace = getOwnedWorkspace(request.params.id, user);
-    if (workspace === null) {
-      return reply.code(404).send({ error: "not found" });
-    }
-    db.prepare("UPDATE workspaces SET paused = 0 WHERE id = ?").run(workspace.id);
-    broadcast(user.id, { kind: "workspace.updated", workspaceId: workspace.id });
-    return { workspace: { ...workspace, paused: false } };
-  });
-
-  app.delete<{ Params: { id: string } }>("/api/v1/workspaces/:id", async (request, reply) => {
-    const user = await requireUser(request);
-    if (user === null) {
-      return reply.code(401).send({ error: "unauthorized" });
-    }
-    const workspace = getOwnedWorkspace(request.params.id, user);
-    if (workspace === null) {
-      return reply.code(404).send({ error: "not found" });
-    }
-    for (const task of listTasks(workspace.id)) {
-      unschedule(task.id);
-      cancelRunningForTask(task.id);
-      queued.delete(task.id);
-    }
-    db.prepare("DELETE FROM workspaces WHERE id = ?").run(workspace.id);
-    const dir = join(workspacesDir, workspace.id);
-    if (existsSync(dir)) {
-      rmSync(dir, { recursive: true, force: true });
-    }
-    broadcast(user.id, { kind: "workspace.deleted", workspaceId: workspace.id });
-    return { ok: true };
-  });
-
-  app.get<{ Params: { id: string } }>("/api/v1/workspaces/:id/export", async (request, reply) => {
-    const user = await requireUser(request);
-    if (user === null) {
-      return reply.code(401).send({ error: "unauthorized" });
-    }
-    const workspace = getOwnedWorkspace(request.params.id, user);
-    if (workspace === null) {
-      return reply.code(404).send({ error: "not found" });
-    }
-    const environments = listEnvironments(workspace.id);
-    let activeEnvironmentName: string | null = null;
-    for (const env of environments) {
-      if (env.id === workspace.active_environment_id) {
-        activeEnvironmentName = env.name;
-      }
-    }
-    return {
-      format: "script-project",
-      version: 1,
-      exported_at: Date.now(),
-      project: {
-        name: workspace.name,
-        path: "",
-        paused: workspace.paused,
-        active_environment_name: activeEnvironmentName,
-      },
-      environments: environments.map((env) => ({ name: env.name, vars: env.vars })),
-      tasks: listTasks(workspace.id).map((task) => ({
-        name: task.name,
-        command: task.command,
-        runtime: task.runtime,
-        docker_image: task.docker_image,
-        docker_platform: task.docker_platform,
-        trigger_type: task.trigger_type,
-        trigger_glob: task.trigger_glob,
-        trigger_cron: task.trigger_cron,
-        concurrency: task.concurrency,
-        enabled: task.enabled,
-      })),
-    };
-  });
-
-  app.post<{ Body: { bundle?: unknown; name?: unknown; projectId?: unknown } }>(
-    "/api/v1/workspaces/import",
+  app.get<{ Params: { projectId: string } }>(
+    "/api/v1/projects/:projectId/export",
     async (request, reply) => {
       const user = await requireUser(request);
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const projectId =
-        typeof request.body?.projectId === "string" ? request.body.projectId.trim() : "";
-      if (projectId.length === 0) {
-        return reply.code(400).send({ error: "projectId required" });
-      }
-      const bundle = request.body?.bundle;
-      if (typeof bundle !== "object" || bundle === null) {
-        return reply.code(400).send({ error: "bundle required" });
-      }
-      const bundleRecord = bundle as Record<string, unknown>;
-      if (bundleRecord["format"] !== "script-project") {
-        return reply.code(400).send({ error: "invalid bundle format" });
-      }
-      const project = bundleRecord["project"];
-      if (typeof project !== "object" || project === null) {
-        return reply.code(400).send({ error: "invalid bundle project" });
-      }
-      const projectRecord = project as Record<string, unknown>;
-      let name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
-      if (name.length === 0 && typeof projectRecord["name"] === "string") {
-        name = projectRecord["name"].trim();
-      }
-      if (name.length === 0) {
-        return reply.code(400).send({ error: "name required" });
-      }
-      const rawTasks = Array.isArray(bundleRecord["tasks"]) ? bundleRecord["tasks"] : [];
-      const parsedTasks: CreateTaskBody[] = [];
-      for (const rawTask of rawTasks) {
-        const parsed = validateCreateTask(rawTask);
-        if (typeof parsed === "string") {
-          return reply.code(400).send({ error: parsed });
-        }
-        parsedTasks.push(parsed);
-      }
-      const id = nanoid(12);
-      mkdirSync(join(workspacesDir, id), { recursive: true });
-      db.prepare(
-        "INSERT INTO workspaces (id, owner_id, project_id, name, paused, active_environment_id, created_at) VALUES (?, ?, ?, ?, 0, NULL, ?)",
-      ).run(id, user.id, projectId, name, Date.now());
-      const rawEnvironments = Array.isArray(bundleRecord["environments"])
-        ? bundleRecord["environments"]
-        : [];
-      const envIds = new Map<string, string>();
-      for (const rawEnv of rawEnvironments) {
-        if (typeof rawEnv !== "object" || rawEnv === null) {
-          continue;
-        }
-        const envRecord = rawEnv as Record<string, unknown>;
-        if (typeof envRecord["name"] !== "string" || envRecord["name"].length === 0) {
-          continue;
-        }
-        const vars = parseEnvVarsBody(envRecord["vars"]);
-        if (typeof vars === "string") {
-          continue;
-        }
-        const envId = nanoid(12);
-        try {
-          db.prepare(
-            "INSERT INTO environments (id, workspace_id, name, vars_json, created_at) VALUES (?, ?, ?, ?, ?)",
-          ).run(envId, id, envRecord["name"], JSON.stringify(vars), Date.now());
-          envIds.set(envRecord["name"], envId);
-        } catch {
-          continue;
-        }
-      }
-      const activeName = projectRecord["active_environment_name"];
-      if (typeof activeName === "string") {
-        const activeId = envIds.get(activeName);
-        if (activeId !== undefined) {
-          db.prepare("UPDATE workspaces SET active_environment_id = ? WHERE id = ?").run(
-            activeId,
-            id,
-          );
-        }
-      }
-      let taskCount = 0;
-      for (const parsed of parsedTasks) {
-        const taskId = nanoid(12);
-        db.prepare(
-          "INSERT INTO tasks (id, workspace_id, name, command, runtime, docker_image, docker_platform, trigger_type, trigger_glob, trigger_cron, concurrency, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        ).run(
-          taskId,
-          id,
-          parsed.name,
-          parsed.command,
-          parsed.runtime,
-          parsed.docker_image,
-          parsed.docker_platform,
-          parsed.trigger_type,
-          parsed.trigger_glob,
-          parsed.trigger_cron,
-          parsed.concurrency,
-          parsed.enabled ? 1 : 0,
-          Date.now(),
-        );
-        const task = getTask(taskId);
-        if (task !== null) {
-          schedule(task);
-        }
-        taskCount += 1;
-      }
-      const workspace = getWorkspace(id);
-      broadcast(user.id, { kind: "workspace.updated", workspaceId: id });
-      return { workspace, taskCount };
-    },
-  );
-
-  app.get<{ Params: { id: string } }>(
-    "/api/v1/workspaces/:id/environments",
-    async (request, reply) => {
-      const user = await requireUser(request);
-      if (user === null) {
-        return reply.code(401).send({ error: "unauthorized" });
-      }
-      const workspace = getOwnedWorkspace(request.params.id, user);
-      if (workspace === null) {
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
         return reply.code(404).send({ error: "not found" });
       }
-      return { environments: listEnvironments(workspace.id) };
+      const environments = listEnvironments(project.project_id);
+      let activeEnvironmentName: string | null = null;
+      for (const env of environments) {
+        if (env.id === project.active_environment_id) {
+          activeEnvironmentName = env.name;
+        }
+      }
+      return {
+        format: "script-project",
+        version: 1,
+        exported_at: Date.now(),
+        project: {
+          name: project.project_id,
+          path: "",
+          paused: project.paused,
+          active_environment_name: activeEnvironmentName,
+        },
+        environments: environments.map((env) => ({ name: env.name, vars: env.vars })),
+        tasks: listTasks(project.project_id).map((task) => ({
+          name: task.name,
+          command: task.command,
+          runtime: task.runtime,
+          docker_image: task.docker_image,
+          docker_platform: task.docker_platform,
+          trigger_type: task.trigger_type,
+          trigger_glob: task.trigger_glob,
+          trigger_cron: task.trigger_cron,
+          concurrency: task.concurrency,
+          enabled: task.enabled,
+        })),
+      };
     },
   );
 
-  app.post<{ Params: { id: string }; Body: { name?: unknown; vars?: unknown } }>(
-    "/api/v1/workspaces/:id/environments",
+  app.post<{ Params: { projectId: string } }>(
+    "/api/v1/projects/:projectId/pause",
     async (request, reply) => {
       const user = await requireUser(request);
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const workspace = getOwnedWorkspace(request.params.id, user);
-      if (workspace === null) {
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
+        return reply.code(404).send({ error: "not found" });
+      }
+      db.prepare("UPDATE project_settings SET paused = 1 WHERE project_id = ?").run(
+        project.project_id,
+      );
+      broadcast(user.id, { kind: "project.updated", projectId: project.project_id });
+      return { settings: { ...project, paused: true } };
+    },
+  );
+
+  app.post<{ Params: { projectId: string } }>(
+    "/api/v1/projects/:projectId/resume",
+    async (request, reply) => {
+      const user = await requireUser(request);
+      if (user === null) {
+        return reply.code(401).send({ error: "unauthorized" });
+      }
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
+        return reply.code(404).send({ error: "not found" });
+      }
+      db.prepare("UPDATE project_settings SET paused = 0 WHERE project_id = ?").run(
+        project.project_id,
+      );
+      broadcast(user.id, { kind: "project.updated", projectId: project.project_id });
+      return { settings: { ...project, paused: false } };
+    },
+  );
+
+  app.get<{ Params: { projectId: string } }>(
+    "/api/v1/projects/:projectId/environments",
+    async (request, reply) => {
+      const user = await requireUser(request);
+      if (user === null) {
+        return reply.code(401).send({ error: "unauthorized" });
+      }
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
+        return reply.code(404).send({ error: "not found" });
+      }
+      return { environments: listEnvironments(project.project_id) };
+    },
+  );
+
+  app.post<{ Params: { projectId: string }; Body: { name?: unknown; vars?: unknown } }>(
+    "/api/v1/projects/:projectId/environments",
+    async (request, reply) => {
+      const user = await requireUser(request);
+      if (user === null) {
+        return reply.code(401).send({ error: "unauthorized" });
+      }
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
         return reply.code(404).send({ error: "not found" });
       }
       const name = typeof request.body?.name === "string" ? request.body.name.trim() : "";
@@ -1170,13 +1047,13 @@ export async function registerScriptRunnerModule(
       const id = nanoid(12);
       try {
         db.prepare(
-          "INSERT INTO environments (id, workspace_id, name, vars_json, created_at) VALUES (?, ?, ?, ?, ?)",
-        ).run(id, workspace.id, name, JSON.stringify(vars), Date.now());
+          "INSERT INTO environments (id, project_id, name, vars_json, created_at) VALUES (?, ?, ?, ?, ?)",
+        ).run(id, project.project_id, name, JSON.stringify(vars), Date.now());
       } catch {
         return reply.code(409).send({ error: "environment name already exists" });
       }
       return {
-        environment: { id, workspace_id: workspace.id, name, vars, created_at: Date.now() },
+        environment: { id, project_id: project.project_id, name, vars, created_at: Date.now() },
       };
     },
   );
@@ -1191,11 +1068,7 @@ export async function registerScriptRunnerModule(
       const row = db.prepare("SELECT * FROM environments WHERE id = ?").get(request.params.id) as
         | EnvironmentRow
         | undefined;
-      if (row === undefined) {
-        return reply.code(404).send({ error: "not found" });
-      }
-      const workspace = getOwnedWorkspace(row.workspace_id, user);
-      if (workspace === null) {
+      if (row === undefined || !userCanAccessProject(row.project_id, user.id)) {
         return reply.code(404).send({ error: "not found" });
       }
       const existing = toEnvironment(row);
@@ -1235,32 +1108,29 @@ export async function registerScriptRunnerModule(
     const row = db.prepare("SELECT * FROM environments WHERE id = ?").get(request.params.id) as
       | EnvironmentRow
       | undefined;
-    if (row === undefined) {
+    if (row === undefined || !userCanAccessProject(row.project_id, user.id)) {
       return reply.code(404).send({ error: "not found" });
     }
-    const workspace = getOwnedWorkspace(row.workspace_id, user);
-    if (workspace === null) {
-      return reply.code(404).send({ error: "not found" });
-    }
-    if (workspace.active_environment_id === row.id) {
-      db.prepare("UPDATE workspaces SET active_environment_id = NULL WHERE id = ?").run(
-        workspace.id,
+    const project = getProjectSettings(row.project_id);
+    if (project !== null && project.active_environment_id === row.id) {
+      db.prepare("UPDATE project_settings SET active_environment_id = NULL WHERE project_id = ?").run(
+        project.project_id,
       );
-      broadcast(user.id, { kind: "workspace.updated", workspaceId: workspace.id });
+      broadcast(user.id, { kind: "project.updated", projectId: row.project_id });
     }
     db.prepare("DELETE FROM environments WHERE id = ?").run(row.id);
     return { ok: true };
   });
 
-  app.patch<{ Params: { id: string }; Body: { environment_id?: unknown } }>(
-    "/api/v1/workspaces/:id/active-environment",
+  app.patch<{ Params: { projectId: string }; Body: { environment_id?: unknown } }>(
+    "/api/v1/projects/:projectId/active-environment",
     async (request, reply) => {
       const user = await requireUser(request);
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const workspace = getOwnedWorkspace(request.params.id, user);
-      if (workspace === null) {
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
         return reply.code(404).send({ error: "not found" });
       }
       let environmentId: string | null = null;
@@ -1272,46 +1142,45 @@ export async function registerScriptRunnerModule(
         const row = db.prepare("SELECT * FROM environments WHERE id = ?").get(rawId) as
           | EnvironmentRow
           | undefined;
-        if (row === undefined || row.workspace_id !== workspace.id) {
+        if (row === undefined || row.project_id !== project.project_id) {
           return reply.code(404).send({ error: "environment not found" });
         }
         environmentId = row.id;
       }
-      db.prepare("UPDATE workspaces SET active_environment_id = ? WHERE id = ?").run(
+      db.prepare("UPDATE project_settings SET active_environment_id = ? WHERE project_id = ?").run(
         environmentId,
-        workspace.id,
+        project.project_id,
       );
-      broadcast(user.id, { kind: "workspace.updated", workspaceId: workspace.id });
-      return { workspace: { ...workspace, active_environment_id: environmentId } };
+      broadcast(user.id, { kind: "project.updated", projectId: project.project_id });
+      return { settings: { ...project, active_environment_id: environmentId } };
     },
   );
 
-  app.get<{ Params: { id: string }; Querystring: { cursor?: string; limit?: string } }>(
-    "/api/v1/workspaces/:id/tasks",
+  app.get<{ Params: { projectId: string } }>(
+    "/api/v1/projects/:projectId/tasks",
     async (request, reply) => {
       const user = await requireUser(request);
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const workspace = getOwnedWorkspace(request.params.id, user);
-      if (workspace === null) {
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
         return reply.code(404).send({ error: "not found" });
       }
-      const tasks = listTasks(workspace.id);
-      return { tasks, nextCursor: null };
+      return { tasks: listTasks(project.project_id), nextCursor: null };
     },
   );
 
-  app.post<{ Params: { id: string }; Body: unknown }>(
-    "/api/v1/workspaces/:id/tasks",
+  app.post<{ Params: { projectId: string }; Body: unknown }>(
+    "/api/v1/projects/:projectId/tasks",
     async (request, reply) => {
       const user = await requireUser(request);
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const workspace = getOwnedWorkspace(request.params.id, user);
-      if (workspace === null) {
-        return reply.code(404).send({ error: "workspace not found" });
+      const project = await requireProjectAccess(request.params.projectId, user);
+      if (project === null) {
+        return reply.code(404).send({ error: "not found" });
       }
       const parsed = validateCreateTask(request.body);
       if (typeof parsed === "string") {
@@ -1319,10 +1188,11 @@ export async function registerScriptRunnerModule(
       }
       const id = nanoid(12);
       db.prepare(
-        "INSERT INTO tasks (id, workspace_id, name, command, runtime, docker_image, docker_platform, trigger_type, trigger_glob, trigger_cron, concurrency, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO tasks (id, project_id, owner_id, name, command, runtime, docker_image, docker_platform, trigger_type, trigger_glob, trigger_cron, concurrency, enabled, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       ).run(
         id,
-        workspace.id,
+        project.project_id,
+        user.id,
         parsed.name,
         parsed.command,
         parsed.runtime,
@@ -1352,7 +1222,7 @@ export async function registerScriptRunnerModule(
     if (user === null) {
       return reply.code(401).send({ error: "unauthorized" });
     }
-    const owned = getOwnedTask(request.params.id, user);
+    const owned = await getOwnedTask(request.params.id, user);
     if (owned === null) {
       return reply.code(404).send({ error: "not found" });
     }
@@ -1366,7 +1236,7 @@ export async function registerScriptRunnerModule(
       if (user === null) {
         return reply.code(401).send({ error: "unauthorized" });
       }
-      const owned = getOwnedTask(request.params.id, user);
+      const owned = await getOwnedTask(request.params.id, user);
       if (owned === null) {
         return reply.code(404).send({ error: "not found" });
       }
@@ -1403,7 +1273,7 @@ export async function registerScriptRunnerModule(
     if (user === null) {
       return reply.code(401).send({ error: "unauthorized" });
     }
-    const owned = getOwnedTask(request.params.id, user);
+    const owned = await getOwnedTask(request.params.id, user);
     if (owned === null) {
       return reply.code(404).send({ error: "not found" });
     }
@@ -1420,7 +1290,7 @@ export async function registerScriptRunnerModule(
     if (user === null) {
       return reply.code(401).send({ error: "unauthorized" });
     }
-    const owned = getOwnedTask(request.params.id, user);
+    const owned = await getOwnedTask(request.params.id, user);
     if (owned === null) {
       return reply.code(404).send({ error: "not found" });
     }
@@ -1448,7 +1318,7 @@ export async function registerScriptRunnerModule(
     if (exec === null) {
       return reply.code(404).send({ error: "execution not found" });
     }
-    const owned = getOwnedTask(exec.task_id, user);
+    const owned = await getOwnedTask(exec.task_id, user);
     if (owned === null) {
       return reply.code(404).send({ error: "execution not found" });
     }
@@ -1480,27 +1350,16 @@ export async function registerScriptRunnerModule(
           limit = n;
         }
       }
-      if (typeof request.query.taskId === "string" && request.query.taskId.length > 0) {
-        const owned = getOwnedTask(request.query.taskId, user);
-        if (owned === null) {
-          return reply.code(404).send({ error: "not found" });
-        }
-        const rows = db
-          .prepare(
-            "SELECT * FROM executions WHERE task_id = ? ORDER BY started_at DESC LIMIT ?",
-          )
-          .all(owned.task.id, limit) as Execution[];
-        return { executions: rows };
+      if (typeof request.query.taskId !== "string" || request.query.taskId.length === 0) {
+        return reply.code(400).send({ error: "taskId required" });
+      }
+      const owned = await getOwnedTask(request.query.taskId, user);
+      if (owned === null) {
+        return reply.code(404).send({ error: "not found" });
       }
       const rows = db
-        .prepare(
-          `SELECT e.* FROM executions e
-           JOIN tasks t ON t.id = e.task_id
-           JOIN workspaces w ON w.id = t.workspace_id
-           WHERE w.owner_id = ?
-           ORDER BY e.started_at DESC LIMIT ?`,
-        )
-        .all(user.id, limit) as Execution[];
+        .prepare("SELECT * FROM executions WHERE task_id = ? ORDER BY started_at DESC LIMIT ?")
+        .all(owned.task.id, limit) as Execution[];
       return { executions: rows };
     },
   );
@@ -1514,7 +1373,7 @@ export async function registerScriptRunnerModule(
     if (exec === null) {
       return reply.code(404).send({ error: "not found" });
     }
-    const owned = getOwnedTask(exec.task_id, user);
+    const owned = await getOwnedTask(exec.task_id, user);
     if (owned === null) {
       return reply.code(404).send({ error: "not found" });
     }

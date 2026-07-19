@@ -71,11 +71,11 @@ function findEnvironmentName(environments: Environment[], id: string | null): st
 }
 
 interface Props {
-  workspaceId: string;
+  projectId: string;
   activeEnvironmentId: string | null;
 }
 
-export function WorkspaceEnvironmentDialog(props: Props): React.JSX.Element {
+export function ProjectEnvironmentDialog(props: Props): React.JSX.Element {
   const [open, setOpen] = useState(false);
   const [environments, setEnvironments] = useState<Environment[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(props.activeEnvironmentId);
@@ -87,12 +87,12 @@ export function WorkspaceEnvironmentDialog(props: Props): React.JSX.Element {
 
   const loadEnvironments = useCallback(async (): Promise<void> => {
     try {
-      const r = await api.listEnvironments(props.workspaceId);
+      const r = await api.listEnvironments(props.projectId);
       setEnvironments(r.environments);
     } catch (e: unknown) {
       toast.error(String(e));
     }
-  }, [props.workspaceId]);
+  }, [props.projectId]);
 
   useEffect(() => {
     void loadEnvironments();
@@ -127,18 +127,18 @@ export function WorkspaceEnvironmentDialog(props: Props): React.JSX.Element {
   async function selectEnvironment(id: string): Promise<void> {
     if (id === 'none') {
       try {
-        await api.setActiveEnvironment(props.workspaceId, null);
+        const r = await api.setActiveEnvironment(props.projectId, null);
         setSelectedId(null);
-        await actions.refreshWorkspaces();
+        actions.setSettings(r.settings);
       } catch (e: unknown) {
         toast.error(String(e));
       }
       return;
     }
     try {
-      await api.setActiveEnvironment(props.workspaceId, id);
+      const r = await api.setActiveEnvironment(props.projectId, id);
       setSelectedId(id);
-      await actions.refreshWorkspaces();
+      actions.setSettings(r.settings);
     } catch (e: unknown) {
       toast.error(String(e));
     }
@@ -152,14 +152,14 @@ export function WorkspaceEnvironmentDialog(props: Props): React.JSX.Element {
     }
     setCreating(true);
     try {
-      const r = await api.createEnvironment(props.workspaceId, { name, vars: {} });
+      const r = await api.createEnvironment(props.projectId, { name, vars: {} });
       setEnvironments((prev) => [...prev, r.environment]);
-      await api.setActiveEnvironment(props.workspaceId, r.environment.id);
+      const activated = await api.setActiveEnvironment(props.projectId, r.environment.id);
       setSelectedId(r.environment.id);
       setRows(varsToRows({}));
       setDirty(false);
       setNewName('');
-      await actions.refreshWorkspaces();
+      actions.setSettings(activated.settings);
       toast.success('Environment created');
     } catch (e: unknown) {
       toast.error(String(e));

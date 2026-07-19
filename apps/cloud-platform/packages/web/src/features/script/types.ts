@@ -4,10 +4,8 @@ export type ConcurrencyKind = 'restart' | 'queue' | 'ignore' | 'parallel';
 export type ExecutionStatus = 'pending' | 'running' | 'success' | 'failed' | 'cancelled';
 export type LogStream = 'out' | 'err';
 
-export interface Workspace {
-  id: string;
-  name: string;
-  path: string;
+export interface ProjectScriptSettings {
+  project_id: string;
   paused: boolean;
   active_environment_id: string | null;
   created_at: number;
@@ -15,7 +13,7 @@ export interface Workspace {
 
 export interface Environment {
   id: string;
-  workspace_id: string;
+  project_id: string;
   name: string;
   vars: Record<string, string>;
   created_at: number;
@@ -23,7 +21,7 @@ export interface Environment {
 
 export interface Task {
   id: string;
-  workspace_id: string;
+  project_id: string;
   name: string;
   command: string;
   runtime: RuntimeKind;
@@ -66,6 +64,5 @@ export type ServerMessage =
     }
   | { kind: 'task.updated'; taskId: string }
   | { kind: 'task.deleted'; taskId: string }
-  | { kind: 'workspace.updated'; workspaceId: string }
-  | { kind: 'workspace.deleted'; workspaceId: string }
+  | { kind: 'project.updated'; projectId: string }
   | { kind: 'hello'; ts: number; running: RunningSnapshot[] };

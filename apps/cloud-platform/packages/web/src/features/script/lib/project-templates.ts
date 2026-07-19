@@ -1,4 +1,3 @@
-import { api } from '@script/api/client';
 import { buildTaskPatchBody } from '@script/lib/task-patch';
 import type { UpdateTaskBody } from '@script/lib/task-patch';
 import type { Task } from '@script/types';
@@ -131,13 +130,4 @@ export function uniqueTaskName(base: string, existingNames: readonly string[]): 
 export function duplicateTaskBody(task: Task, existingNames: readonly string[]): TaskCreateBody {
   const name = uniqueTaskName(task.name, existingNames);
   return buildTaskPatchBody(task, { name });
-}
-
-export async function seedWorkspaceTasks(
-  workspaceId: string,
-  tasks: readonly TaskCreateBody[],
-): Promise<void> {
-  for (const body of tasks) {
-    await api.createTask(workspaceId, body);
-  }
 }

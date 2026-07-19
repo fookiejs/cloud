@@ -4,7 +4,7 @@ import { resolveCronExpression } from '@script/lib/cron-presets';
 import { actions } from '@script/state/store';
 import type { Task } from '@script/types';
 
-export type UpdateTaskBody = Omit<Task, 'id' | 'workspace_id' | 'created_at'>;
+export type UpdateTaskBody = Omit<Task, 'id' | 'project_id' | 'created_at'>;
 
 export function buildTaskPatchBody(task: Task, partial: Partial<Task>): UpdateTaskBody {
   const merged: Task = { ...task, ...partial };

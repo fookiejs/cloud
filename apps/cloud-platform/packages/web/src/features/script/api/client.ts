@@ -1,5 +1,11 @@
 import type { ProjectExportBundle } from '../lib/project-export.js';
-import type { Workspace, Task, Execution, Environment, RunningSnapshot } from '../types.js';
+import type {
+  ProjectScriptSettings,
+  Task,
+  Execution,
+  Environment,
+  RunningSnapshot,
+} from '../types.js';
 import { getAccessToken, isCloudHost } from '@/lib/auth';
 
 function authHeaders(extra?: HeadersInit): HeadersInit {
@@ -25,68 +31,44 @@ async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export interface ScriptSnapshot {
+  settings: ProjectScriptSettings;
+  environments: Environment[];
+  tasks: Task[];
+  executions: Execution[];
+  running: RunningSnapshot[];
+}
+
 export const api = {
-  listWorkspaces(projectId?: string): Promise<{ workspaces: Workspace[] }> {
-    if (projectId !== undefined && projectId.length > 0) {
-      return jsonFetch(`/api/v1/workspaces?projectId=${encodeURIComponent(projectId)}`);
-    }
-    return jsonFetch('/api/v1/workspaces');
+  // Single round trip for the whole script page: settings, environments, tasks and
+  // recent executions for every task in the project, replacing the old
+  // workspace-fetch -> per-task-execution-fetch waterfall.
+  getScriptSnapshot(projectId: string, perTaskLimit = 20): Promise<ScriptSnapshot> {
+    return jsonFetch(
+      `/api/v1/projects/${encodeURIComponent(projectId)}/script-snapshot?limit=${String(perTaskLimit)}`,
+    );
   },
-  createWorkspace(name: string, projectId: string): Promise<{ workspace: Workspace }> {
-    return jsonFetch('/api/v1/workspaces', {
+  pauseProject(projectId: string): Promise<{ settings: ProjectScriptSettings }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/pause`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ name, projectId }),
     });
   },
-  ensureProjectWorkspace(
-    projectId: string,
-    projectName: string,
-  ): Promise<{ workspace: Workspace }> {
-    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/script-workspace`, {
+  resumeProject(projectId: string): Promise<{ settings: ProjectScriptSettings }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/resume`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ projectName }),
     });
   },
-  updateWorkspace(id: string, body: { name?: string }): Promise<{ workspace: Workspace }> {
-    return jsonFetch(`/api/v1/workspaces/${id}`, {
-      method: 'PATCH',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+  exportProject(projectId: string): Promise<ProjectExportBundle> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/export`);
   },
-  pauseWorkspace(id: string): Promise<{ workspace: Workspace }> {
-    return jsonFetch(`/api/v1/workspaces/${id}/pause`, { method: 'POST' });
-  },
-  resumeWorkspace(id: string): Promise<{ workspace: Workspace }> {
-    return jsonFetch(`/api/v1/workspaces/${id}/resume`, { method: 'POST' });
-  },
-  deleteWorkspace(id: string): Promise<{ ok: boolean }> {
-    return jsonFetch(`/api/v1/workspaces/${id}`, { method: 'DELETE' });
-  },
-  exportProject(workspaceId: string): Promise<ProjectExportBundle> {
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/export`);
-  },
-  importProject(body: {
-    bundle: ProjectExportBundle;
-    name: string;
-    projectId: string;
-  }): Promise<{ workspace: Workspace; taskCount: number }> {
-    return jsonFetch('/api/v1/workspaces/import', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-  },
-  listEnvironments(workspaceId: string): Promise<{ environments: Environment[] }> {
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/environments`);
+  listEnvironments(projectId: string): Promise<{ environments: Environment[] }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/environments`);
   },
   createEnvironment(
-    workspaceId: string,
+    projectId: string,
     body: { name: string; vars?: Record<string, string> },
   ): Promise<{ environment: Environment }> {
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/environments`, {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/environments`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
@@ -106,35 +88,23 @@ export const api = {
     return jsonFetch(`/api/v1/environments/${id}`, { method: 'DELETE' });
   },
   setActiveEnvironment(
-    workspaceId: string,
+    projectId: string,
     environmentId: string | null,
-  ): Promise<{ workspace: Workspace }> {
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/active-environment`, {
+  ): Promise<{ settings: ProjectScriptSettings }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/active-environment`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ environment_id: environmentId }),
     });
   },
-  listTasks(workspaceId: string): Promise<{ tasks: Task[] }> {
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/tasks`);
-  },
-  listTasksPage(
-    workspaceId: string,
-    cursor: string | null,
-    limit: number,
-  ): Promise<{ tasks: Task[]; nextCursor: string | null }> {
-    const params = new URLSearchParams();
-    params.set('limit', String(limit));
-    if (cursor !== null) {
-      params.set('cursor', cursor);
-    }
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/tasks?${params.toString()}`);
+  listTasks(projectId: string): Promise<{ tasks: Task[]; nextCursor: string | null }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/tasks`);
   },
   createTask(
-    workspaceId: string,
-    body: Omit<Task, 'id' | 'workspace_id' | 'created_at'>,
+    projectId: string,
+    body: Omit<Task, 'id' | 'project_id' | 'created_at'>,
   ): Promise<{ task: Task }> {
-    return jsonFetch(`/api/v1/workspaces/${workspaceId}/tasks`, {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/tasks`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
@@ -145,7 +115,7 @@ export const api = {
   },
   updateTask(
     id: string,
-    body: Omit<Task, 'id' | 'workspace_id' | 'created_at'>,
+    body: Omit<Task, 'id' | 'project_id' | 'created_at'>,
   ): Promise<{ task: Task }> {
     return jsonFetch(`/api/v1/tasks/${id}`, {
       method: 'PATCH',
@@ -165,12 +135,10 @@ export const api = {
   listRunningExecutions(): Promise<{ running: RunningSnapshot[] }> {
     return jsonFetch('/api/v1/executions/running');
   },
-  listExecutions(taskId: string | null, limit: number): Promise<{ executions: Execution[] }> {
+  listExecutions(taskId: string, limit: number): Promise<{ executions: Execution[] }> {
     const params = new URLSearchParams();
     params.set('limit', String(limit));
-    if (taskId !== null) {
-      params.set('taskId', taskId);
-    }
+    params.set('taskId', taskId);
     return jsonFetch(`/api/v1/executions?${params.toString()}`);
   },
   getExecutionLog(id: string): Promise<{ log: string }> {
