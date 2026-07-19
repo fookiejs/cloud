@@ -11,14 +11,8 @@ import {
   tokenStillValid,
 } from '@/lib/auth';
 
-const MIN_SPLASH_MS = 2000;
-
-function waitAtLeast(startedAt: number): Promise<void> {
-  const left = MIN_SPLASH_MS - (Date.now() - startedAt);
-  if (left <= 0) return Promise.resolve();
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, left);
-  });
+function waitAtLeast(_startedAt: number): Promise<void> {
+  return Promise.resolve();
 }
 
 interface Props {

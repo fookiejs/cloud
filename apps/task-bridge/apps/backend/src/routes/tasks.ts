@@ -14,6 +14,7 @@ import {
   claimBridgeTask,
   getBridgeTask,
   listBridgeTasks,
+  listBridgeTasksForProject,
   releaseBridgeTask,
   clearBridgeTaskComments,
   updateBridgeTaskBrief,
@@ -296,7 +297,7 @@ export function taskRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: "Unknown parent task" });
     }
 
-    const allTasks = listBridgeTasks();
+    const allTasks = listBridgeTasksForProject(parent.projectId);
     const epicId = resolveEpicId(allTasks, parent);
     if (!epicId) {
       return reply.status(400).send({ error: "Task must belong to an epic" });

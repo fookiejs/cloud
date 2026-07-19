@@ -73,7 +73,24 @@ function TaskRedirect(props: { taskId: string }): React.JSX.Element {
     }
     navigate('/');
   }, [props.taskId, tasksByWorkspace]);
-  return <BrandSplash title="Script Manager" subtitle="Opening task…" />;
+  return (
+    <Shell>
+      <div className="max-w-[1600px] mx-auto px-8 py-8">
+        <ContentSkeleton />
+      </div>
+    </Shell>
+  );
+}
+
+function ContentSkeleton(): React.JSX.Element {
+  return (
+    <div className="space-y-4">
+      <div className="h-6 w-48 rounded bg-muted animate-pulse" />
+      <div className="h-24 w-full rounded bg-muted animate-pulse" />
+      <div className="h-24 w-full rounded bg-muted animate-pulse" />
+      <div className="h-24 w-full rounded bg-muted animate-pulse" />
+    </div>
+  );
 }
 
 function useRouteWithRedirect(): { route: Route; taskRedirect: string | null } {
@@ -110,10 +127,6 @@ function ConnectedApp(): React.JSX.Element {
   const { ready } = useBootstrap();
   const { route, taskRedirect } = useRouteWithRedirect();
 
-  if (!ready) {
-    return <BrandSplash title="Script Manager" subtitle="Loading…" />;
-  }
-
   if (taskRedirect !== null) {
     return <TaskRedirect taskId={taskRedirect} />;
   }
@@ -122,7 +135,7 @@ function ConnectedApp(): React.JSX.Element {
     return (
       <Shell activeWorkspaceId={route.id}>
         <div className="w-full px-8 py-6">
-          <WorkspaceView workspaceId={route.id} />
+          {ready ? <WorkspaceView workspaceId={route.id} /> : <ContentSkeleton />}
         </div>
       </Shell>
     );
@@ -131,7 +144,7 @@ function ConnectedApp(): React.JSX.Element {
   return (
     <Shell>
       <div className="max-w-[1600px] mx-auto px-8 py-8">
-        <DashboardView />
+        {ready ? <DashboardView /> : <ContentSkeleton />}
       </div>
     </Shell>
   );

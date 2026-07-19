@@ -584,20 +584,26 @@ export function useBootstrap(projectId?: string): { ready: boolean } {
     const unsub = stream.subscribe(handleMessage);
     void (async () => {
       try {
-        await actions.refreshWorkspaces();
-        await actions.refreshRunningExecutions();
+        await Promise.all([
+          actions.refreshWorkspaces(),
+          actions.refreshRunningExecutions(),
+        ]);
         const ws = state.workspaces;
-        for (const w of ws) {
-          await actions.refreshTasks(w.id);
-          const taskList = selectTasksOf(state, w.id);
-          const ids: string[] = [];
-          for (const t of taskList) {
-            ids.push(t.id);
-          }
-          await actions.prefetchExecutionsForTasks(ids, 20);
-        }
-        await actions.refreshRecentExecutions();
-        await actions.refreshRunningExecutions();
+        await Promise.all(
+          ws.map(async (w) => {
+            await actions.refreshTasks(w.id);
+            const taskList = selectTasksOf(state, w.id);
+            const ids: string[] = [];
+            for (const t of taskList) {
+              ids.push(t.id);
+            }
+            await actions.prefetchExecutionsForTasks(ids, 20);
+          }),
+        );
+        await Promise.all([
+          actions.refreshRecentExecutions(),
+          actions.refreshRunningExecutions(),
+        ]);
       } catch {} finally {
         setReady(true);
       }

@@ -18,7 +18,7 @@ import {
   encodeInboxCursor,
   inboxItemBeforeCursor,
 } from "../lib/inbox-cursor.js";
-import { listBridgeTasks } from "../services/task-service.js";
+import { getBridgeTask, listBridgeTasks, listBridgeTasksForProject } from "../services/task-service.js";
 import { listWorkflowStateSummaries } from "../services/workflow-state-service.js";
 import { getProjectById } from "../services/project-registry.js";
 
@@ -118,12 +118,12 @@ function mapSubtaskSummary(
 export function mapTaskDetail(task: BridgeTask) {
   if (task.parentId === null) {
     syncEpicStage(task.id);
-    const refreshed = listBridgeTasks().find((entry) => entry.id === task.id);
+    const refreshed = getBridgeTask(task.id);
     if (refreshed) task = refreshed;
   }
 
   const stage = getStageSnapshot(task.projectId, task.stageId);
-  const allTasks = listBridgeTasks();
+  const allTasks = listBridgeTasksForProject(task.projectId);
   const stageTitles = getStageTitleLookup(task.projectId);
   let workflowSubtasks: BridgeTask[];
   if (task.parentId === null) {

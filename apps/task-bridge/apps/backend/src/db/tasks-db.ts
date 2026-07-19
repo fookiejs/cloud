@@ -283,6 +283,16 @@ export function listTaskRows(filter: { id: number }): BridgeTask[] {
   );
 }
 
+export function listTaskRowsForProject(projectId: string): BridgeTask[] {
+  const database = getTasksDb();
+  const rows = database
+    .prepare(
+      "SELECT * FROM tasks WHERE project_id = ? ORDER BY updated_at DESC, id DESC",
+    )
+    .all(projectId);
+  return sortTasks(rows.map((row) => rowToTask(row as TaskSqliteRow)));
+}
+
 export function allocateTaskRowId(): number {
   const database = getTasksDb();
   const row = database.prepare("SELECT MAX(id) AS maxId FROM tasks").get() as {

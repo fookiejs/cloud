@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Route, Routes, useNavigate, useParams } from "react-router-dom";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@script/api/client";
 import { actions, useBootstrap, useStore } from "@script/state/store";
@@ -16,26 +17,29 @@ function ScriptNavigatorBinder(props: { basePath: string }): null {
   return null;
 }
 
-function ScriptLoadingShell(props: { title: string }): React.JSX.Element {
+function ScriptBodySkeleton(): React.JSX.Element {
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-8 px-8 py-8">
-      <header className="flex items-end justify-between gap-4 border-b pb-6">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight">{props.title}</h1>
-          <Skeleton className="h-3 w-40" />
-        </div>
-        <Skeleton className="h-9 w-32 rounded-md" />
-      </header>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Skeleton className="h-36 rounded-xl" />
-        <Skeleton className="h-36 rounded-xl" />
-        <Skeleton className="h-36 rounded-xl" />
-      </div>
+    <div className="grid grid-cols-1 gap-4 p-8 sm:grid-cols-2 lg:grid-cols-3">
+      <Skeleton className="h-36 rounded-xl" />
+      <Skeleton className="h-36 rounded-xl" />
+      <Skeleton className="h-36 rounded-xl" />
     </div>
   );
 }
 
-function TaskRedirect(props: { basePath: string }): React.JSX.Element {
+function ScriptPageShell(props: {
+  projectName: string;
+  children: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-8">
+      <PageHeader title="Scripts" subtitle={props.projectName} />
+      {props.children}
+    </div>
+  );
+}
+
+function TaskRedirect(props: { basePath: string; projectName: string }): React.JSX.Element {
   const params = useParams();
   const taskId = params["taskId"];
   const tasksByWorkspace = useStore((s) => s.tasksByWorkspace);
@@ -58,7 +62,11 @@ function TaskRedirect(props: { basePath: string }): React.JSX.Element {
     }
     navigate(props.basePath);
   }, [taskId, tasksByWorkspace, props.basePath]);
-  return <ScriptLoadingShell title="Scripts" />;
+  return (
+    <ScriptPageShell projectName={props.projectName}>
+      <ScriptBodySkeleton />
+    </ScriptPageShell>
+  );
 }
 
 function ScriptProjectPage(props: {
@@ -90,9 +98,17 @@ function ScriptProjectPage(props: {
   const workspace = workspaces[0];
   if (!ready || ensuring || workspace === undefined) {
     if (error !== null) {
-      return <div className="p-8 text-sm text-destructive">{error}</div>;
+      return (
+        <ScriptPageShell projectName={props.projectName}>
+          <div className="p-8 text-sm text-destructive">{error}</div>
+        </ScriptPageShell>
+      );
     }
-    return <ScriptLoadingShell title="Scripts" />;
+    return (
+      <ScriptPageShell projectName={props.projectName}>
+        <ScriptBodySkeleton />
+      </ScriptPageShell>
+    );
   }
   return (
     <div className="w-full px-8 py-6">
@@ -116,7 +132,10 @@ export function ScriptFeature(props: {
             <ScriptProjectPage projectId={props.projectId} projectName={props.projectName} />
           }
         />
-        <Route path="task/:taskId" element={<TaskRedirect basePath={basePath} />} />
+        <Route
+          path="task/:taskId"
+          element={<TaskRedirect basePath={basePath} projectName={props.projectName} />}
+        />
         <Route path="workspace/:workspaceId" element={<Navigate to={basePath} replace />} />
         <Route path="*" element={<Navigate to={basePath} replace />} />
       </Routes>

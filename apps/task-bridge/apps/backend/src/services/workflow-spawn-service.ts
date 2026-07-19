@@ -21,7 +21,7 @@ import {
   syncTaskIntoWorkflowState,
 } from "./workflow-state-service.js";
 import { computeEpicStageId } from "./epic-service.js";
-import { allocateTaskId, listBridgeTasks, upsertBridgeTask } from "./task-service.js";
+import { allocateTaskId, getBridgeTask, listBridgeTasksForProject, upsertBridgeTask } from "./task-service.js";
 import { pickMemberByProjectRole } from "./workflow-service.js";
 
 function buildSpawnContext(
@@ -127,7 +127,7 @@ function spawnTemplateTask(input: {
     });
   }
   linkSpawnedTemplateTask(input.epic.id, input.template.id, id);
-  const refreshed = listBridgeTasks().find((entry) => entry.id === id);
+  const refreshed = getBridgeTask(id);
   if (refreshed) {
     syncTaskIntoWorkflowState(refreshed);
     return refreshed;
@@ -169,7 +169,7 @@ export function spawnUnlockedWorkflowTasks(epic: BridgeTask): BridgeTask[] {
   if (epic.parentId !== null) return [];
 
   const rows = listWorkflowStageRows({ projectId: epic.projectId, stageId: "" }).sort((a, b) => a.position - b.position);
-  const allTasks = listBridgeTasks();
+  const allTasks = listBridgeTasksForProject(epic.projectId);
   const workflowTasks = listEpicWorkflowTasks(allTasks, epic.id);
   const created: BridgeTask[] = [];
 

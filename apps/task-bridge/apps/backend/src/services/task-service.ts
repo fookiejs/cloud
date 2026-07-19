@@ -1,6 +1,7 @@
 import {
   allocateTaskRowId,
   listTaskRows,
+  listTaskRowsForProject,
   mutateTaskRow,
   upsertTaskRow,
 } from "../db/tasks-db.js";
@@ -36,6 +37,10 @@ export function allocateTaskId(): number {
 
 export function listBridgeTasks(): BridgeTask[] {
   return listTaskRows({ id: 0 });
+}
+
+export function listBridgeTasksForProject(projectId: string): BridgeTask[] {
+  return listTaskRowsForProject(projectId);
 }
 
 export function getBridgeTask(id: number): BridgeTask | null {

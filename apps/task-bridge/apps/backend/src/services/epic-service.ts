@@ -17,7 +17,7 @@ import {
   workflowUpdateBlockReason,
 } from "./task-claim-policy.js";
 import { AppError } from "../errors/app-error.js";
-import { getBridgeTask, listBridgeTasks, transitionBridgeTask } from "./task-service.js";
+import { getBridgeTask, listBridgeTasksForProject, transitionBridgeTask } from "./task-service.js";
 import { deleteTaskRows, mutateTaskRow } from "../db/tasks-db.js";
 import { touchTask } from "../domain/task.js";
 import { spawnEpicWorkflowGraph, spawnUnlockedWorkflowTasks } from "./workflow-spawn-service.js";
@@ -71,10 +71,10 @@ export function syncEpicStage(epicId: number): BridgeTask | null {
   if (!epic || epic.parentId !== null) return epic;
 
   const rows = listWorkflowStageRows({ projectId: epic.projectId, stageId: "" }).sort((a, b) => a.position - b.position);
+  const allTasks = listBridgeTasksForProject(epic.projectId);
+  const subtasks = listEpicWorkflowTasks(allTasks, epicId);
   let current = epic;
   for (let pass = 0; pass < rows.length + 1; pass += 1) {
-    const allTasks = listBridgeTasks();
-    const subtasks = listEpicWorkflowTasks(allTasks, epicId);
     const nextStageId = computeEpicStageId(rows, subtasks);
     if (!nextStageId || nextStageId === current.stageId) break;
     const transitioned = transitionBridgeTask(epicId, {
@@ -137,7 +137,7 @@ export function applyTodoCascadeFromTask(
 ): void {
   const includeLaterStages = options === null || options.laterStages !== false;
   const includeDescendants = options === null || options.descendants !== false;
-  const tasks = listBridgeTasks();
+  const tasks = listBridgeTasksForProject(source.projectId);
 
   let epicId: number | null;
   if (source.epicId !== null && source.epicId !== null) {
@@ -221,7 +221,7 @@ export function updateTaskWorkStatus(
   if (!existing || existing.parentId === null) {
     return existing;
   }
-  const tasksForPolicy = listBridgeTasks();
+  const tasksForPolicy = listBridgeTasksForProject(existing.projectId);
   assertCanAdvanceWorkStatus(tasksForPolicy, existing, workStatus);
 
   const index = buildEpicClaimIndex(tasksForPolicy);
@@ -254,7 +254,7 @@ export function updateTaskWorkStatus(
     });
   }
   syncTaskIntoWorkflowState(updated);
-  const allTasks = listBridgeTasks();
+  const allTasks = listBridgeTasksForProject(updated.projectId);
 
   let epicId: number | null;
   if (updated.epicId !== null && updated.epicId !== null) {
@@ -272,7 +272,9 @@ export function updateTaskWorkStatus(
 }
 
 export function listEpicSubtasks(epicId: number): BridgeTask[] {
-  const tasks = listBridgeTasks();
+  const epic = getBridgeTask(epicId);
+  if (!epic) return [];
+  const tasks = listBridgeTasksForProject(epic.projectId);
   return listEpicWorkflowTasks(tasks, epicId);
 }
 
