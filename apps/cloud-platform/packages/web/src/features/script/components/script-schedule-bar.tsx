@@ -3,12 +3,12 @@ import { cronScheduleProgress, formatCronCountdown } from '@script/lib/cron-sche
 import { cn } from '@/lib/utils';
 
 interface Props {
-  triggerCron: string | null;
+  triggerCron: string;
   nowMs: number;
   paused: boolean;
 }
 
-export function TaskScheduleBar(props: Props): React.JSX.Element {
+export function ScriptScheduleBar(props: Props): React.JSX.Element {
   const expression = resolveCronExpression(props.triggerCron);
   const progress = cronScheduleProgress(expression, props.nowMs);
   const countdown = formatCronCountdown(expression, props.nowMs);

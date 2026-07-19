@@ -37,8 +37,8 @@ interface Props {
 }
 
 export function LogPanel(props: Props): React.JSX.Element {
-  const history = useStore((s) => selectExecutionsOf(s, props.target.taskId));
-  const live = useStore((s) => selectLiveLogsOf(s, props.target.taskId));
+  const history = useStore((s) => selectExecutionsOf(s, props.target.scriptId));
+  const live = useStore((s) => selectLiveLogsOf(s, props.target.scriptId));
   const [historyLog, setHistoryLog] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);

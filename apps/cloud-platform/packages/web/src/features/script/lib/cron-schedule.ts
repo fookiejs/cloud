@@ -67,6 +67,6 @@ export function formatCronCountdown(expression: string, nowMs: number): string {
   return `${String(d)}d ${String(h)}h`;
 }
 
-export function resolvedCronIntervalMs(stored: string | null): number {
+export function resolvedCronIntervalMs(stored: string): number {
   return cronIntervalMs(resolveCronExpression(stored));
 }

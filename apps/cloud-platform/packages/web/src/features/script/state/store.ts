@@ -3,7 +3,7 @@ import { api } from '../api/client.js';
 import { connectStream } from '../api/stream.js';
 import type {
   ProjectScriptSettings,
-  Task,
+  Script,
   Execution,
   ExecutionStatus,
   RunningSnapshot,
@@ -12,7 +12,7 @@ import type {
 
 interface ExecutionRuntime {
   id: string;
-  taskId: string;
+  scriptId: string;
   status: ExecutionStatus | 'running';
   startedAt: number;
   endedAt: number | null;
@@ -22,18 +22,18 @@ interface ExecutionRuntime {
 
 interface State {
   settings: ProjectScriptSettings | null;
-  tasks: Task[];
-  executionsByTask: Record<string, Execution[]>;
+  scripts: Script[];
+  executionsByScript: Record<string, Execution[]>;
   liveExecutions: Record<string, ExecutionRuntime>;
-  liveLogsByTask: Record<string, ExecutionRuntime[]>;
+  liveLogsByScript: Record<string, ExecutionRuntime[]>;
 }
 
 const initial: State = {
   settings: null,
-  tasks: [],
-  executionsByTask: {},
+  scripts: [],
+  executionsByScript: {},
   liveExecutions: {},
-  liveLogsByTask: {},
+  liveLogsByScript: {},
 };
 
 type Listener = () => void;
@@ -70,16 +70,16 @@ export function useStore<T>(selector: (s: State) => T): T {
 const EMPTY_EXECUTIONS: readonly Execution[] = Object.freeze([]);
 const EMPTY_RUNTIMES: readonly ExecutionRuntime[] = Object.freeze([]);
 
-export function selectExecutionsOf(s: State, taskId: string): readonly Execution[] {
-  const list = s.executionsByTask[taskId];
+export function selectExecutionsOf(s: State, scriptId: string): readonly Execution[] {
+  const list = s.executionsByScript[scriptId];
   if (list === undefined) {
     return EMPTY_EXECUTIONS;
   }
   return list;
 }
 
-export function selectLiveLogsOf(s: State, taskId: string): readonly ExecutionRuntime[] {
-  const list = s.liveLogsByTask[taskId];
+export function selectLiveLogsOf(s: State, scriptId: string): readonly ExecutionRuntime[] {
+  const list = s.liveLogsByScript[scriptId];
   if (list === undefined) {
     return EMPTY_RUNTIMES;
   }
@@ -88,23 +88,23 @@ export function selectLiveLogsOf(s: State, taskId: string): readonly ExecutionRu
 
 const executionRefreshAt = new Map<string, number>();
 
-function scheduleExecutionRefresh(taskId: string, delayMs: number): void {
+function scheduleExecutionRefresh(scriptId: string, delayMs: number): void {
   const now = Date.now();
-  const last = executionRefreshAt.get(taskId);
+  const last = executionRefreshAt.get(scriptId);
   if (last !== undefined && now - last < delayMs) {
     return;
   }
-  executionRefreshAt.set(taskId, now);
-  void actions.refreshExecutionsForTask(taskId);
+  executionRefreshAt.set(scriptId, now);
+  void actions.refreshExecutionsForScript(scriptId);
 }
 
 function mergeRunningExecution(
-  executionsByTask: Record<string, Execution[]>,
+  executionsByScript: Record<string, Execution[]>,
   row: RunningSnapshot,
 ): void {
   const stub: Execution = {
     id: row.executionId,
-    task_id: row.taskId,
+    script_id: row.scriptId,
     status: 'running',
     started_at: row.startedAt,
     ended_at: null,
@@ -112,9 +112,9 @@ function mergeRunningExecution(
     trigger_reason: 'live',
     log_path: '',
   };
-  const list = executionsByTask[row.taskId];
+  const list = executionsByScript[row.scriptId];
   if (list === undefined) {
-    executionsByTask[row.taskId] = [stub];
+    executionsByScript[row.scriptId] = [stub];
     return;
   }
   let found = false;
@@ -134,17 +134,17 @@ function mergeRunningExecution(
     }
   }
   if (!found) {
-    executionsByTask[row.taskId] = [stub, ...list];
+    executionsByScript[row.scriptId] = [stub, ...list];
     return;
   }
-  executionsByTask[row.taskId] = next;
+  executionsByScript[row.scriptId] = next;
 }
 
 function reconcileLiveLogRow(
-  taskId: string,
+  scriptId: string,
   logRow: ExecutionRuntime,
   runningIds: ReadonlySet<string>,
-  executionsByTask: Record<string, Execution[]>,
+  executionsByScript: Record<string, Execution[]>,
 ): ExecutionRuntime | null {
   if (runningIds.has(logRow.id)) {
     return logRow;
@@ -152,7 +152,7 @@ function reconcileLiveLogRow(
   if (logRow.status !== 'running') {
     return logRow;
   }
-  const history = executionsByTask[taskId];
+  const history = executionsByScript[scriptId];
   if (history !== undefined) {
     for (const row of history) {
       if (row.id !== logRow.id) {
@@ -175,8 +175,8 @@ function reconcileLiveLogRow(
 function applyRunningSnapshot(s: State, running: readonly RunningSnapshot[]): State {
   const runningIds = new Set(running.map((row) => row.executionId));
   const liveExecutions: Record<string, ExecutionRuntime> = {};
-  const liveLogsByTask = { ...s.liveLogsByTask };
-  const executionsByTask = { ...s.executionsByTask };
+  const liveLogsByScript = { ...s.liveLogsByScript };
+  const executionsByScript = { ...s.executionsByScript };
 
   for (const row of running) {
     const existing = s.liveExecutions[row.executionId];
@@ -186,7 +186,7 @@ function applyRunningSnapshot(s: State, running: readonly RunningSnapshot[]): St
     }
     const rt: ExecutionRuntime = {
       id: row.executionId,
-      taskId: row.taskId,
+      scriptId: row.scriptId,
       status: 'running',
       startedAt: row.startedAt,
       endedAt: null,
@@ -194,42 +194,42 @@ function applyRunningSnapshot(s: State, running: readonly RunningSnapshot[]): St
       logLines,
     };
     liveExecutions[row.executionId] = rt;
-    mergeRunningExecution(executionsByTask, row);
+    mergeRunningExecution(executionsByScript, row);
 
-    const taskLogs = liveLogsByTask[row.taskId];
+    const scriptLogs = liveLogsByScript[row.scriptId];
     let nextList: ExecutionRuntime[] = [rt];
-    if (taskLogs !== undefined) {
+    if (scriptLogs !== undefined) {
       const filtered: ExecutionRuntime[] = [];
-      for (const logRow of taskLogs) {
+      for (const logRow of scriptLogs) {
         if (logRow.id !== row.executionId) {
           filtered.push(logRow);
         }
       }
       nextList = [rt, ...filtered].slice(0, 5);
     }
-    liveLogsByTask[row.taskId] = nextList;
+    liveLogsByScript[row.scriptId] = nextList;
   }
 
-  for (const taskId of Object.keys(liveLogsByTask)) {
-    const logs = liveLogsByTask[taskId];
+  for (const scriptId of Object.keys(liveLogsByScript)) {
+    const logs = liveLogsByScript[scriptId];
     if (logs === undefined) {
       continue;
     }
     const next: ExecutionRuntime[] = [];
     for (const logRow of logs) {
-      const reconciled = reconcileLiveLogRow(taskId, logRow, runningIds, executionsByTask);
+      const reconciled = reconcileLiveLogRow(scriptId, logRow, runningIds, executionsByScript);
       if (reconciled !== null) {
         next.push(reconciled);
       }
     }
     if (next.length === 0) {
-      delete liveLogsByTask[taskId];
+      delete liveLogsByScript[scriptId];
     } else {
-      liveLogsByTask[taskId] = next;
+      liveLogsByScript[scriptId] = next;
     }
   }
 
-  return { ...s, liveExecutions, liveLogsByTask, executionsByTask };
+  return { ...s, liveExecutions, liveLogsByScript, executionsByScript };
 }
 
 let currentProjectId: string | undefined;
@@ -238,54 +238,54 @@ export const actions = {
   setSettings(settings: ProjectScriptSettings): void {
     set((s) => ({ ...s, settings }));
   },
-  async refreshTasks(projectId: string): Promise<void> {
-    const r = await api.listTasks(projectId);
-    set((s) => ({ ...s, tasks: r.tasks }));
+  async refreshScripts(projectId: string): Promise<void> {
+    const r = await api.listScripts(projectId);
+    set((s) => ({ ...s, scripts: r.scripts }));
   },
-  upsertTask(task: Task): void {
+  upsertScript(script: Script): void {
     set((s) => {
-      const next: Task[] = [];
+      const next: Script[] = [];
       let found = false;
-      for (const row of s.tasks) {
-        if (row.id === task.id) {
-          next.push(task);
+      for (const row of s.scripts) {
+        if (row.id === script.id) {
+          next.push(script);
           found = true;
         } else {
           next.push(row);
         }
       }
       if (!found) {
-        next.push(task);
+        next.push(script);
       }
-      return { ...s, tasks: next };
+      return { ...s, scripts: next };
     });
   },
-  async syncTask(taskId: string): Promise<void> {
+  async syncScript(scriptId: string): Promise<void> {
     try {
-      const r = await api.getTask(taskId);
-      actions.upsertTask(r.task);
+      const r = await api.getScript(scriptId);
+      actions.upsertScript(r.script);
     } catch (_e: unknown) {}
   },
-  removeTask(taskId: string): void {
+  removeScript(scriptId: string): void {
     set((s) => {
-      const next: Task[] = [];
-      for (const row of s.tasks) {
-        if (row.id !== taskId) {
+      const next: Script[] = [];
+      for (const row of s.scripts) {
+        if (row.id !== scriptId) {
           next.push(row);
         }
       }
-      return { ...s, tasks: next };
+      return { ...s, scripts: next };
     });
   },
   async refreshRunningExecutions(): Promise<void> {
     const r = await api.listRunningExecutions();
     set((s) => applyRunningSnapshot(s, r.running));
   },
-  async refreshExecutionsForTask(taskId: string, limit = 20): Promise<void> {
-    const r = await api.listExecutions(taskId, limit);
+  async refreshExecutionsForScript(scriptId: string, limit = 20): Promise<void> {
+    const r = await api.listExecutions(scriptId, limit);
     set((s) => ({
       ...s,
-      executionsByTask: { ...s.executionsByTask, [taskId]: r.executions },
+      executionsByScript: { ...s.executionsByScript, [scriptId]: r.executions },
     }));
   },
 };
@@ -300,26 +300,26 @@ function handleMessage(msg: ServerMessage): void {
     return;
   }
   if (msg.kind === 'execution.started') {
-    scheduleExecutionRefresh(msg.taskId, 1500);
+    scheduleExecutionRefresh(msg.scriptId, 1500);
     set((s) => {
       const rt: ExecutionRuntime = {
         id: msg.executionId,
-        taskId: msg.taskId,
+        scriptId: msg.scriptId,
         status: 'running',
         startedAt: msg.ts,
         endedAt: null,
         exitCode: null,
         logLines: [],
       };
-      const taskLogs = s.liveLogsByTask[msg.taskId];
+      const scriptLogs = s.liveLogsByScript[msg.scriptId];
       let nextList: ExecutionRuntime[] = [rt];
-      if (taskLogs !== undefined) {
-        nextList = [rt, ...taskLogs].slice(0, 5);
+      if (scriptLogs !== undefined) {
+        nextList = [rt, ...scriptLogs].slice(0, 5);
       }
       return {
         ...s,
         liveExecutions: { ...s.liveExecutions, [msg.executionId]: rt },
-        liveLogsByTask: { ...s.liveLogsByTask, [msg.taskId]: nextList },
+        liveLogsByScript: { ...s.liveLogsByScript, [msg.scriptId]: nextList },
       };
     });
     return;
@@ -333,24 +333,24 @@ function handleMessage(msg: ServerMessage): void {
       const lines = [...existing.logLines, { stream: msg.stream, line: msg.line, ts: msg.ts }];
       const trimmed = lines.slice(-2000);
       const updated: ExecutionRuntime = { ...existing, logLines: trimmed };
-      const taskLogs = s.liveLogsByTask[existing.taskId];
-      let nextList = taskLogs;
-      if (taskLogs !== undefined) {
-        nextList = taskLogs.map((e) => {
+      const scriptLogs = s.liveLogsByScript[existing.scriptId];
+      let nextList = scriptLogs;
+      if (scriptLogs !== undefined) {
+        nextList = scriptLogs.map((e) => {
           if (e.id === existing.id) {
             return updated;
           }
           return e;
         });
       }
-      const liveLogsByTask = { ...s.liveLogsByTask };
+      const liveLogsByScript = { ...s.liveLogsByScript };
       if (nextList !== undefined) {
-        liveLogsByTask[existing.taskId] = nextList;
+        liveLogsByScript[existing.scriptId] = nextList;
       }
       return {
         ...s,
         liveExecutions: { ...s.liveExecutions, [msg.executionId]: updated },
-        liveLogsByTask,
+        liveLogsByScript,
       };
     });
     return;
@@ -358,28 +358,28 @@ function handleMessage(msg: ServerMessage): void {
   if (msg.kind === 'execution.ended') {
     set((s) => {
       const existing = s.liveExecutions[msg.executionId];
-      let taskId: string | undefined;
+      let scriptId: string | undefined;
       if (existing !== undefined) {
-        taskId = existing.taskId;
+        scriptId = existing.scriptId;
       }
-      if (taskId === undefined) {
-        for (const key of Object.keys(s.liveLogsByTask)) {
-          const logs = s.liveLogsByTask[key];
+      if (scriptId === undefined) {
+        for (const key of Object.keys(s.liveLogsByScript)) {
+          const logs = s.liveLogsByScript[key];
           if (logs === undefined) {
             continue;
           }
           for (const row of logs) {
             if (row.id === msg.executionId) {
-              taskId = key;
+              scriptId = key;
               break;
             }
           }
-          if (taskId !== undefined) {
+          if (scriptId !== undefined) {
             break;
           }
         }
       }
-      if (taskId === undefined) {
+      if (scriptId === undefined) {
         const liveExecNext: Record<string, ExecutionRuntime> = {};
         for (const key of Object.keys(s.liveExecutions)) {
           if (key !== msg.executionId) {
@@ -405,19 +405,19 @@ function handleMessage(msg: ServerMessage): void {
       }
       const updated: ExecutionRuntime = {
         id: msg.executionId,
-        taskId,
+        scriptId,
         status: msg.status,
         startedAt,
         endedAt: msg.ts,
         exitCode: msg.exitCode,
         logLines,
       };
-      const taskLogs = s.liveLogsByTask[taskId];
+      const scriptLogs = s.liveLogsByScript[scriptId];
       let nextList: ExecutionRuntime[];
-      if (taskLogs !== undefined) {
+      if (scriptLogs !== undefined) {
         let matchIndex = -1;
-        for (let i = 0; i < taskLogs.length; i++) {
-          const row = taskLogs[i];
+        for (let i = 0; i < scriptLogs.length; i++) {
+          const row = scriptLogs[i];
           if (row === undefined) {
             continue;
           }
@@ -427,23 +427,23 @@ function handleMessage(msg: ServerMessage): void {
           }
         }
         if (matchIndex >= 0) {
-          nextList = taskLogs.map((row, i) => {
+          nextList = scriptLogs.map((row, i) => {
             if (i === matchIndex) {
               return updated;
             }
             return row;
           });
         } else {
-          nextList = [updated, ...taskLogs].slice(0, 5);
+          nextList = [updated, ...scriptLogs].slice(0, 5);
         }
       } else {
         nextList = [updated];
       }
-      const liveLogsByTask = { ...s.liveLogsByTask, [taskId]: nextList };
-      scheduleExecutionRefresh(taskId, 800);
+      const liveLogsByScript = { ...s.liveLogsByScript, [scriptId]: nextList };
+      scheduleExecutionRefresh(scriptId, 800);
       const endedExec: Execution = {
         id: msg.executionId,
-        task_id: taskId,
+        script_id: scriptId,
         status: msg.status,
         started_at: startedAt,
         ended_at: msg.ts,
@@ -451,7 +451,7 @@ function handleMessage(msg: ServerMessage): void {
         trigger_reason: 'live',
         log_path: '',
       };
-      const prev = s.executionsByTask[taskId];
+      const prev = s.executionsByScript[scriptId];
       let nextHist: Execution[] = [endedExec];
       if (prev !== undefined) {
         const filtered: Execution[] = [];
@@ -477,10 +477,10 @@ function handleMessage(msg: ServerMessage): void {
       return {
         ...s,
         liveExecutions: liveExecNext,
-        liveLogsByTask,
-        executionsByTask: {
-          ...s.executionsByTask,
-          [taskId]: nextHist,
+        liveLogsByScript,
+        executionsByScript: {
+          ...s.executionsByScript,
+          [scriptId]: nextHist,
         },
       };
     });
@@ -494,11 +494,11 @@ function handleMessage(msg: ServerMessage): void {
     }
     return;
   }
-  if (msg.kind === 'task.updated') {
-    void actions.syncTask(msg.taskId);
+  if (msg.kind === 'script.updated') {
+    void actions.syncScript(msg.scriptId);
     return;
   }
-  actions.removeTask(msg.taskId);
+  actions.removeScript(msg.scriptId);
 }
 
 export function useBootstrap(projectId?: string): { ready: boolean } {
@@ -515,14 +515,14 @@ export function useBootstrap(projectId?: string): { ready: boolean } {
       try {
         const snapshot = await api.getScriptSnapshot(projectId);
         set((s) => {
-          const executionsByTask: Record<string, Execution[]> = {};
-          for (const task of snapshot.tasks) {
-            executionsByTask[task.id] = [];
+          const executionsByScript: Record<string, Execution[]> = {};
+          for (const script of snapshot.scripts) {
+            executionsByScript[script.id] = [];
           }
           for (const exec of snapshot.executions) {
-            const list = executionsByTask[exec.task_id];
+            const list = executionsByScript[exec.script_id];
             if (list === undefined) {
-              executionsByTask[exec.task_id] = [exec];
+              executionsByScript[exec.script_id] = [exec];
             } else {
               list.push(exec);
             }
@@ -530,8 +530,8 @@ export function useBootstrap(projectId?: string): { ready: boolean } {
           return {
             ...s,
             settings: snapshot.settings,
-            tasks: snapshot.tasks,
-            executionsByTask,
+            scripts: snapshot.scripts,
+            executionsByScript,
           };
         });
         await actions.refreshRunningExecutions();

@@ -19,7 +19,7 @@ import { actions, useStore, selectExecutionsOf, selectLiveLogsOf } from '@script
 import type { Execution, ExecutionStatus } from '@script/types';
 
 interface Props {
-  taskId: string;
+  scriptId: string;
   selectedId: string | null;
   onInspect(target: InspectTarget): void;
 }
@@ -31,12 +31,12 @@ function cancelledRunWord(count: number): string {
   return 'runs';
 }
 
-function dotToInspect(taskId: string, d: RunDot): InspectTarget {
+function dotToInspect(scriptId: string, d: RunDot): InspectTarget {
   let isLive = false;
   if (d.status === 'running') {
     isLive = true;
   }
-  return { taskId, executionId: d.id, isLive };
+  return { scriptId, executionId: d.id, isLive };
 }
 
 function findExecution(history: readonly Execution[], id: string): Execution | null {
@@ -48,10 +48,10 @@ function findExecution(history: readonly Execution[], id: string): Execution | n
   return null;
 }
 
-export function TaskHistory(props: Props): React.JSX.Element {
+export function ScriptHistory(props: Props): React.JSX.Element {
   const scrollRef = useRef<HTMLDivElement | null>(null);
-  const history = useStore((s) => selectExecutionsOf(s, props.taskId));
-  const liveLogs = useStore((s) => selectLiveLogsOf(s, props.taskId));
+  const history = useStore((s) => selectExecutionsOf(s, props.scriptId));
+  const liveLogs = useStore((s) => selectLiveLogsOf(s, props.scriptId));
   const liveExec = useStore((s) => s.liveExecutions);
   const [loading, setLoading] = useState(false);
   const [cancellingAll, setCancellingAll] = useState(false);
@@ -59,16 +59,16 @@ export function TaskHistory(props: Props): React.JSX.Element {
   useEffect(() => {
     setLoading(true);
     void actions
-      .refreshExecutionsForTask(props.taskId, 50)
+      .refreshExecutionsForScript(props.scriptId, 50)
       .catch((e: unknown) => {
         toast.error(String(e));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [props.taskId]);
+  }, [props.scriptId]);
 
-  const dots = collectRunDots(props.taskId, history, liveLogs, liveExec);
+  const dots = collectRunDots(props.scriptId, history, liveLogs, liveExec);
 
   let newestId = '';
   if (dots.length > 0) {
@@ -84,11 +84,11 @@ export function TaskHistory(props: Props): React.JSX.Element {
       return;
     }
     el.scrollTop = 0;
-  }, [props.taskId, newestId, dots.length]);
+  }, [props.scriptId, newestId, dots.length]);
 
   function reload(): void {
     setLoading(true);
-    void actions.refreshExecutionsForTask(props.taskId, 50).finally(() => {
+    void actions.refreshExecutionsForScript(props.scriptId, 50).finally(() => {
       setLoading(false);
     });
   }
@@ -110,7 +110,7 @@ export function TaskHistory(props: Props): React.JSX.Element {
     if (row === undefined) {
       continue;
     }
-    if (row.taskId !== props.taskId) {
+    if (row.scriptId !== props.scriptId) {
       continue;
     }
     if (row.status !== 'running') {
@@ -218,7 +218,7 @@ export function TaskHistory(props: Props): React.JSX.Element {
                 key={d.id}
                 type="button"
                 onClick={() => {
-                  props.onInspect(dotToInspect(props.taskId, d));
+                  props.onInspect(dotToInspect(props.scriptId, d));
                 }}
                 className={cn(
                   'w-full shrink-0 flex flex-col gap-1 p-2.5 rounded-md border text-left transition-colors',

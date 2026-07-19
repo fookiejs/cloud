@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from '@script/components/ui/dialog';
 
-type DeleteKind = 'task' | 'project';
+type DeleteKind = 'script' | 'project';
 
 interface Props {
   open: boolean;
@@ -24,12 +24,12 @@ function titleForKind(kind: DeleteKind): string {
   if (kind === 'project') {
     return 'Delete project?';
   }
-  return 'Delete task?';
+  return 'Delete script?';
 }
 
 function descriptionForKind(kind: DeleteKind, name: string): string {
   if (kind === 'project') {
-    return `"${name}" and all of its tasks will be permanently removed. This cannot be undone.`;
+    return `"${name}" and all of its scripts will be permanently removed. This cannot be undone.`;
   }
   return `"${name}" and its run history will be permanently removed. This cannot be undone.`;
 }

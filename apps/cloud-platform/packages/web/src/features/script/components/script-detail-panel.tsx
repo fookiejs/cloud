@@ -13,20 +13,19 @@ import {
 } from '@script/components/ui/select';
 import { Switch } from '@script/components/ui/switch';
 import { CommandField } from '@script/components/command-editor-dialog';
-import { patchTask } from '@script/lib/task-patch';
-import { duplicateTaskBody } from '@script/lib/project-templates';
+import { patchScript } from '@script/lib/script-patch';
+import { duplicateScriptBody } from '@script/lib/project-templates';
 import { CRON_PRESETS, resolveCronExpression } from '@script/lib/cron-presets';
 import { DOCKER_PLATFORM_OPTIONS, platformSelectValue } from '@script/lib/docker-platform';
-import { nullToEmpty } from '@script/lib/format';
 import { ConfirmDeleteDialog } from '@script/components/confirm-delete-dialog';
 import { ConfirmDuplicateDialog } from '@script/components/confirm-duplicate-dialog';
-import { TaskHistory } from '@script/components/task-history';
+import { ScriptHistory } from '@script/components/script-history';
 import { LogPanel } from '@script/components/log-panel';
 import type { InspectTarget } from '@script/components/run-dots';
 import { cn } from '@/lib/utils';
 import { api } from '@script/api/client';
 import { actions, useStore } from '@script/state/store';
-import type { Task, RuntimeKind, TriggerKind, ConcurrencyKind } from '@script/types';
+import type { Script, RuntimeKind, TriggerKind, ConcurrencyKind } from '@script/types';
 
 const runtimeOptions: readonly { value: RuntimeKind; label: string }[] = [
   { value: 'shell', label: 'Shell' },
@@ -52,27 +51,20 @@ function enabledLabel(enabled: boolean): string {
   return 'Off';
 }
 
-function emptyToNull(v: string): string | null {
-  if (v === '') {
-    return null;
-  }
-  return v;
-}
-
-type DetailTab = 'task' | 'logs';
+type DetailTab = 'script' | 'logs';
 
 interface Props {
-  task: Task;
+  script: Script;
   inspectId: string | null;
   inspect: InspectTarget | null;
   detailTab: DetailTab;
   onDetailTabChange(tab: DetailTab): void;
-  existingTaskNames: readonly string[];
+  existingScriptNames: readonly string[];
   onInspect(target: InspectTarget): void;
   onCancelExecution(executionId: string): void;
   onClosePanel(): void;
-  onDuplicated(task: Task): void;
-  onDeleted(taskId: string): void;
+  onDuplicated(script: Script): void;
+  onDeleted(scriptId: string): void;
 }
 
 function detailTabClass(active: boolean): string {
@@ -82,19 +74,19 @@ function detailTabClass(active: boolean): string {
   return 'border-transparent text-muted-foreground hover:text-foreground';
 }
 
-export function TaskDetailPanel(props: Props): React.JSX.Element {
+export function ScriptDetailPanel(props: Props): React.JSX.Element {
   const t = useStore((s) => {
-    for (const row of s.tasks) {
-      if (row.id === props.task.id) {
+    for (const row of s.scripts) {
+      if (row.id === props.script.id) {
         return row;
       }
     }
-    return props.task;
+    return props.script;
   });
   const [name, setName] = useState(t.name);
   const [command, setCommand] = useState(t.command);
-  const [glob, setGlob] = useState(nullToEmpty(t.trigger_glob));
-  const [dockerImage, setDockerImage] = useState(nullToEmpty(t.docker_image));
+  const [glob, setGlob] = useState(t.trigger_glob);
+  const [dockerImage, setDockerImage] = useState(t.docker_image);
   const [enabled, setEnabled] = useState(t.enabled);
   const [duplicateOpen, setDuplicateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -102,46 +94,46 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
   useEffect(() => {
     setName(t.name);
     setCommand(t.command);
-    setGlob(nullToEmpty(t.trigger_glob));
-    setDockerImage(nullToEmpty(t.docker_image));
+    setGlob(t.trigger_glob);
+    setDockerImage(t.docker_image);
     setEnabled(t.enabled);
   }, [t.id, t.name, t.command, t.trigger_glob, t.trigger_cron, t.docker_image, t.enabled]);
 
-  async function saveField(partial: Partial<Task>): Promise<void> {
+  async function saveField(partial: Partial<Script>): Promise<void> {
     try {
-      await patchTask(t, partial);
+      await patchScript(t, partial);
     } catch (e: unknown) {
       toast.error(String(e));
     }
   }
 
-  async function setTaskEnabled(next: boolean): Promise<void> {
+  async function setScriptEnabled(next: boolean): Promise<void> {
     if (next === t.enabled) {
       return;
     }
     setEnabled(next);
     try {
-      await patchTask(t, { enabled: next });
+      await patchScript(t, { enabled: next });
     } catch (e: unknown) {
       setEnabled(t.enabled);
       toast.error(String(e));
     }
   }
 
-  const duplicatePreview = duplicateTaskBody(t, props.existingTaskNames);
+  const duplicatePreview = duplicateScriptBody(t, props.existingScriptNames);
 
   async function duplicate(): Promise<void> {
-    const body = duplicateTaskBody(t, props.existingTaskNames);
-    const r = await api.createTask(t.project_id, body);
-    actions.upsertTask(r.task);
-    toast.success('Task duplicated');
-    props.onDuplicated(r.task);
+    const body = duplicateScriptBody(t, props.existingScriptNames);
+    const r = await api.createScript(t.project_id, body);
+    actions.upsertScript(r.script);
+    toast.success('Script duplicated');
+    props.onDuplicated(r.script);
   }
 
-  async function removeTask(): Promise<void> {
-    await api.deleteTask(t.id);
-    actions.removeTask(t.id);
-    toast.success('Task deleted');
+  async function removeScript(): Promise<void> {
+    await api.deleteScript(t.id);
+    actions.removeScript(t.id);
+    toast.success('Script deleted');
     props.onDeleted(t.id);
   }
 
@@ -155,10 +147,7 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
         <Select
           value={platformSelectValue(t.docker_platform)}
           onValueChange={(v) => {
-            let next: string | null = null;
-            if (v !== 'auto') {
-              next = v;
-            }
+            const next = v === 'auto' ? '' : v;
             void saveField({ docker_platform: next });
           }}
         >
@@ -188,7 +177,7 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
             setDockerImage(e.target.value);
           }}
           onBlur={() => {
-            void saveField({ docker_image: emptyToNull(dockerImage) });
+            void saveField({ docker_image: dockerImage });
           }}
           placeholder="node:22-alpine"
           className="font-mono h-9 text-xs w-full"
@@ -208,7 +197,7 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
             setGlob(e.target.value);
           }}
           onBlur={() => {
-            void saveField({ trigger_glob: emptyToNull(glob) });
+            void saveField({ trigger_glob: glob });
           }}
           placeholder="**/*.ts"
           className="font-mono h-9 text-xs w-full"
@@ -262,13 +251,13 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
             type="button"
             className={cn(
               'text-sm font-semibold px-2 py-1 border-b-2 transition-colors',
-              detailTabClass(props.detailTab === 'task'),
+              detailTabClass(props.detailTab === 'script'),
             )}
             onClick={() => {
-              props.onDetailTabChange('task');
+              props.onDetailTabChange('script');
             }}
           >
-            Task
+            Script
           </button>
           <button
             type="button"
@@ -326,13 +315,13 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
       />
       <ConfirmDeleteDialog
         open={deleteOpen}
-        kind="task"
+        kind="script"
         name={t.name}
         onOpenChange={setDeleteOpen}
-        onConfirm={removeTask}
+        onConfirm={removeScript}
       />
 
-      {props.detailTab === 'task' && (
+      {props.detailTab === 'script' && (
         <div className="flex flex-1 min-h-0 flex flex-col gap-3 overflow-y-auto p-4">
           <div className="flex items-center gap-3 shrink-0">
             <Input
@@ -351,7 +340,7 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
               <Switch
                 checked={enabled}
                 onCheckedChange={(v) => {
-                  void setTaskEnabled(v);
+                  void setScriptEnabled(v);
                 }}
               />
               <span className="text-xs text-muted-foreground">{enabledLabel(enabled)}</span>
@@ -446,7 +435,7 @@ export function TaskDetailPanel(props: Props): React.JSX.Element {
             {dockerImageInput}
           </div>
 
-          <TaskHistory taskId={t.id} selectedId={props.inspectId} onInspect={props.onInspect} />
+          <ScriptHistory scriptId={t.id} selectedId={props.inspectId} onInspect={props.onInspect} />
         </div>
       )}
 

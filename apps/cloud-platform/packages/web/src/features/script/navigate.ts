@@ -16,7 +16,7 @@ export function navigate(path: string): void {
     target = navigateBase;
   } else if (p.startsWith("/script")) {
     target = p;
-  } else if (p.startsWith("/workspace/") || p.startsWith("/task/")) {
+  } else if (p.startsWith("/workspace/") || p.startsWith("/script/")) {
     target = `${navigateBase}${p}`;
   } else {
     target = `${navigateBase}${p}`;

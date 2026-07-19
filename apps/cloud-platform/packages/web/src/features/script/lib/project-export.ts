@@ -1,7 +1,7 @@
 export const PROJECT_EXPORT_FORMAT = 'script-project';
 export const PROJECT_EXPORT_VERSION = 1;
 
-export interface ProjectExportTask {
+export interface ProjectExportScript {
   name: string;
   command: string;
   runtime: string;
@@ -32,7 +32,7 @@ export interface ProjectExportBundle {
   exported_at: number;
   project: ProjectExportProject;
   environments: ProjectExportEnvironment[];
-  tasks: ProjectExportTask[];
+  scripts: ProjectExportScript[];
 }
 
 export function isProjectExportBundle(raw: unknown): raw is ProjectExportBundle {
@@ -49,7 +49,7 @@ export function isProjectExportBundle(raw: unknown): raw is ProjectExportBundle 
   if (typeof row['project'] !== 'object' || row['project'] === null) {
     return false;
   }
-  if (!Array.isArray(row['tasks'])) {
+  if (!Array.isArray(row['scripts'])) {
     return false;
   }
   return true;

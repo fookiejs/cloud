@@ -1,7 +1,7 @@
 import type { ProjectExportBundle } from '../lib/project-export.js';
 import type {
   ProjectScriptSettings,
-  Task,
+  Script,
   Execution,
   Environment,
   RunningSnapshot,
@@ -34,18 +34,18 @@ async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
 export interface ScriptSnapshot {
   settings: ProjectScriptSettings;
   environments: Environment[];
-  tasks: Task[];
+  scripts: Script[];
   executions: Execution[];
   running: RunningSnapshot[];
 }
 
 export const api = {
-  // Single round trip for the whole script page: settings, environments, tasks and
-  // recent executions for every task in the project, replacing the old
-  // workspace-fetch -> per-task-execution-fetch waterfall.
-  getScriptSnapshot(projectId: string, perTaskLimit = 20): Promise<ScriptSnapshot> {
+  // Single round trip for the whole script page: settings, environments, scripts and
+  // recent executions for every script in the project, replacing the old
+  // workspace-fetch -> per-script-execution-fetch waterfall.
+  getScriptSnapshot(projectId: string, perScriptLimit = 20): Promise<ScriptSnapshot> {
     return jsonFetch(
-      `/api/v1/projects/${encodeURIComponent(projectId)}/script-snapshot?limit=${String(perTaskLimit)}`,
+      `/api/v1/projects/${encodeURIComponent(projectId)}/script-snapshot?limit=${String(perScriptLimit)}`,
     );
   },
   pauseProject(projectId: string): Promise<{ settings: ProjectScriptSettings }> {
@@ -97,37 +97,37 @@ export const api = {
       body: JSON.stringify({ environment_id: environmentId }),
     });
   },
-  listTasks(projectId: string): Promise<{ tasks: Task[]; nextCursor: string | null }> {
-    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/tasks`);
+  listScripts(projectId: string): Promise<{ scripts: Script[]; nextCursor: string | null }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/scripts`);
   },
-  createTask(
+  createScript(
     projectId: string,
-    body: Omit<Task, 'id' | 'project_id' | 'created_at'>,
-  ): Promise<{ task: Task }> {
-    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/tasks`, {
+    body: Omit<Script, 'id' | 'project_id' | 'created_at'>,
+  ): Promise<{ script: Script }> {
+    return jsonFetch(`/api/v1/projects/${encodeURIComponent(projectId)}/scripts`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     });
   },
-  getTask(id: string): Promise<{ task: Task }> {
-    return jsonFetch(`/api/v1/tasks/${id}`);
+  getScript(id: string): Promise<{ script: Script }> {
+    return jsonFetch(`/api/v1/scripts/${id}`);
   },
-  updateTask(
+  updateScript(
     id: string,
-    body: Omit<Task, 'id' | 'project_id' | 'created_at'>,
-  ): Promise<{ task: Task }> {
-    return jsonFetch(`/api/v1/tasks/${id}`, {
+    body: Omit<Script, 'id' | 'project_id' | 'created_at'>,
+  ): Promise<{ script: Script }> {
+    return jsonFetch(`/api/v1/scripts/${id}`, {
       method: 'PATCH',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(body),
     });
   },
-  deleteTask(id: string): Promise<{ ok: boolean }> {
-    return jsonFetch(`/api/v1/tasks/${id}`, { method: 'DELETE' });
+  deleteScript(id: string): Promise<{ ok: boolean }> {
+    return jsonFetch(`/api/v1/scripts/${id}`, { method: 'DELETE' });
   },
-  runTask(id: string): Promise<{ ok: boolean }> {
-    return jsonFetch(`/api/v1/tasks/${id}/run`, { method: 'POST' });
+  runScript(id: string): Promise<{ ok: boolean }> {
+    return jsonFetch(`/api/v1/scripts/${id}/run`, { method: 'POST' });
   },
   cancelExecution(id: string): Promise<{ ok: boolean }> {
     return jsonFetch(`/api/v1/executions/${id}/cancel`, { method: 'POST' });
@@ -135,10 +135,10 @@ export const api = {
   listRunningExecutions(): Promise<{ running: RunningSnapshot[] }> {
     return jsonFetch('/api/v1/executions/running');
   },
-  listExecutions(taskId: string, limit: number): Promise<{ executions: Execution[] }> {
+  listExecutions(scriptId: string, limit: number): Promise<{ executions: Execution[] }> {
     const params = new URLSearchParams();
     params.set('limit', String(limit));
-    params.set('taskId', taskId);
+    params.set('scriptId', scriptId);
     return jsonFetch(`/api/v1/executions?${params.toString()}`);
   },
   getExecutionLog(id: string): Promise<{ log: string }> {

@@ -47,7 +47,7 @@ export function ConfirmDuplicateDialog(props: Props): React.JSX.Element {
               <Copy className="h-5 w-5" />
             </div>
             <div className="min-w-0 space-y-1.5 pt-0.5">
-              <DialogTitle>Duplicate task?</DialogTitle>
+              <DialogTitle>Duplicate script?</DialogTitle>
               <DialogDescription className="text-left leading-relaxed">
                 {`A copy of "${props.name}" will be created as "${props.copyName}".`}
               </DialogDescription>

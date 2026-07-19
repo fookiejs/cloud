@@ -8,13 +8,13 @@ import { useStore, selectExecutionsOf, selectLiveLogsOf } from '@script/state/st
 import type { ExecutionStatus } from '@script/types';
 
 export interface InspectTarget {
-  taskId: string;
+  scriptId: string;
   executionId: string;
   isLive: boolean;
 }
 
 interface Props {
-  taskId: string;
+  scriptId: string;
   onInspect(target: InspectTarget): void;
   compact?: boolean;
 }
@@ -36,10 +36,10 @@ function dotTitle(status: ExecutionStatus | 'running'): string {
 }
 
 export function RunDots(props: Props): React.JSX.Element {
-  const history = useStore((s) => selectExecutionsOf(s, props.taskId));
-  const liveLogs = useStore((s) => selectLiveLogsOf(s, props.taskId));
+  const history = useStore((s) => selectExecutionsOf(s, props.scriptId));
+  const liveLogs = useStore((s) => selectLiveLogsOf(s, props.scriptId));
   const liveExec = useStore((s) => s.liveExecutions);
-  const allDots = collectRunDots(props.taskId, history, liveLogs, liveExec);
+  const allDots = collectRunDots(props.scriptId, history, liveLogs, liveExec);
   let dots = allDots;
   if (props.compact === true) {
     dots = allDots.slice(0, 10);
@@ -58,7 +58,7 @@ export function RunDots(props: Props): React.JSX.Element {
     if (first.status === 'running') {
       isLive = true;
     }
-    props.onInspect({ taskId: props.taskId, executionId: first.id, isLive });
+    props.onInspect({ scriptId: props.scriptId, executionId: first.id, isLive });
   }
 
   function onDotClick(e: MouseEvent, d: RunDot): void {
@@ -68,7 +68,7 @@ export function RunDots(props: Props): React.JSX.Element {
       isLive = true;
     }
     props.onInspect({
-      taskId: props.taskId,
+      scriptId: props.scriptId,
       executionId: d.id,
       isLive,
     });

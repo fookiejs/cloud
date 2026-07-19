@@ -5,15 +5,15 @@ import { collectRunDots } from '@script/lib/runs';
 import { useStore, selectExecutionsOf, selectLiveLogsOf } from '@script/state/store';
 
 interface Props {
-  taskId: string;
+  scriptId: string;
   max?: number;
 }
 
 export function RunDotsPreview(props: Props): React.JSX.Element {
-  const history = useStore((s) => selectExecutionsOf(s, props.taskId));
-  const liveLogs = useStore((s) => selectLiveLogsOf(s, props.taskId));
+  const history = useStore((s) => selectExecutionsOf(s, props.scriptId));
+  const liveLogs = useStore((s) => selectLiveLogsOf(s, props.scriptId));
   const liveExec = useStore((s) => s.liveExecutions);
-  const allDots = collectRunDots(props.taskId, history, liveLogs, liveExec);
+  const allDots = collectRunDots(props.scriptId, history, liveLogs, liveExec);
   let limit = 12;
   if (props.max !== undefined) {
     limit = props.max;

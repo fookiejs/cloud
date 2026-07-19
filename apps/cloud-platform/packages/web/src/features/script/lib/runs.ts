@@ -1,5 +1,5 @@
 import { tsOrZero } from '@script/lib/format';
-import { taskHasLiveRunning } from '@script/lib/task-running';
+import { scriptHasLiveRunning } from '@script/lib/script-running';
 import type { Execution, ExecutionStatus } from '@script/types';
 import type { ExecutionRuntime } from '@script/state/store';
 
@@ -10,21 +10,21 @@ export interface RunDot {
 }
 
 export function collectRunDots(
-  taskId: string,
+  scriptId: string,
   history: readonly Execution[],
   liveLogs: readonly ExecutionRuntime[],
   liveExec: Record<string, ExecutionRuntime>,
 ): RunDot[] {
   const byId = new Map<string, RunDot>();
 
-  const stillRunning = taskHasLiveRunning(taskId, liveExec, history);
+  const stillRunning = scriptHasLiveRunning(scriptId, liveExec, history);
 
   for (const key of Object.keys(liveExec)) {
     const e = liveExec[key];
     if (e === undefined) {
       continue;
     }
-    if (e.taskId !== taskId) {
+    if (e.scriptId !== scriptId) {
       continue;
     }
     let st: ExecutionStatus | 'running' = e.status;

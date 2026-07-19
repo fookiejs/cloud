@@ -3,15 +3,15 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface Props {
-  taskName: string;
+  scriptName: string;
   onClear(): void;
   children: ReactNode;
 }
 
 export function LogShell(props: Props): React.JSX.Element {
   let subtitleEl: React.JSX.Element | null = null;
-  if (props.taskName.length > 0) {
-    subtitleEl = <div className="text-[10px] text-muted-foreground truncate">{props.taskName}</div>;
+  if (props.scriptName.length > 0) {
+    subtitleEl = <div className="text-[10px] text-muted-foreground truncate">{props.scriptName}</div>;
   }
 
   return (

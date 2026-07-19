@@ -14,9 +14,9 @@ export function isActiveExecution(row: Execution): boolean {
   return row.status === 'running' || row.status === 'pending';
 }
 
-export function taskHasLiveRunning(
-  taskId: string,
-  liveExec: Record<string, { taskId: string; status: ExecutionStatus }>,
+export function scriptHasLiveRunning(
+  scriptId: string,
+  liveExec: Record<string, { scriptId: string; status: ExecutionStatus }>,
   _history: readonly Execution[],
 ): boolean {
   for (const key of Object.keys(liveExec)) {
@@ -24,7 +24,7 @@ export function taskHasLiveRunning(
     if (e === undefined) {
       continue;
     }
-    if (e.taskId !== taskId) {
+    if (e.scriptId !== scriptId) {
       continue;
     }
     if (e.status === 'running') {
@@ -35,8 +35,8 @@ export function taskHasLiveRunning(
 }
 
 export function findRunningExecutionId(
-  taskId: string,
-  liveExec: Record<string, { taskId: string; status: ExecutionStatus }>,
+  scriptId: string,
+  liveExec: Record<string, { scriptId: string; status: ExecutionStatus }>,
   _history: readonly Execution[],
   liveLogs: readonly { id: string; status: ExecutionStatus }[],
 ): string | null {
@@ -50,7 +50,7 @@ export function findRunningExecutionId(
     if (e === undefined) {
       continue;
     }
-    if (e.taskId !== taskId) {
+    if (e.scriptId !== scriptId) {
       continue;
     }
     if (e.status !== 'running') {
@@ -61,13 +61,13 @@ export function findRunningExecutionId(
   return null;
 }
 
-export function taskIsBusy(
-  taskId: string,
-  liveExec: Record<string, { taskId: string; status: ExecutionStatus }>,
+export function scriptIsBusy(
+  scriptId: string,
+  liveExec: Record<string, { scriptId: string; status: ExecutionStatus }>,
   history: readonly Execution[],
   liveLogs: readonly { status: ExecutionStatus }[],
 ): boolean {
-  if (taskHasLiveRunning(taskId, liveExec, history)) {
+  if (scriptHasLiveRunning(scriptId, liveExec, history)) {
     return true;
   }
   for (const rt of liveLogs) {

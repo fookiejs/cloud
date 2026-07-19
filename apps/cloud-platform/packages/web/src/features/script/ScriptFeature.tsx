@@ -42,11 +42,11 @@ function ScriptBodySkeleton(): React.JSX.Element {
   );
 }
 
-function TaskRedirect(props: { basePath: string; projectName: string }): React.JSX.Element {
+function ScriptRedirect(props: { basePath: string; projectName: string }): React.JSX.Element {
   const params = useParams();
   useEffect(() => {
     navigate(props.basePath);
-  }, [params["taskId"], props.basePath]);
+  }, [params["scriptId"], props.basePath]);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <ScriptHeader projectName={props.projectName} />
@@ -92,8 +92,8 @@ export function ScriptFeature(props: {
           }
         />
         <Route
-          path="task/:taskId"
-          element={<TaskRedirect basePath={basePath} projectName={props.projectName} />}
+          path="script/:scriptId"
+          element={<ScriptRedirect basePath={basePath} projectName={props.projectName} />}
         />
         <Route path="workspace/:workspaceId" element={<Navigate to={basePath} replace />} />
         <Route path="*" element={<Navigate to={basePath} replace />} />

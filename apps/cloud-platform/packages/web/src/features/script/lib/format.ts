@@ -1,12 +1,5 @@
 import type { ExecutionStatus } from '@script/types';
 
-export function nullToEmpty(v: string | null): string {
-  if (v === null) {
-    return '';
-  }
-  return v;
-}
-
 export function tsOrZero(ts: number | null): number {
   if (ts === null) {
     return 0;

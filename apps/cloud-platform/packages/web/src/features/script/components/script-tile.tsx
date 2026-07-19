@@ -7,21 +7,21 @@ import { cn } from '@/lib/utils';
 import { cronPresetLabel, resolveCronExpression } from '@script/lib/cron-presets';
 import { statusCaptionClass, statusDotClass, statusLabel } from '@script/lib/format';
 import { RunDotsPreview } from '@script/components/run-dots-preview';
-import { TaskScheduleBar } from '@script/components/task-schedule-bar';
+import { ScriptScheduleBar } from '@script/components/script-schedule-bar';
 import { useStableRunning } from '@script/hooks/use-stable-running';
 import { useTick } from '@script/hooks/use-tick';
 import { api } from '@script/api/client';
 import { actions } from '@script/state/store';
-import { findRunningExecutionId, taskHasLiveRunning } from '@script/lib/task-running';
+import { findRunningExecutionId, scriptHasLiveRunning } from '@script/lib/script-running';
 import { useStore, selectExecutionsOf, selectLiveLogsOf } from '@script/state/store';
-import type { Execution, Task, ExecutionStatus } from '@script/types';
+import type { Execution, Script, ExecutionStatus } from '@script/types';
 
 function lastStatus(
-  taskId: string,
-  liveExec: Record<string, { taskId: string; status: ExecutionStatus }>,
+  scriptId: string,
+  liveExec: Record<string, { scriptId: string; status: ExecutionStatus }>,
   history: readonly Execution[],
 ): ExecutionStatus | 'idle' {
-  if (taskHasLiveRunning(taskId, liveExec, history)) {
+  if (scriptHasLiveRunning(scriptId, liveExec, history)) {
     return 'running';
   }
   const last = history[0];
@@ -31,7 +31,7 @@ function lastStatus(
   return last.status;
 }
 
-function triggerSummary(t: Task): string {
+function triggerSummary(t: Script): string {
   if (t.trigger_type === 'save') {
     return 'on save';
   }
@@ -49,18 +49,18 @@ function stopBubble(e: MouseEvent): void {
 }
 
 interface Props {
-  task: Task;
+  script: Script;
   selected: boolean;
   workspacePaused: boolean;
   onSelect(): void;
 }
 
-export function TaskTile(props: Props): React.JSX.Element {
-  const t = props.task;
+export function ScriptTile(props: Props): React.JSX.Element {
+  const t = props.script;
   const history = useStore((s) => selectExecutionsOf(s, t.id));
   const liveExec = useStore((s) => s.liveExecutions);
   const live = useStore((s) => selectLiveLogsOf(s, t.id));
-  const isRunning = taskHasLiveRunning(t.id, liveExec, history);
+  const isRunning = scriptHasLiveRunning(t.id, liveExec, history);
   const stableRunning = useStableRunning(isRunning, 500);
   const [runPending, setRunPending] = useState(false);
   const status = lastStatus(t.id, liveExec, history);
@@ -74,7 +74,7 @@ export function TaskTile(props: Props): React.JSX.Element {
     }
     setRunPending(true);
     try {
-      await api.runTask(t.id);
+      await api.runScript(t.id);
     } finally {
       setRunPending(false);
     }
@@ -87,7 +87,7 @@ export function TaskTile(props: Props): React.JSX.Element {
       return;
     }
     await api.cancelExecution(executionId);
-    void actions.refreshExecutionsForTask(t.id);
+    void actions.refreshExecutionsForScript(t.id);
     void actions.refreshRunningExecutions();
   }
 
@@ -162,7 +162,7 @@ export function TaskTile(props: Props): React.JSX.Element {
     <Card
       className={cn(
         'cursor-pointer hover:bg-secondary/20 transition-colors overflow-hidden flex flex-col relative min-h-[5.5rem]',
-        flash !== null && 'task-card-flash',
+        flash !== null && 'script-card-flash',
         props.selected && 'bg-secondary/20',
         !t.enabled && 'opacity-55',
         props.workspacePaused && 'opacity-70',
@@ -187,9 +187,9 @@ export function TaskTile(props: Props): React.JSX.Element {
             {runBtn}
           </div>
         </div>
-        <RunDotsPreview taskId={t.id} max={14} />
+        <RunDotsPreview scriptId={t.id} max={14} />
         {isScheduled && (
-          <TaskScheduleBar
+          <ScriptScheduleBar
             triggerCron={t.trigger_cron}
             nowMs={nowMs}
             paused={props.workspacePaused || !t.enabled}

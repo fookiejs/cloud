@@ -8,17 +8,17 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@script/components/ui/switch';
-import { TaskTile } from '@script/components/task-tile';
-import { TaskDetailPanel } from '@script/components/task-detail-panel';
+import { ScriptTile } from '@script/components/script-tile';
+import { ScriptDetailPanel } from '@script/components/script-detail-panel';
 import { api } from '@script/api/client';
 import { ProjectEnvironmentDialog } from '@script/components/workspace-environment-dialog';
 import { downloadProjectBundle, exportFileName } from '@script/lib/project-export';
-import { BLANK_TASK_BODY } from '@script/lib/project-templates';
+import { BLANK_SCRIPT_BODY } from '@script/lib/project-templates';
 import type { InspectTarget } from '@script/components/run-dots';
 import { actions, useStore } from '@script/state/store';
-import type { Task } from '@script/types';
+import type { Script } from '@script/types';
 
-type DetailTab = 'task' | 'logs';
+type DetailTab = 'script' | 'logs';
 
 function detailPanelWidth(open: boolean, size: number): number {
   if (open) {
@@ -34,11 +34,11 @@ interface Props {
 
 export function ProjectScriptView(props: Props): React.JSX.Element {
   const settings = useStore((s) => s.settings);
-  const tasks = useStore((s) => s.tasks);
+  const scripts = useStore((s) => s.scripts);
   const liveExec = useStore((s) => s.liveExecutions);
   const [creating, setCreating] = useState(false);
   const [inspect, setInspect] = useState<InspectTarget | null>(null);
-  const [detailTab, setDetailTab] = useState<DetailTab>('task');
+  const [detailTab, setDetailTab] = useState<DetailTab>('script');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewportMaxDetail, setViewportMaxDetail] = useState(960);
   const detailResize = useDragResize({
@@ -73,7 +73,7 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
     if (selectedId === null) {
       return;
     }
-    void actions.refreshExecutionsForTask(selectedId, 50);
+    void actions.refreshExecutionsForScript(selectedId, 50);
   }, [selectedId]);
 
   if (settings === null) {
@@ -81,43 +81,43 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
   }
 
   let running = 0;
-  for (const t of tasks) {
+  for (const t of scripts) {
     for (const key of Object.keys(liveExec)) {
       const e = liveExec[key];
       if (e === undefined) {
         continue;
       }
-      if (e.taskId === t.id && e.status === 'running') {
+      if (e.scriptId === t.id && e.status === 'running') {
         running += 1;
       }
     }
   }
 
-  let selectedTask: Task | null = null;
+  let selectedScript: Script | null = null;
   if (selectedId !== null) {
-    for (const t of tasks) {
+    for (const t of scripts) {
       if (t.id === selectedId) {
-        selectedTask = t;
+        selectedScript = t;
       }
     }
-    if (selectedTask === null) {
+    if (selectedScript === null) {
       for (const key of Object.keys(liveExec)) {
         const e = liveExec[key];
         if (e === undefined) {
           continue;
         }
-        if (e.taskId === selectedId) {
-          selectedTask = {
+        if (e.scriptId === selectedId) {
+          selectedScript = {
             id: selectedId,
             project_id: props.projectId,
-            name: 'Task',
+            name: 'Script',
             command: '',
             runtime: 'shell',
-            docker_image: null,
-            docker_platform: null,
+            docker_image: '',
+            docker_platform: '',
             trigger_type: 'manual',
-            trigger_glob: null,
-            trigger_cron: null,
+            trigger_glob: '',
+            trigger_cron: '',
             concurrency: 'restart',
             enabled: true,
             created_at: Date.now(),
@@ -132,19 +132,19 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
     inspectId = inspect.executionId;
   }
 
-  function selectTask(taskId: string): void {
-    if (selectedId === taskId) {
+  function selectScript(scriptId: string): void {
+    if (selectedId === scriptId) {
       resetSelection();
-      setDetailTab('task');
+      setDetailTab('script');
       return;
     }
-    setSelectedId(taskId);
+    setSelectedId(scriptId);
     setInspect(null);
-    setDetailTab('task');
+    setDetailTab('script');
   }
 
   function onInspect(target: InspectTarget): void {
-    setSelectedId(target.taskId);
+    setSelectedId(target.scriptId);
     setInspect(target);
     setDetailTab('logs');
   }
@@ -174,19 +174,19 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
     }
   }
 
-  function adoptCreatedTask(task: Task): void {
-    actions.upsertTask(task);
-    setSelectedId(task.id);
+  function adoptCreatedScript(script: Script): void {
+    actions.upsertScript(script);
+    setSelectedId(script.id);
     setInspect(null);
-    setDetailTab('task');
+    setDetailTab('script');
   }
 
-  async function createTask(): Promise<void> {
+  async function createScript(): Promise<void> {
     setCreating(true);
     try {
-      const r = await api.createTask(props.projectId, BLANK_TASK_BODY);
-      adoptCreatedTask(r.task);
-      toast.success('Task created');
+      const r = await api.createScript(props.projectId, BLANK_SCRIPT_BODY);
+      adoptCreatedScript(r.script);
+      toast.success('Script created');
     } catch (e: unknown) {
       toast.error(String(e));
     } finally {
@@ -204,41 +204,41 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
   }
 
   let detailOpen = false;
-  if (selectedId !== null && selectedTask !== null) {
+  if (selectedId !== null && selectedScript !== null) {
     detailOpen = true;
   }
 
   let detailBody: React.JSX.Element;
-  if (selectedTask !== null) {
+  if (selectedScript !== null) {
     detailBody = (
-      <TaskDetailPanel
-        task={selectedTask}
+      <ScriptDetailPanel
+        script={selectedScript}
         inspectId={inspectId}
         inspect={inspect}
         detailTab={detailTab}
         onDetailTabChange={setDetailTab}
-        existingTaskNames={tasks.map((row) => row.name)}
+        existingScriptNames={scripts.map((row) => row.name)}
         onInspect={onInspect}
         onCancelExecution={(id) => {
           void api.cancelExecution(id);
         }}
         onClosePanel={() => {
           resetSelection();
-          setDetailTab('task');
+          setDetailTab('script');
         }}
-        onDuplicated={(task) => {
-          adoptCreatedTask(task);
+        onDuplicated={(script) => {
+          adoptCreatedScript(script);
         }}
         onDeleted={() => {
           resetSelection();
-          setDetailTab('task');
+          setDetailTab('script');
         }}
       />
     );
   } else {
     detailBody = (
       <div className="flex items-center justify-center h-full p-6 text-sm text-muted-foreground text-center">
-        Select a task tile to edit and browse run history.
+        Select a script tile to edit and browse run history.
       </div>
     );
   }
@@ -284,31 +284,31 @@ export function ProjectScriptView(props: Props): React.JSX.Element {
               <Button
                 type="button"
                 onClick={() => {
-                  void createTask();
+                  void createScript();
                 }}
                 disabled={creating}
                 size="sm"
               >
-                New task
+                New script
               </Button>
             </div>
           </header>
 
           <div className="flex-1 min-h-0 overflow-y-auto py-3">
-            {tasks.length === 0 && (
+            {scripts.length === 0 && (
               <Card className="border-dashed">
-                <div className="p-8 text-center text-sm text-muted-foreground">No tasks yet</div>
+                <div className="p-8 text-center text-sm text-muted-foreground">No scripts yet</div>
               </Card>
             )}
             <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr))]">
-              {tasks.map((t) => (
-                <TaskTile
+              {scripts.map((t) => (
+                <ScriptTile
                   key={t.id}
-                  task={t}
+                  script={t}
                   selected={selectedId === t.id}
                   workspacePaused={settings.paused}
                   onSelect={() => {
-                    selectTask(t.id);
+                    selectScript(t.id);
                   }}
                 />
               ))}

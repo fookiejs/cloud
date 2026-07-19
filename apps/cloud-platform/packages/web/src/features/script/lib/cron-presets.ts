@@ -24,8 +24,8 @@ export const CRON_PRESETS: readonly CronPreset[] = [
 
 export const DEFAULT_CRON_EXPRESSION = '0 */5 * * * *';
 
-export function resolveCronExpression(stored: string | null): string {
-  if (stored === null || stored.length === 0) {
+export function resolveCronExpression(stored: string): string {
+  if (stored.length === 0) {
     return DEFAULT_CRON_EXPRESSION;
   }
   for (const p of CRON_PRESETS) {

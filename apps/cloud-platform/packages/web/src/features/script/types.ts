@@ -19,17 +19,18 @@ export interface Environment {
   created_at: number;
 }
 
-export interface Task {
+export interface Script {
   id: string;
   project_id: string;
   name: string;
   command: string;
   runtime: RuntimeKind;
-  docker_image: string | null;
-  docker_platform: string | null;
+  // Empty string means "unset" — optional depending on runtime/trigger_type, not absent data.
+  docker_image: string;
+  docker_platform: string;
   trigger_type: TriggerKind;
-  trigger_glob: string | null;
-  trigger_cron: string | null;
+  trigger_glob: string;
+  trigger_cron: string;
   concurrency: ConcurrencyKind;
   enabled: boolean;
   created_at: number;
@@ -37,7 +38,7 @@ export interface Task {
 
 export interface Execution {
   id: string;
-  task_id: string;
+  script_id: string;
   status: ExecutionStatus;
   started_at: number | null;
   ended_at: number | null;
@@ -48,12 +49,12 @@ export interface Execution {
 
 export interface RunningSnapshot {
   executionId: string;
-  taskId: string;
+  scriptId: string;
   startedAt: number;
 }
 
 export type ServerMessage =
-  | { kind: 'execution.started'; executionId: string; taskId: string; ts: number }
+  | { kind: 'execution.started'; executionId: string; scriptId: string; ts: number }
   | { kind: 'execution.log'; executionId: string; line: string; stream: LogStream; ts: number }
   | {
       kind: 'execution.ended';
@@ -62,7 +63,7 @@ export type ServerMessage =
       exitCode: number | null;
       ts: number;
     }
-  | { kind: 'task.updated'; taskId: string }
-  | { kind: 'task.deleted'; taskId: string }
+  | { kind: 'script.updated'; scriptId: string }
+  | { kind: 'script.deleted'; scriptId: string }
   | { kind: 'project.updated'; projectId: string }
   | { kind: 'hello'; ts: number; running: RunningSnapshot[] };
