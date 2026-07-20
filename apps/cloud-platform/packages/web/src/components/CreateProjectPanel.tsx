@@ -31,7 +31,6 @@ export function CreateProjectPanel({
     try {
       const created = await createProject(session, {
         name: trimmedName,
-        id: "",
         description: description.trim(),
         workflowTemplateId: DEFAULT_WORKFLOW_TEMPLATE_ID,
       });

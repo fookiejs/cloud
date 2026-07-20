@@ -93,7 +93,15 @@
   }
 
   .app-sidebar {
-    @apply flex w-60 shrink-0 flex-col border-r border-border bg-card/40;
+    @apply fixed inset-y-0 left-0 z-50 flex w-72 -translate-x-full flex-col border-r border-border bg-card/95 backdrop-blur transition-transform duration-200 ease-out md:static md:z-auto md:w-60 md:shrink-0 md:translate-x-0 md:bg-card/40 md:backdrop-blur-none md:transition-none;
+  }
+
+  .app-sidebar.is-open {
+    @apply translate-x-0;
+  }
+
+  .app-sidebar-backdrop {
+    @apply fixed inset-0 z-40 bg-black/50 md:hidden;
   }
 
   .app-main {

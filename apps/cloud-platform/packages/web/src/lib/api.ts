@@ -18,7 +18,6 @@ export type UpdateProjectInput = {
 
 export type CreateProjectInput = {
   name: string;
-  id: string;
   description: string;
   workflowTemplateId: string;
 };
@@ -493,7 +492,6 @@ export async function createProject(session: Session, input: CreateProjectInput)
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       name: input.name,
-      id: input.id.trim(),
       description: input.description.trim(),
       workflowTemplateId: input.workflowTemplateId.trim() || DEFAULT_WORKFLOW_TEMPLATE_ID,
     }),

@@ -12,7 +12,6 @@ const projectIdPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const createProjectSchema = z.object({
   name: z.string().trim().min(1),
-  id: z.string().trim().refine((projectId) => projectId.length === 0 || projectIdPattern.test(projectId)),
   description: z.string().trim(),
   workflowTemplateId: z.string().trim().min(1),
 });

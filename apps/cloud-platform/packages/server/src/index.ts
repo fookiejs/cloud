@@ -12,6 +12,7 @@ loadDotenv();
 import { registerTaskBridgeModule } from "../../../../task-bridge/apps/backend/dist/index.js";
 import { registerObservability } from "../../../../task-bridge/apps/backend/dist/observability.js";
 import { registerCodeServerModule } from "./modules/code-server.js";
+import { registerDeployModule } from "./modules/deploy.js";
 import { registerEmbeddedAuth } from "./modules/embedded-auth.js";
 import { registerGitProjectsModule } from "./modules/git-projects.js";
 import { registerGithubAuthModule } from "./modules/github-auth.js";
@@ -110,6 +111,17 @@ await registerCodeServerModule(app, {
   publicUrl,
   image: process.env.CODE_SERVER_IMAGE?.trim() || "codercom/code-server:latest",
   domain: codeServerDomain !== undefined && codeServerDomain.length > 0 ? codeServerDomain : null,
+});
+const deployDomain = process.env.DEPLOY_DOMAIN?.trim();
+await registerDeployModule(app, {
+  ...projectPaths,
+  identity,
+  publicUrl,
+  scriptDataDir: projectPaths.dataDir,
+  image: process.env.DEPLOY_IMAGE?.trim() || "node:22-bookworm",
+  memoryLimitMb: Number(process.env.DEPLOY_MEMORY_LIMIT_MB ?? 512),
+  cpuLimit: Number(process.env.DEPLOY_CPU_LIMIT ?? 1),
+  domain: deployDomain !== undefined && deployDomain.length > 0 ? deployDomain : null,
 });
 const penpotAccessToken = process.env.PENPOT_ACCESS_TOKEN?.trim();
 await registerPenpotModule(app, {

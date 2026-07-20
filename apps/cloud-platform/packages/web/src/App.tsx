@@ -77,10 +77,6 @@ export function App() {
             <Route path="notes/*" element={<ProjectNotesRoute />} />
             <Route path="designs" element={<ProjectDesignsRoute />} />
           </Route>
-          <Route path="/tasks/projects" element={<Navigate to="/projects" replace />} />
-          <Route path="/tasks/projects/:projectId/*" element={<LegacyProjectRedirect />} />
-          <Route path="/script/*" element={<LegacyScriptRedirect />} />
-          <Route path="/notes/*" element={<LegacyNotesRedirect />} />
         </Route>
         <Route path="/" element={<RootRedirect />} />
         <Route path="*" element={<RootRedirect />} />
@@ -136,30 +132,6 @@ function ProjectDesignsRoute(): React.JSX.Element {
     return <Navigate to="/projects" replace />;
   }
   return <DesignsFeature projectId={projectId} />;
-}
-
-function LegacyNotesRedirect(): React.JSX.Element {
-  const session = loadSession();
-  if (session === null || session.projectId === null) {
-    return <Navigate to="/projects" replace />;
-  }
-  return <Navigate to={`/projects/${session.projectId}/notes`} replace />;
-}
-
-function LegacyProjectRedirect(): React.JSX.Element {
-  const { projectId } = useParams();
-  if (projectId === undefined) {
-    return <Navigate to="/projects" replace />;
-  }
-  return <Navigate to={`/projects/${projectId}/tasks`} replace />;
-}
-
-function LegacyScriptRedirect(): React.JSX.Element {
-  const session = loadSession();
-  if (session === null || session.projectId === null) {
-    return <Navigate to="/projects" replace />;
-  }
-  return <Navigate to={`/projects/${session.projectId}/scripts`} replace />;
 }
 
 function RootRedirect(): React.JSX.Element {

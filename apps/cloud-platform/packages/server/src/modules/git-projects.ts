@@ -119,6 +119,41 @@ export async function registerGitProjectsModule(
     },
   );
 
+  async function cloneIntoProject(
+    projectId: string,
+    ownerId: string,
+    token: string,
+    owner: string,
+    repoName: string,
+    branch: string,
+  ): Promise<string | null> {
+    const dir = projectDir(options, projectId);
+    mkdirSync(dir, { recursive: true });
+    if (readdirSync(dir).length > 0) {
+      return "project folder is not empty — clear it before linking a repo";
+    }
+    try {
+      await runGit(process.cwd(), [
+        "clone",
+        "--branch",
+        branch,
+        "--single-branch",
+        authedRepoUrl(token, owner, repoName),
+        dir,
+      ]);
+      // Strip the token back out of the stored remote — it's re-injected fresh on
+      // every push/pull instead of sitting in .git/config indefinitely.
+      await runGit(dir, ["remote", "set-url", "origin", repoUrl(owner, repoName)]);
+    } catch (err) {
+      return `clone failed: ${err instanceof Error ? err.message : String(err)}`;
+    }
+    db.prepare(
+      `INSERT INTO project_repos (project_id, owner_id, github_owner, github_repo, default_branch, linked_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(projectId, ownerId, owner, repoName, branch, Date.now());
+    return null;
+  }
+
   app.post<{ Params: { projectId: string }; Body: { owner?: unknown; repo?: unknown; branch?: unknown } }>(
     "/api/v1/projects/:projectId/git/link",
     async (request, reply) => {
@@ -126,9 +161,8 @@ export async function registerGitProjectsModule(
       if (user === null) {
         return reply.code(404).send({ error: "not found" });
       }
-      const account = options.github.getAccount(user.id);
       const token = options.github.getAccessToken(user.id);
-      if (account === null || token === null) {
+      if (token === null) {
         return reply.code(409).send({ error: "github not connected" });
       }
       const owner = typeof request.body.owner === "string" ? request.body.owner.trim() : "";
@@ -142,33 +176,80 @@ export async function registerGitProjectsModule(
       if (getRepo(request.params.projectId) !== null) {
         return reply.code(409).send({ error: "a repo is already linked to this project" });
       }
-      const dir = projectDir(options, request.params.projectId);
-      mkdirSync(dir, { recursive: true });
-      if (readdirSync(dir).length > 0) {
-        return reply.code(409).send({
-          error: "project folder is not empty — clear it before linking a repo",
-        });
+      const failure = await cloneIntoProject(request.params.projectId, user.id, token, owner, repoName, branch);
+      if (failure !== null) {
+        return reply.code(502).send({ error: failure });
       }
-      try {
-        await runGit(
-          process.cwd(),
-          ["clone", "--branch", branch, "--single-branch", authedRepoUrl(token, owner, repoName), dir],
-        );
-        // Strip the token back out of the stored remote — it's re-injected fresh on
-        // every push/pull instead of sitting in .git/config indefinitely.
-        await runGit(dir, ["remote", "set-url", "origin", repoUrl(owner, repoName)]);
-      } catch (err) {
-        return reply.code(502).send({
-          error: `clone failed: ${err instanceof Error ? err.message : String(err)}`,
-        });
-      }
-      db.prepare(
-        `INSERT INTO project_repos (project_id, owner_id, github_owner, github_repo, default_branch, linked_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-      ).run(request.params.projectId, user.id, owner, repoName, branch, Date.now());
       return reply.code(201).send({ linked: true, owner, repo: repoName, branch });
     },
   );
+
+  // Starting a project from a blank idea shouldn't require detouring to github.com
+  // first — create the repo via GitHub's API, then clone it the same way /git/link
+  // does.
+  app.post<{
+    Params: { projectId: string };
+    Body: { name?: unknown; private?: unknown; description?: unknown };
+  }>("/api/v1/projects/:projectId/git/create", async (request, reply) => {
+    const user = await requireProjectAccess(request, request.params.projectId);
+    if (user === null) {
+      return reply.code(404).send({ error: "not found" });
+    }
+    const account = options.github.getAccount(user.id);
+    const token = options.github.getAccessToken(user.id);
+    if (account === null || token === null) {
+      return reply.code(409).send({ error: "github not connected" });
+    }
+    const name = typeof request.body.name === "string" ? request.body.name.trim() : "";
+    if (name.length === 0) {
+      return reply.code(400).send({ error: "name is required" });
+    }
+    if (getRepo(request.params.projectId) !== null) {
+      return reply.code(409).send({ error: "a repo is already linked to this project" });
+    }
+    const isPrivate = request.body.private !== false;
+    const description = typeof request.body.description === "string" ? request.body.description : "";
+
+    const createResponse = await fetch("https://api.github.com/user/repos", {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: "application/vnd.github+json",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        private: isPrivate,
+        description,
+        auto_init: true,
+      }),
+    });
+    if (!createResponse.ok) {
+      const text = await createResponse.text();
+      return reply.code(502).send({ error: `github repo creation failed: ${text}` });
+    }
+    const created = (await createResponse.json()) as {
+      owner?: { login?: unknown };
+      name?: unknown;
+      default_branch?: unknown;
+    };
+    const owner = typeof created.owner?.login === "string" ? created.owner.login : account.login;
+    const repoName = typeof created.name === "string" ? created.name : name;
+    const branch = typeof created.default_branch === "string" ? created.default_branch : "main";
+
+    // Freshly created repos need a moment before they're clone-able.
+    let failure: string | null = "repo not ready";
+    for (let attempt = 0; attempt < 5 && failure !== null; attempt++) {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+      failure = await cloneIntoProject(request.params.projectId, user.id, token, owner, repoName, branch);
+    }
+    if (failure !== null) {
+      return reply.code(502).send({ error: failure });
+    }
+    return reply.code(201).send({ linked: true, owner, repo: repoName, branch });
+  });
 
   app.post<{ Params: { projectId: string }; Body: { message?: unknown } }>(
     "/api/v1/projects/:projectId/git/push",

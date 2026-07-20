@@ -33,6 +33,13 @@ services:
       # Leave unset to disable the browser-IDE feature entirely. When set, requires a
       # wildcard DNS record (and TLS cert) for "*.<this value>" pointing at this host.
       CODE_SERVER_DOMAIN: ${CODE_SERVER_DOMAIN:-}
+      DEPLOY_IMAGE: ${DEPLOY_IMAGE:-node:22-bookworm}
+      DEPLOY_MEMORY_LIMIT_MB: ${DEPLOY_MEMORY_LIMIT_MB:-512}
+      DEPLOY_CPU_LIMIT: ${DEPLOY_CPU_LIMIT:-1}
+      # Leave unset to disable Deploy. Needs its OWN wildcard DNS record — deployed
+      # apps are public, unlike the private code-server IDE, so they must not share
+      # CODE_SERVER_DOMAIN's routing.
+      DEPLOY_DOMAIN: ${DEPLOY_DOMAIN:-}
     volumes:
       - fookie-cloud-data:/data
       - /var/run/docker.sock:/var/run/docker.sock

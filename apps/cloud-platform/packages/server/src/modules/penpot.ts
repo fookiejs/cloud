@@ -13,6 +13,7 @@ type TeamBinding = {
   teamId: string;
   teamName: string;
   updatedAt: string;
+  invitedEmails: string[];
 };
 
 type TeamStore = {
@@ -65,11 +66,15 @@ function readStore(path: string): TeamStore {
         typeof item["updatedAt"] === "string" && item["updatedAt"].length > 0
           ? item["updatedAt"]
           : new Date().toISOString();
+      const invitedEmails = Array.isArray(item["invitedEmails"])
+        ? item["invitedEmails"].filter((v): v is string => typeof v === "string")
+        : [];
       teams.push({
         projectId: item["projectId"],
         teamId: item["teamId"],
         teamName,
         updatedAt,
+        invitedEmails,
       });
     }
     return { teams };
@@ -197,6 +202,20 @@ export async function registerPenpotModule(
     const store = readStore(options.dataFile);
     const existing = bindingFor(store, project.id);
     if (existing !== null) {
+      // Already provisioned AND already invited this exact user — skip the network
+      // round trip to Penpot entirely. Re-inviting on every page load was the actual
+      // cause of Designs taking ~20s to open on every single visit.
+      const alreadyInvited =
+        user.email !== null && existing.invitedEmails.includes(user.email.toLowerCase());
+      if (alreadyInvited) {
+        return {
+          teamId: existing.teamId,
+          openUrl: teamOpenUrl(options.publicUri, existing.teamId),
+          provisioned: true,
+          invited: true,
+          message: null,
+        };
+      }
       let invited = false;
       if (options.accessToken !== null && user.email !== null && user.email.length > 0) {
         try {
@@ -206,6 +225,13 @@ export async function registerPenpotModule(
             role: "editor",
           });
           invited = true;
+          writeStore(
+            options.dataFile,
+            upsertBinding(store, {
+              ...existing,
+              invitedEmails: [...existing.invitedEmails, user.email.toLowerCase()],
+            }),
+          );
         } catch {
           invited = false;
         }
@@ -238,15 +264,8 @@ export async function registerPenpotModule(
     if (teamId === null) {
       throw new Error("penpot create-team returned no id");
     }
-    const next = upsertBinding(store, {
-      projectId: project.id,
-      teamId,
-      teamName,
-      updatedAt: new Date().toISOString(),
-    });
-    writeStore(options.dataFile, next);
-
     let invited = false;
+    const invitedEmails: string[] = [];
     if (user.email !== null && user.email.length > 0) {
       try {
         await penpotRpc(options.publicUri, options.accessToken, "create-team-invitations", {
@@ -255,10 +274,21 @@ export async function registerPenpotModule(
           role: "editor",
         });
         invited = true;
+        invitedEmails.push(user.email.toLowerCase());
       } catch {
         invited = false;
       }
     }
+    writeStore(
+      options.dataFile,
+      upsertBinding(store, {
+        projectId: project.id,
+        teamId,
+        teamName,
+        updatedAt: new Date().toISOString(),
+        invitedEmails,
+      }),
+    );
 
     return {
       teamId,

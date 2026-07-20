@@ -66,7 +66,6 @@ export function ScriptFeature(props: {
           path="script/:scriptId"
           element={<ScriptRedirect basePath={basePath} projectName={props.projectName} />}
         />
-        <Route path="workspace/:workspaceId" element={<Navigate to={basePath} replace />} />
         <Route path="*" element={<Navigate to={basePath} replace />} />
       </Routes>
     </>

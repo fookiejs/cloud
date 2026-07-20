@@ -13,6 +13,7 @@ import {
   Smartphone,
   Terminal,
   Users,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { FookieCloudMark } from "@/components/FookieCloudMark";
@@ -21,7 +22,7 @@ import { useCommentNotifications } from "@/hooks/useCommentNotifications";
 import { useSession } from "@/hooks/useSession";
 import { unreadCommentCount } from "@/lib/read-tasks";
 
-export function AppSidebar() {
+export function AppSidebar(props: { mobileOpen: boolean; onClose: () => void }) {
   const { pathname } = useLocation();
   const session = useSession();
 
@@ -51,9 +52,17 @@ export function AppSidebar() {
   const isAdmin = session !== null && session.userRole === "admin";
 
   return (
-    <aside className="app-sidebar">
-      <div className="flex h-14 shrink-0 items-center border-b px-4">
+    <aside className={cn("app-sidebar", props.mobileOpen && "is-open")}>
+      <div className="flex h-14 shrink-0 items-center justify-between border-b px-4">
         <FookieCloudMark href="/projects" />
+        <button
+          type="button"
+          onClick={props.onClose}
+          className="grid h-8 w-8 place-items-center rounded-md text-muted-foreground hover:bg-secondary/60 hover:text-foreground md:hidden"
+          aria-label="Close menu"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-3">

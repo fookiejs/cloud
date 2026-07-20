@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ListPageHeader, ListBody } from "@/components/layout/ListPage";
 import { getAccessToken } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,7 @@ function NotesListPage(props: { projectId: string }): React.JSX.Element {
   const base = notesBase(props.projectId);
   const [notes, setNotes] = useState<NoteListItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("");
 
   const load = useCallback(async () => {
     setError(null);
@@ -67,8 +68,6 @@ function NotesListPage(props: { projectId: string }): React.JSX.Element {
       setNotes(data.notes || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "load failed");
-    } finally {
-      setLoading(false);
     }
   }, [props.projectId]);
 
@@ -80,63 +79,51 @@ function NotesListPage(props: { projectId: string }): React.JSX.Element {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-14 items-center gap-3 border-b px-6 py-5">
-        <h1 className="text-sm font-semibold tracking-tight">Notes</h1>
-        {unread > 0 ? <Badge variant="warn">{unread} unread</Badge> : null}
-        <div className="flex-1" />
-        <Button type="button" size="sm" onClick={() => navigate(`${base}/new`)}>
-          <Plus className="h-4 w-4" />
-          New note
-        </Button>
-      </div>
-      <div className="p-6">
-        {error ? <p className="mb-4 text-sm text-destructive">{error}</p> : null}
-        {loading ? (
-          <ul className="flex max-w-3xl flex-col gap-1">
-            <li>
-              <Skeleton className="h-[4.25rem] w-full rounded-md" />
-            </li>
-            <li>
-              <Skeleton className="h-[4.25rem] w-full rounded-md" />
-            </li>
-            <li>
-              <Skeleton className="h-[4.25rem] w-full rounded-md" />
-            </li>
-          </ul>
-        ) : notes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No notes yet.</p>
-        ) : (
-          <ul className="flex max-w-3xl flex-col gap-1">
-            {notes.map((n) => (
-              <li key={n.id}>
-                <Link
-                  to={`${base}/${n.id}`}
-                  className={cn(
-                    "block w-full rounded-md border px-3.5 py-3 text-left transition-colors",
-                    "hover:bg-secondary/60",
-                    n.seen ? "border-transparent bg-transparent" : "border-border bg-card/40",
-                  )}
-                >
-                  <div className="flex items-start gap-3">
-                    <span
-                      className={cn(
-                        "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                        n.seen ? "bg-transparent" : "bg-warn",
-                      )}
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">{n.title}</div>
-                      <div className="mt-0.5 text-xs text-muted-foreground">
-                        {n.source || "note"} · {fmt(n.createdAt)}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+      <ListPageHeader
+        title="Notes"
+        badge={unread > 0 ? <Badge variant="warn">{unread} unread</Badge> : null}
+        actions={
+          <Button type="button" size="sm" onClick={() => navigate(`${base}/new`)}>
+            <Plus className="h-4 w-4" />
+            New note
+          </Button>
+        }
+      />
+      <ListBody
+        items={notes}
+        error={error}
+        emptyText="No notes yet."
+        keyOf={(n) => n.id}
+        filterValue={filter}
+        onFilterChange={setFilter}
+        filterPlaceholder="Filter notes…"
+        filterFn={(n, q) => n.title.toLowerCase().includes(q) || n.source.toLowerCase().includes(q)}
+        renderItem={(n) => (
+          <Link
+            to={`${base}/${n.id}`}
+            className={cn(
+              "block w-full rounded-md border px-3.5 py-3 text-left transition-colors",
+              "hover:bg-secondary/60",
+              n.seen ? "border-transparent bg-transparent" : "border-border bg-card/40",
+            )}
+          >
+            <div className="flex items-start gap-3">
+              <span
+                className={cn(
+                  "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                  n.seen ? "bg-transparent" : "bg-warn",
+                )}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium">{n.title}</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  {n.source || "note"} · {fmt(n.createdAt)}
+                </div>
+              </div>
+            </div>
+          </Link>
         )}
-      </div>
+      />
     </div>
   );
 }

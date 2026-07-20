@@ -45,6 +45,16 @@ export const codeApi = {
       body: JSON.stringify(body),
     });
   },
+  createRepo(
+    projectId: string,
+    body: { name: string; private: boolean; description: string },
+  ): Promise<{ linked: true; owner: string; repo: string; branch: string }> {
+    return fetchJson(`/api/v1/projects/${projectId}/git/create`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  },
   pull(projectId: string): Promise<{ ok: boolean }> {
     return fetchJson(`/api/v1/projects/${projectId}/git/pull`, { method: "POST" });
   },
@@ -61,4 +71,29 @@ export const codeApi = {
   stopIde(projectId: string): Promise<{ ok: boolean }> {
     return fetchJson(`/api/v1/projects/${projectId}/ide/stop`, { method: "POST" });
   },
+  deployStatus(projectId: string): Promise<DeployStatus> {
+    return fetchJson(`/api/v1/projects/${projectId}/deploy`);
+  },
+  deployStart(projectId: string): Promise<{ ok: boolean; url: string }> {
+    return fetchJson(`/api/v1/projects/${projectId}/deploy/start`, { method: "POST" });
+  },
+  deployRedeploy(projectId: string): Promise<{ ok: boolean }> {
+    return fetchJson(`/api/v1/projects/${projectId}/deploy/redeploy`, { method: "POST" });
+  },
+  deployStop(projectId: string): Promise<{ ok: boolean }> {
+    return fetchJson(`/api/v1/projects/${projectId}/deploy/stop`, { method: "POST" });
+  },
+  deployLogs(projectId: string): Promise<{ log: string }> {
+    return fetchJson(`/api/v1/projects/${projectId}/deploy/logs`);
+  },
 };
+
+export type DeployStatus =
+  | { deployed: false; configured: boolean }
+  | {
+      deployed: true;
+      running: boolean;
+      deployType: "static" | "node";
+      lastDeployedAt: number | null;
+      url: string | null;
+    };

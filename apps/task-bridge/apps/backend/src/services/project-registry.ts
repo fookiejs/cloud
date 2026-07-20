@@ -1,3 +1,4 @@
+import * as nodeCrypto from "node:crypto";
 import {
   getProjectsDb,
   insertProjectRow,
@@ -6,6 +7,13 @@ import {
   listProjectRowsForOwner,
   updateProjectRow,
 } from "../db/projects-db.js";
+
+// Time-ordered UUIDs (sortable, no info leak like the old human-typed slug ids).
+// Falls back to v4 on Node runtimes without native v7 support.
+function newProjectId(): string {
+  const withV7 = nodeCrypto as unknown as { randomUUIDv7?: () => string };
+  return withV7.randomUUIDv7 !== undefined ? withV7.randomUUIDv7() : nodeCrypto.randomUUID();
+}
 import { migrateEpicWorkflowTables } from "../db/epic-workflow-db.js";
 import {
   copyTemplateStagesToProject,
@@ -32,7 +40,6 @@ export type BridgeProjectPublic = {
 
 export type CreateProjectInput = {
   name: string;
-  id: string;
   description: string;
   workflowTemplateId: string;
 };
@@ -59,19 +66,6 @@ function rowToProject(row: {
   };
 }
 
-function slugifyProjectId(name: string): string {
-  const mapped = name
-    .replace(/ş/g, "s")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/ı/g, "i")
-    .replace(/İ/g, "i");
-  return mapped
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 export function initProjectRegistry(): void {
   getProjectsDb();
@@ -105,10 +99,10 @@ export function createProject(
 ): BridgeProject | "duplicate" | null {
   const name = input.name.trim();
   if (!name) return null;
-  const inputId = input.id;
-  const id = inputId || slugifyProjectId(name);
-  if (!id || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id)) return null;
-  if (listProjectRowsById(id).length > 0) return "duplicate";
+  let id = newProjectId();
+  while (listProjectRowsById(id).length > 0) {
+    id = newProjectId();
+  }
   const templateId = normalizeWorkflowTemplateId(input.workflowTemplateId);
   const description = input.description;
   const owner = ownerUserId ?? null;
